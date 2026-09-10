@@ -1,0 +1,19 @@
+{
+  "name": "@rivals/cli",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "rivals": "./src/index.ts"
+  },
+  "scripts": {
+    "start": "node --experimental-strip-types src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@rivals/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.2"
+  }
+}
