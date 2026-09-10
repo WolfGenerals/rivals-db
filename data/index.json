@@ -590,7 +590,6 @@
         "Vehicle",
         "override_vehicle"
       ],
-      "good_against": {},
       "wave_size": 1,
       "vision_range": 2
     },
@@ -877,13 +876,11 @@
       "health": 3400,
       "speed": 3.958857,
       "cost": 60,
-      "weapon_count": 0,
       "tags": [
         "Vehicle",
         "override_harvester",
         "override_vehicle"
       ],
-      "good_against": {},
       "wave_size": 1,
       "vision_range": 1
     },
@@ -897,13 +894,11 @@
       "health": 3400,
       "speed": 6.928,
       "cost": 60,
-      "weapon_count": 0,
       "tags": [
         "Vehicle",
         "override_harvester",
         "override_vehicle"
       ],
-      "good_against": {},
       "wave_size": 1,
       "vision_range": 1
     },
@@ -1057,13 +1052,11 @@
       "health": 3400,
       "speed": 3.958857,
       "cost": 60,
-      "weapon_count": 0,
       "tags": [
         "Vehicle",
         "override_harvester",
         "override_vehicle"
       ],
-      "good_against": {},
       "wave_size": 1,
       "vision_range": 1
     },
@@ -1077,13 +1070,11 @@
       "health": 3400,
       "speed": 6.928,
       "cost": 60,
-      "weapon_count": 0,
       "tags": [
         "Vehicle",
         "override_harvester",
         "override_vehicle"
       ],
-      "good_against": {},
       "wave_size": 1,
       "vision_range": 1
     },
@@ -1233,7 +1224,6 @@
       "variant": "drillpod",
       "health": 1800,
       "cost": 70,
-      "weapon_count": 0,
       "tags": [
         "Vehicle",
         "override_vehicle"
@@ -1253,7 +1243,6 @@
       ],
       "health": 3200,
       "cost": 70,
-      "weapon_count": 0,
       "tags": [
         "Vehicle",
         "override_vehicle"
@@ -2079,14 +2068,12 @@
     {
       "unit_id": "unit_dlc_test",
       "faction": "UNKNOWN",
-      "variant": "unit_dlc_test",
-      "weapon_count": 0
+      "variant": "unit_dlc_test"
     },
     {
       "unit_id": "unit_example",
       "faction": "UNKNOWN",
-      "variant": "unit_example",
-      "weapon_count": 0
+      "variant": "unit_example"
     },
     {
       "unit_id": "unit_gdi_repairdrone",
@@ -2102,7 +2089,6 @@
         "Aircraft",
         "override_aircraft"
       ],
-      "good_against": {},
       "wave_size": 1,
       "vision_range": 2
     },
@@ -2123,7 +2109,6 @@
         "Aircraft",
         "override_aircraft"
       ],
-      "good_against": {},
       "wave_size": 1,
       "vision_range": 2
     },

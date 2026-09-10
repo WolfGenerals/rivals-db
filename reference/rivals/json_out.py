@@ -25,6 +25,21 @@ def _pick(config: dict, *path: str):
     return cur
 
 
+def _nonempty_list(value):
+    """空列表归一成 None，好在 _summary 里被省略。
+
+    原因：空的 Lua 表无法区分"空数组"和"空表"，提取时统一变成 {}。
+    对 index 这种扁平概览来说没有语义，留着会让消费者拿到 `{}` 而以为
+    是数组（真实踩过：`(u.good_against ?? []).includes is not a function`）。
+    完整的 config 树里仍保留 {}，那里要求保真。
+    """
+    if isinstance(value, list):
+        return value or None
+    if isinstance(value, dict) and not value:
+        return None
+    return value
+
+
 def _summary(record: UnitRecord) -> dict:
     """给 index.json 用的扁平概览。"""
     cfg = record.config
@@ -48,9 +63,9 @@ def _summary(record: UnitRecord) -> dict:
         ("damage_overrides", overrides),
         ("range", _pick(first, "maxRangeInTiles") if isinstance(first, dict) else None),
         ("cooldown", _pick(first, "burstTiming", "cooldown") if isinstance(first, dict) else None),
-        ("weapon_count", len(weapons) if isinstance(weapons, list) else None),
-        ("tags", _pick(cfg, "combatantTuning", "tags")),
-        ("good_against", _pick(cfg, "combatantTuning", "goodAgainstTags")),
+        ("weapon_count", len(weapons) if isinstance(weapons, list) and weapons else None),
+        ("tags", _nonempty_list(_pick(cfg, "combatantTuning", "tags"))),
+        ("good_against", _nonempty_list(_pick(cfg, "combatantTuning", "goodAgainstTags"))),
         ("wave_size", _pick(cfg, "squadTuning", "waveSize")),
         ("vision_range", _pick(cfg, "squadTuning", "visionRangeInTiles")),
     ):
