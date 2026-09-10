@@ -72,7 +72,7 @@ uv run rivals extract tmp/com.ea.gp.candcwarzones
 ```
 tmp/com.ea.gp.candcwarzones/          ← 不入库（386 MiB，版权资产）
         │
-        │  rivals extract   （唯一读取 Lua 的环节，Python + lupa）
+        │  pnpm extract   （唯一读取 Lua 的环节，reference/ 的 Python + lupa）
         ▼
 data/                                 ← 入库（274 KiB，派生数值）
 ├── index.json
@@ -80,11 +80,18 @@ data/                                 ← 入库（274 KiB，派生数值）
 ├── nod/*.json  (39)
 └── misc/*.json  (2)
         │
-        │  静态托管 / 直接读取
-        ▼
-   网页 / 机器人 / 任何下游
+        ├──────────────────┐
+        │                  │ 构建时由 scripts/sync-data.mjs 复制
+        ▼                  ▼
+packages/core          apps/web/public/data/   ← 不入库（副本）
+  纯函数                  │
+  （CLI 与网页共用）        ▼
+        │              apps/web/dist/          ← 构建产物，不入库
+        ├──► apps/cli
+        └──► apps/web
 ```
 
-**关键约定：只有提取器读 Lua。** 下游一律只读 `data/` 下的 JSON，
+**关键约定：只有 `reference/` 读 Lua。** 下游一律只读 `data/` 下的 JSON，
 不要在任何其他语言里重新解析游戏文件 —— 那会导致同一份数据出现多套理解。
+需要新数据时改 `reference/` 并重新提取，而不是在 TS 侧"就地解析"。
 详见 [docs/output-format.md](docs/output-format.md)。
