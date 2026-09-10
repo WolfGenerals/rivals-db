@@ -1,7 +1,7 @@
 [project]
 name = "rivals"
 version = "0.1.0"
-description = "从《命令与征服：宿敌》客户端提取单位数值并输出 JSON"
+description = "从《命令与征服：宿敌》客户端提取单位数值并输出 JSON（参考实现，用 lupa 真求值游戏 Lua）"
 readme = "README.md"
 authors = [
     { name = "WolfGenerals", email = "2301146268@qq.com" }
@@ -17,3 +17,12 @@ rivals = "rivals:main"
 [build-system]
 requires = ["uv_build>=0.12.9,<0.13.0"]
 build-backend = "uv_build"
+
+# 包体放在 reference/ 而不是默认的 src/（该目录专门用于放参考实现）
+[tool.uv.build-backend]
+module-root = "reference"
+module-name = "rivals"
+
+[tool.uv]
+# 参考实现不参与 workspace 的默认测试目标，由 README 里单独的命令运行
+package = true

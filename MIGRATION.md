@@ -4,11 +4,34 @@
 
 | 路径 | 入库 | 说明 |
 | --- | --- | --- |
-| `src/rivals/` | ✅ | 提取器源码 |
+| `reference/rivals/` | ✅ | 参考实现（Python + lupa），见下 |
 | `data/` | ✅ | 提取产物，`data/*/*.json` + `data/index.json`（约 274 KiB） |
+| `packages/` `apps/` | ✅ | 其他语言的实现（pnpm workspace） |
 | `docs/` | ✅ | 文档 |
 | `README.md` / `pyproject.toml` / `uv.lock` | ✅ | 项目定义 |
 | `tmp/` | ❌ | 游戏原始资产，见下 |
+
+## `reference/` —— 参考实现（必须入库）
+
+```
+reference/
+└── rivals/                      Python 包：extract / json_out / cli
+```
+
+**为什么它叫「参考」而不是「源码」**：它是唯一直接执行游戏 Lua 源码的东西，
+所以是**真值来源**。将来若用其他语言重写运算逻辑（网页要算升级或 buff 后的数据），
+重写结果对不对，只能拿它来交叉验证 —— 它的产出（`data/`）就是基准。
+
+因此它不能进 `tmp/`。一旦丢失，重写实现就失去了独立校验的依据。
+
+运行方式：
+
+```powershell
+# 提取（产出到 data/）
+.venv\Scripts\python.exe -m rivals extract tmp/com.ea.gp.candcwarzones
+
+# 作为校验基准：重跑一遍，结果必须与已提交的 data/ 逐字节一致
+```
 
 ## `tmp/` —— 游戏原始资产
 

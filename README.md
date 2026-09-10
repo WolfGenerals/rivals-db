@@ -229,11 +229,20 @@ JSON 另有优势：任何语言、任何工具链都原生支持，无需 `toml
 
 | 路径 | 入库 | 职责 |
 | --- | :---: | --- |
-| `src/rivals/extract.py` | ✅ | lupa 求值、宿主桩、数据整理 |
-| `src/rivals/json_out.py` | ✅ | JSON 序列化、索引生成 |
-| `src/rivals/cli.py` | ✅ | 命令行入口 |
+| `reference/rivals/extract.py` | ✅ | 参考实现：lupa 求值、宿主桩、数据整理 |
+| `reference/rivals/json_out.py` | ✅ | 参考实现：JSON 序列化、索引生成 |
+| `reference/rivals/cli.py` | ✅ | 参考实现：命令行入口 |
 | `data/` | ✅ | 提取产物（约 274 KiB） |
 | `docs/` | ✅ | 输出格式与提取原理说明 |
 | `tmp/` | ❌ | 游戏原始资产（386 MiB，版权） |
+
+### 为什么参考实现放在 `reference/`
+
+Python 版是**真值来源**：它直接执行游戏分发的 Lua 源码，产出 `data/`。
+将来若用其他语言重写运算逻辑（例如网页需要计算升级或 buff 后的数据），
+重写结果是否正确，只能靠它来交叉验证。所以它必须入库、不能丢。
+
+其他语言的重写实现放在 `packages/`（pnpm workspace），`reference/` 保持独立，
+仅在本地或 CI 中作为校验基准运行。
 
 什么入库、什么不入库、以及数据流的完整说明见 **[MIGRATION.md](MIGRATION.md)**。

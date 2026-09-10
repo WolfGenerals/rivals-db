@@ -14,9 +14,11 @@ tmp/
 
 # ─────────────────────────────────────────────────────────
 # 以下**应该**入库，仅在此说明意图，勿忽略：
-#   data/      提取产物（data/*/*.json + index.json）
-#   src/       提取器源码
-#   docs/      文档
+#   data/       提取产物（data/*/*.json + index.json）
+#   reference/  参考实现（Python + lupa，重写实现的校验基准）
+#   packages/   其他语言的共享逻辑（pnpm workspace）
+#   apps/       命令行与网页
+#   docs/       文档
 # ─────────────────────────────────────────────────────────
 
 # Python 生成物
@@ -31,5 +33,12 @@ wheels/
 .venv
 .uv-cache/
 
+# Node / pnpm
+node_modules/
+.pnpm-store/
+
 # 临时输出
 /out/
+
+# 网页构建时从 data/ 同步进来的副本（唯一真相是仓库根的 data/）
+/apps/web/public/data/
