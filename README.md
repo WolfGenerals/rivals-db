@@ -231,9 +231,9 @@ JSON 另有优势：任何语言、任何工具链都原生支持，无需 `toml
 Rivals/
 ├── data/                     ✅ 提取产物（唯一真相，约 274 KiB）
 ├── reference/rivals/         ✅ Python 参考实现（真值来源，见下）
-├── packages/core/            ✅ 共享纯逻辑（TS，不依赖 DOM / Node API）
-├── apps/cli/                 ✅ 命令行查询工具
-├── apps/web/                 ✅ 网页（vite）
+├── core/                     ✅ 共享纯逻辑（TS，不依赖 DOM / Node API）
+├── cli/                      ✅ 命令行查询工具
+├── web/                      ✅ 网页（vite）
 ├── docs/                     ✅ 输出格式与提取原理
 ├── tmp/                      ❌ 游戏原始资产（386 MiB，版权）
 └── pnpm-workspace.yaml       工作区定义
@@ -245,7 +245,7 @@ Python 版是**真值来源**：它直接执行游戏分发的 Lua 源码，产�
 将来若用其他语言重写运算逻辑（例如网页需要计算升级或 buff 后的数据），
 重写结果是否正确，只能靠它来交叉验证。所以它必须入库、不能丢。
 
-其他语言的重写实现放在 `packages/`（pnpm workspace），`reference/` 保持独立，
+其他语言的重写实现放在 `core/`、`cli/`、`web/`（pnpm workspace），`reference/` 保持独立，
 仅在本地或 CI 中作为校验基准运行。
 
 什么入库、什么不入库、以及数据流的完整说明见 **[MIGRATION.md](MIGRATION.md)**。
@@ -264,7 +264,7 @@ pnpm install
 | `pnpm test` | 单元测试 |
 | `pnpm cli <命令>` | 命令行查询 |
 | `pnpm web` | 本地起网页（dev） |
-| `pnpm web:build` | 构建网页到 `apps/web/dist/` |
+| `pnpm web:build` | 构建网页到 `web/dist/` |
 | `pnpm extract` | 跑 Python 参考实现，重新生成 `data/` |
 
 ### CLI
@@ -283,8 +283,8 @@ pnpm cli list --json                       # JSON 输出
 | --- | --- | --- |
 | `reference/` | Python + lupa | **唯一**读取游戏 Lua 的环节，离线跑 |
 | `data/` | —— | 两层之间的契约 |
-| `packages/core` | 无 | 纯函数，CLI 与网页共用 |
-| `apps/*` | core | 只做各自的 I/O |
+| `core` | 无 | 纯函数，CLI 与网页共用 |
+| `cli/` `web/` | core | 只做各自的 I/O |
 
 **不要在 TS 侧重新解析游戏 Lua。** 那会造成同一份数据出现两套理解。
 需要新数据时，改 `reference/` 提取进 `data/`。
@@ -292,7 +292,7 @@ pnpm cli list --json                       # JSON 输出
 ### 网页的数据从哪来
 
 `data/` 在仓库根，而 vite 的 `publicDir` 必须位于项目目录之内，所以构建时
-由 `apps/web/scripts/sync-data.mjs` 把 `data/` 复制到 `apps/web/public/data/`。
+由 `web/scripts/sync-data.mjs` 把 `data/` 复制到 `web/public/data/`。
 
 `publicDir` 里的文件**原样复制**到构建输出根（不改名、不打包、不做类型检查），
 正适合纯运行时读取的 JSON。`public/data/` 已在 `.gitignore` 中忽略 ——

@@ -12,30 +12,17 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
-  apps/cli:
+  cli:
     dependencies:
       '@rivals/core':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../core
     devDependencies:
       '@types/node':
         specifier: ^22.20.2
         version: 22.20.2
 
-  apps/web:
-    dependencies:
-      '@rivals/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-    devDependencies:
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-      vite:
-        specifier: ^8.3.0
-        version: 8.3.0(@types/node@22.20.2)
-
-  packages/core:
+  core:
     devDependencies:
       '@types/node':
         specifier: ^22.20.2
@@ -43,6 +30,19 @@ importers:
       vitest:
         specifier: ^5.0.0
         version: 5.0.0(@types/node@22.20.2)(vite@8.3.0(@types/node@22.20.2))
+
+  web:
+    dependencies:
+      '@rivals/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vite:
+        specifier: ^8.3.0
+        version: 8.3.0(@types/node@22.20.2)
 
 packages:
 

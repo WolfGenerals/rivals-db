@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 把仓库根的 data/ 同步到 apps/web/public/data/。
  *
  * 为什么需要这一步：Vite 的 publicDir 必须在项目根目录**之内**，
@@ -12,7 +12,7 @@ import { dirname, join, resolve } from "node:path";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const WEB_ROOT = resolve(HERE, "..");
 // apps/web/scripts/ -> 上溯 3 级到仓库根
-const REPO_ROOT = resolve(HERE, "../../..");
+const REPO_ROOT = resolve(HERE, "../..");
 const SRC = join(REPO_ROOT, "data");
 const DEST = join(WEB_ROOT, "public", "data");
 

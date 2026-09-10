@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 /**
  * 命令行：查询 data/ 下的提取产物。
  *
@@ -14,7 +14,7 @@ import { cheaperThan, counters, pickDamage, type UnitIndex, type UnitSummary } f
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 // apps/cli/src/ -> 上溯 3 级到仓库根
-const REPO_ROOT = resolve(HERE, "../../..");
+const REPO_ROOT = resolve(HERE, "../..");
 const DEFAULT_DATA = join(REPO_ROOT, "data");
 
 const USAGE = `

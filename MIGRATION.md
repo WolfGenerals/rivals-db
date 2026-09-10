@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | `reference/rivals/` | ✅ | 参考实现（Python + lupa），见下 |
 | `data/` | ✅ | 提取产物，`data/*/*.json` + `data/index.json`（约 274 KiB） |
-| `packages/` `apps/` | ✅ | 其他语言的实现（pnpm workspace） |
+| `core/` `cli/` `web/` | ✅ | 其他语言的实现（pnpm workspace） |
 | `docs/` | ✅ | 文档 |
 | `README.md` / `pyproject.toml` / `uv.lock` | ✅ | 项目定义 |
 | `tmp/` | ❌ | 游戏原始资产，见下 |
@@ -80,15 +80,15 @@ data/                                 ← 入库（274 KiB，派生数值）
 ├── nod/*.json  (39)
 └── misc/*.json  (2)
         │
-        ├──────────────────┐
-        │                  │ 构建时由 scripts/sync-data.mjs 复制
-        ▼                  ▼
-packages/core          apps/web/public/data/   ← 不入库（副本）
-  纯函数                  │
-  （CLI 与网页共用）        ▼
-        │              apps/web/dist/          ← 构建产物，不入库
-        ├──► apps/cli
-        └──► apps/web
+        ├────────────────────────────┐
+        │                            │ 构建时由 web/scripts/sync-data.mjs 复制
+        ▼                            ▼
+core/                                web/public/data/   ← 不入库（副本）
+  纯函数（CLI 与网页共用）              │
+        │                            ▼
+        │                          web/dist/            ← 构建产物，不入库
+        ├──► cli/
+        └──► web/
 ```
 
 **关键约定：只有 `reference/` 读 Lua。** 下游一律只读 `data/` 下的 JSON，
