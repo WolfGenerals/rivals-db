@@ -1,0 +1,93 @@
+{
+  "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。",
+  "config": {
+    "combatStoreTuning": {
+      "addIncreaseCountOnPurchase": true,
+      "subtractIncreaseCountOnDeath": true,
+      "tiberiumCost": 10,
+      "useGlobalCooldown": true
+    },
+    "combatantTuning": {
+      "aggroRadiusInTiles": 2.5,
+      "angularSpeed": 900,
+      "avoidanceRadius": 1.7,
+      "descriptors": [
+        8.0,
+        2048.0,
+        32.0,
+        64.0
+      ],
+      "goodAgainstTags": [
+        "Infantry"
+      ],
+      "health": 130,
+      "speed": 6.928,
+      "tags": [
+        "Infantry",
+        "override_infantry"
+      ],
+      "weaponTunings": [
+        {
+          "burstTiming": {
+            "chargeUpDuration": 0,
+            "cooldown": 1.72,
+            "numToBurst": 1
+          },
+          "damageTuning": {
+            "default": 38,
+            "overrides": [
+              [
+                "Vehicle",
+                15
+              ]
+            ]
+          },
+          "descriptors": [
+            8.0,
+            4.0
+          ],
+          "maxRangeInTiles": 2.5,
+          "muzzleCount": 1,
+          "name": "rifle",
+          "projectile": {
+            "homing": true,
+            "initialSpeed": 125,
+            "maxRangeTimeToHit": 10,
+            "minRangeTimeToHit": 5
+          },
+          "targetSelector": "unit_antiInfantry",
+          "targetingTuning": {
+            "randomBurstMax": 5,
+            "randomBurstMin": 2,
+            "targetMode": "kRandom"
+          },
+          "turret": {
+            "pitch": {
+              "relaxOnDeath": true
+            },
+            "yaw": {
+              "relaxOnDeath": true
+            }
+          },
+          "weaponType": "projectile"
+        }
+      ]
+    },
+    "name": "unit_nod_militant",
+    "squadTuning": {
+      "accelerationDistance": 1,
+      "attackSeparationDurationMS": 344,
+      "canBeCrushed": true,
+      "decelerationDistance": 1,
+      "hexReservationRadius": 3,
+      "maxAttackRangeInTiles": 1,
+      "stealthDetectionRangeInTiles": 1,
+      "visionRangeInTiles": 3,
+      "waveSize": 5
+    }
+  },
+  "faction": "NOD",
+  "source": "gameplay/units/unit_nod_militant.lua",
+  "unit_id": "unit_nod_militant",
+  "variant": "militant"
+}

@@ -1,0 +1,119 @@
+{
+  "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。",
+  "config": {
+    "combatStoreTuning": {
+      "addIncreaseCountOnPurchase": true,
+      "subtractIncreaseCountOnDeath": true,
+      "tiberiumCost": 30,
+      "useGlobalCooldown": true
+    },
+    "combatantTuning": {
+      "aggroRadiusInTiles": 3.5,
+      "angularSpeed": 200,
+      "avoidanceRadius": 2.4,
+      "descriptors": [
+        8.0,
+        2048.0,
+        32.0,
+        64.0
+      ],
+      "faceTargetBeforeMoving": true,
+      "goodAgainstTags": [
+        "Vehicle",
+        "Infantry"
+      ],
+      "health": 400,
+      "modifier_death": {
+        "behaviour": {},
+        "name": "modifier_mgsquad_death",
+        "tuning": {
+          "durationMs": 500
+        }
+      },
+      "speed": 5.5424,
+      "tags": [
+        "Infantry",
+        "override_infantry"
+      ],
+      "weaponTunings": [
+        {
+          "burstTiming": {
+            "chargeUpDuration": 0,
+            "cooldown": 0.2,
+            "numToBurst": 1
+          },
+          "canInterruptIntro": true,
+          "damageTuning": {
+            "default": 28,
+            "overrides": [
+              [
+                "Vehicle",
+                28
+              ]
+            ]
+          },
+          "descriptors": [
+            8.0,
+            4.0
+          ],
+          "faceTargetBeforePackup": true,
+          "maxRangeInTiles": 2.5,
+          "modifier_intro": {
+            "behaviour": {},
+            "name": "modifier_mgsquad_intro",
+            "tuning": {
+              "DAMAGE_REDUCTION_TIME_MS": 4750,
+              "damageReductionPercent": 0.5,
+              "durationMs": 5000
+            }
+          },
+          "modifier_outro": {
+            "behaviour": {},
+            "name": "modifier_mgsquad_outro",
+            "tuning": {
+              "DAMAGE_REDUCTION_TIME_MS": 250,
+              "durationMs": 2000
+            }
+          },
+          "muzzleCount": 1,
+          "name": "rockets",
+          "projectile": {
+            "homing": true,
+            "initialSpeed": 250,
+            "maxRangeTimeToHit": 10,
+            "minRangeTimeToHit": 5
+          },
+          "targetSelector": "unit_antiInfantry",
+          "targetingTuning": {
+            "centerSpread": 3,
+            "targetMode": "kDirect"
+          },
+          "turret": {
+            "pitch": {},
+            "yaw": {}
+          },
+          "weaponType": "projectile"
+        }
+      ]
+    },
+    "name": "unit_gdi_mgsquad",
+    "squadTuning": {
+      "accelerationDistance": 1,
+      "canBeCrushed": true,
+      "decelerationDistance": 1,
+      "dontMoveWhileTurning": true,
+      "hexReservationRadius": 3,
+      "maxAttackRangeInTiles": 2,
+      "stealthDetectionRangeInTiles": 1,
+      "visionRangeInTiles": 2,
+      "waveSize": 1
+    }
+  },
+  "faction": "GDI",
+  "source": "gameplay/units/unit_gdi_mgsquad.lua",
+  "unit_id": "unit_gdi_mgsquad",
+  "variant": "mgsquad",
+  "warnings": [
+    "已丢弃占位/未解析字段：GetStatInfo=<function>, SetStatOverrides=<function>, oldTuning.GetStatInfo=<function>, oldTuning.SetStatOverrides=<function>"
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。",
+  "config": {
+    "combatStoreTuning": {
+      "addIncreaseCountOnPurchase": true,
+      "subtractIncreaseCountOnDeath": true,
+      "tiberiumCost": 100,
+      "useGlobalCooldown": true
+    },
+    "combatantTuning": {
+      "aggroRadiusInTiles": 2.5,
+      "angularSpeed": 900,
+      "avoidanceRadius": 1.7,
+      "descriptors": [
+        8.0,
+        2048.0,
+        32.0,
+        64.0
+      ],
+      "goodAgainstTags": [
+        "Infantry",
+        "Aircraft"
+      ],
+      "health": 800,
+      "speed": 5.5424,
+      "tags": [
+        "Infantry",
+        "override_infantry"
+      ],
+      "weaponTunings": [
+        {
+          "burstTiming": {
+            "numToBurst": 1
+          },
+          "damageTuning": {
+            "default": 40,
+            "overrides": [
+              [
+                "Vehicle",
+                15
+              ],
+              [
+                "Aircraft",
+                45
+              ]
+            ]
+          },
+          "descriptors": [
+            2.0,
+            4.0
+          ],
+          "maxRangeInTiles": 2.5,
+          "modifier_sequence": {
+            "behaviour": {},
+            "name": "ability_confessor_weapon_sequence",
+            "tuning": {
+              "burstCooldown": 400,
+              "chargeUpDuration": 0,
+              "initialChargeUpMs": 0
+            }
+          },
+          "muzzleCount": 1,
+          "name": "rifle",
+          "projectile": {
+            "homing": true,
+            "initialSpeed": 125,
+            "maxRangeTimeToHit": 10,
+            "minRangeTimeToHit": 5
+          },
+          "targetSelector": "unit_antiInfantry",
+          "turret": {
+            "pitch": {
+              "relaxOnDeath": true
+            },
+            "yaw": {
+              "relaxOnDeath": true
+            }
+          },
+          "weaponType": "projectile"
+        }
+      ]
+    },
+    "name": "unit_nod_confessor",
+    "squadTuning": {
+      "accelerationDistance": 1,
+      "attackSeparationDurationMS": 1000,
+      "canBeCrushed": true,
+      "decelerationDistance": 1,
+      "hexReservationRadius": 3,
+      "maxAttackRangeInTiles": 1,
+      "modifier_spawn": {
+        "behaviour": {},
+        "name": "modifier_confessor_spawn_zeal_squad",
+        "tuning": {
+          "ARMY_FILTER_FLAG": "kQueryArmyFilter_Friendly",
+          "DESCRIPTOR_FILTERS": 2048.0,
+          "MODIFIER": "modifier_confessor_zeal",
+          "durationMs": -1,
+          "tickPeriodMs": 250,
+          "zeal": {
+            "MODIFIER": "modifier_confessor_zeal_combatant",
+            "durationMs": 5000,
+            "stats": {
+              "AttackSpeedIncrease": 0.5,
+              "ReloadSpeedPercentIncrease": 0.5
+            }
+          }
+        }
+      },
+      "stealthDetectionRangeInTiles": 1,
+      "visionRangeInTiles": 2,
+      "waveSize": 3
+    }
+  },
+  "faction": "NOD",
+  "source": "gameplay/units/unit_nod_confessor.lua",
+  "unit_id": "unit_nod_confessor",
+  "variant": "confessor",
+  "warnings": [
+    "已丢弃占位/未解析字段：SetStatOverrides=<function>, oldTuning.SetStatOverrides=<function>"
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。",
+  "config": {
+    "combatStoreTuning": {
+      "addIncreaseCountOnPurchase": true,
+      "purchaseCooldownMS": 45000,
+      "subtractIncreaseCountOnDeath": true,
+      "tiberiumCost": 60,
+      "useGlobalCooldown": true
+    },
+    "combatantTuning": {
+      "angularSpeed": 180,
+      "avoidanceRadius": 3,
+      "descriptors": [
+        8.0,
+        16.0,
+        32.0,
+        8192.0
+      ],
+      "goodAgainstTags": {},
+      "health": 3400,
+      "healthBarWidthOverride": 35,
+      "speed": 6.928,
+      "tags": [
+        "Vehicle",
+        "override_harvester",
+        "override_vehicle"
+      ]
+    },
+    "name": "unit_nod_harvester_mayhem",
+    "squadTuning": {
+      "accelerationDistance": 2,
+      "crusherRadius": 5.0,
+      "deathCooldownMs": 0,
+      "decelerationDistance": 2,
+      "hexReservationRadius": 3.5,
+      "killAwardTiberium": 80,
+      "repurchaseDiscountFlat": 60,
+      "visionRangeInTiles": 1,
+      "waveSize": 1
+    }
+  },
+  "faction": "NOD",
+  "source": "gameplay/units/unit_nod_harvester_mayhem.lua",
+  "suffixes": [
+    "mayhem"
+  ],
+  "unit_id": "unit_nod_harvester_mayhem",
+  "variant": "harvester"
+}

@@ -1,0 +1,95 @@
+{
+  "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。",
+  "config": {
+    "combatStoreTuning": {
+      "purchaseCooldownMS": 30000
+    },
+    "combatantTuning": {
+      "aggroRadiusInTiles": 2.5,
+      "angularSpeed": 180,
+      "avoidanceRadius": 2.7,
+      "descriptors": [
+        8.0,
+        128.0,
+        32.0,
+        64.0
+      ],
+      "goodAgainstTags": [
+        "Infantry",
+        "Aircraft"
+      ],
+      "health": 3800,
+      "tags": [
+        "Structure",
+        "override_structure"
+      ],
+      "weaponTunings": [
+        {
+          "burstTiming": {
+            "chargeUpDuration": 0.0,
+            "cooldown": 0.05,
+            "numToBurst": 1
+          },
+          "damageTuning": {
+            "default": 20,
+            "overrides": [
+              [
+                "Vehicle",
+                40
+              ],
+              [
+                "Structure",
+                20
+              ],
+              [
+                "Infantry",
+                10
+              ]
+            ]
+          },
+          "descriptors": [
+            2.0,
+            4.0
+          ],
+          "disableSpawnGrace": true,
+          "introDuration": 1.33,
+          "maxRangeInTiles": 2.5,
+          "muzzleCount": 2,
+          "name": "guns",
+          "projectile": {
+            "homing": true,
+            "initialSpeed": 125,
+            "maxRangeTimeToHit": 10,
+            "minRangeTimeToHit": 5
+          },
+          "targetSelector": "unit_antiInfantry",
+          "turret": {
+            "pitch": {
+              "speed": 225
+            },
+            "yaw": {
+              "enable": true,
+              "speed": 225
+            }
+          },
+          "weaponType": "projectile"
+        }
+      ]
+    },
+    "name": "unit_gdi_turret_CR",
+    "squadTuning": {
+      "deathTimer": 16,
+      "disableTimerUI": true,
+      "maxAttackRangeInTiles": 2,
+      "visionRangeInTiles": 2,
+      "waveSize": 1
+    }
+  },
+  "faction": "GDI",
+  "source": "gameplay/units/unit_gdi_turret_CR.lua",
+  "suffixes": [
+    "CR"
+  ],
+  "unit_id": "unit_gdi_turret_CR",
+  "variant": "turret"
+}

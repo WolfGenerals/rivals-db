@@ -1,0 +1,103 @@
+{
+  "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。",
+  "config": {
+    "combatStoreTuning": {
+      "addIncreaseCountOnPurchase": true,
+      "subtractIncreaseCountOnDeath": true,
+      "tiberiumCost": 70,
+      "useGlobalCooldown": true
+    },
+    "combatantTuning": {
+      "aggroRadiusInTiles": 2.5,
+      "angularSpeed": 300,
+      "avoidanceRadius": 1.6,
+      "descriptors": [
+        8.0,
+        2048.0,
+        32.0,
+        64.0
+      ],
+      "goodAgainstTags": [
+        "Vehicle"
+      ],
+      "health": 620,
+      "speed": 6.9,
+      "tags": [
+        "Infantry",
+        "override_infantry"
+      ],
+      "weaponTunings": [
+        {
+          "burstTiming": {
+            "chargeUpDuration": 0,
+            "cooldown": 2.64,
+            "numToBurst": 1
+          },
+          "damageTuning": {
+            "default": 340,
+            "overrides": [
+              [
+                "Infantry",
+                27
+              ]
+            ]
+          },
+          "descriptors": [
+            8.0,
+            4.0
+          ],
+          "fireAnimTime": 0.33,
+          "maxRangeInTiles": 2.5,
+          "muzzleCount": 1,
+          "muzzleStrategy": "All",
+          "name": "rifle",
+          "projectile": {
+            "acceleration": 0,
+            "homing": false,
+            "initialSpeed": 37.5,
+            "modifier": {
+              "behaviour": {},
+              "name": "modifier_grenadier_projectile",
+              "tuning": {
+                "ARMY_FILTER_FLAG": "kQueryArmyFilter_None",
+                "DESCRIPTOR_FILTERS": 16.0,
+                "MODIFIER": "modifier_grenadier_emp",
+                "emp": {
+                  "MODIFIER": "modifier_grenadier_emp_combatant",
+                  "durationMs": 700,
+                  "stats": {
+                    "AngularSpeedPercentDecrease": 0.3,
+                    "AttackSpeedDecrease": 0.25,
+                    "MovementSpeedPercentDecrease": 0.3,
+                    "ReloadSpeedPercentDecrease": 0.25
+                  }
+                }
+              }
+            }
+          },
+          "targetSelector": "unit_antiInfantry",
+          "weaponType": "projectile"
+        }
+      ]
+    },
+    "name": "unit_gdi_grenadier",
+    "squadTuning": {
+      "accelerationDistance": 2,
+      "attackSeparationDurationMS": 880,
+      "canBeCrushed": true,
+      "decelerationDistance": 2,
+      "hexReservationRadius": 3,
+      "maxAttackRangeInTiles": 1,
+      "stealthDetectionRangeInTiles": 1,
+      "visionRangeInTiles": 2,
+      "waveSize": 3
+    }
+  },
+  "faction": "GDI",
+  "source": "gameplay/units/unit_gdi_grenadier.lua",
+  "unit_id": "unit_gdi_grenadier",
+  "variant": "grenadier",
+  "warnings": [
+    "已丢弃占位/未解析字段：SetStatOverrides=<function>, oldTuning.SetStatOverrides=<function>"
+  ]
+}

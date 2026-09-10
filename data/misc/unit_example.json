@@ -1,0 +1,11 @@
+{
+  "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。",
+  "config": {},
+  "faction": "UNKNOWN",
+  "source": "gameplay/units/unit_example.lua",
+  "unit_id": "unit_example",
+  "variant": "unit_example",
+  "warnings": [
+    "缺少 combatantTuning.health（可能是占位/测试单位）"
+  ]
+}
