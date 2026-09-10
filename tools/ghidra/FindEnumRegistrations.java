@@ -1,6 +1,19 @@
 // 在 libapp.so 里定位枚举注册相关的字符串引用，并反编译引用它们的函数。
-// 用 Ghidra headless 运行：
-//   analyzeHeadless <proj> <name> -import libapp.so -postScript FindEnumRegistrations.java <outfile>
+//
+// 用法（两步，别加 -deleteProject）：
+//   1) 建项目并分析（约 30 分钟，61 MiB 已 strip 的二进制）：
+//        analyzeHeadless <projDir> <projName> \
+//          -import <libapp.so> \
+//          -scriptPath tools/ghidra \
+//          -postScript FindEnumRegistrations.java <outfile>
+//   2) 改脚本后复用已保存的分析，只重跑脚本（秒级）：
+//        analyzeHeadless <projDir> <projName> \
+//          -process libapp.so -noanalysis \
+//          -scriptPath tools/ghidra \
+//          -postScript FindEnumRegistrations.java <outfile>
+//
+// ⚠ 踩过的坑：不要加 -deleteProject —— 它会在分析结束后删掉项目，
+//   于是脚本出错时无法复用，只能从头再花 30 分钟分析。
 
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.Address;
@@ -44,10 +57,15 @@ public class FindEnumRegistrations extends GhidraScript {
         List<Data> stringDatas = new ArrayList<>();
         for (Data d : currentProgram.getListing().getDefinedData(true)) {
             if (d == null) continue;
-            StringDataInstance sdi = StringDataInstance.getStringDataInstance(d);
-            if (sdi == null || !sdi.isString()) continue;
+            StringDataInstance sdi;
+            try {
+                sdi = StringDataInstance.getStringDataInstance(d);
+            } catch (Exception e) {
+                continue;
+            }
+            if (sdi == null) continue;
             String v = sdi.getStringValue();
-            if (v == null) continue;
+            if (v == null || v.isEmpty()) continue;
             for (String n : NEEDLES) {
                 if (v.equals(n)) {
                     stringDatas.add(d);
