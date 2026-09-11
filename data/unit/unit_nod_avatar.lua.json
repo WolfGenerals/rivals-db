@@ -1,5 +1,6 @@
 {
   "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "_schema": 2,
   "config": {
     "combatStoreTuning": {
       "addIncreaseCountOnPurchase": true,
@@ -181,12 +182,104 @@
       "waveSize": 1
     }
   },
-  "desc_en": "Explodes on death, damaging all adjacent ground units.",
-  "desc_zh": "被摧毁时会产生爆炸，对附近的地面单位造成伤害。",
+  "derived": {
+    "_note": "已按引擎算法算好的最终值。消费方只读这里，不要解析 config。",
+    "attack": {
+      "composition": "parallel",
+      "cycle_ms": null,
+      "member_offset_ms": 0,
+      "tracks": [
+        {
+          "timing": {
+            "cycle_ms": 250,
+            "hits": 1,
+            "interval_ms": 250,
+            "kind": "单发"
+          },
+          "weapon": "laser0"
+        },
+        {
+          "timing": {
+            "cycle_ms": 500,
+            "hits": 1,
+            "interval_ms": 500,
+            "kind": "单发"
+          },
+          "weapon": "fire1"
+        }
+      ]
+    },
+    "dps": 640,
+    "health": {
+      "per_member": 6200,
+      "total": 6200,
+      "wave_size": 1
+    },
+    "notes": [
+      "多武器并行（同时开火）"
+    ],
+    "primary": "laser0",
+    "weapons": [
+      {
+        "area": {
+          "kind": "none"
+        },
+        "can_attack": [
+          "Infantry",
+          "Vehicle",
+          "Structure",
+          "Harvester"
+        ],
+        "damage": 160,
+        "homing": true,
+        "id": "laser0",
+        "name": "laser",
+        "overrides": [
+          [
+            "Infantry",
+            35
+          ],
+          [
+            "Harvester",
+            140
+          ]
+        ],
+        "range_tiles": 1.25,
+        "targeting_unknown": false,
+        "type": "光束"
+      },
+      {
+        "area": {
+          "kind": "none"
+        },
+        "can_attack": [
+          "Infantry",
+          "Vehicle",
+          "Structure",
+          "Harvester"
+        ],
+        "damage": 140,
+        "homing": true,
+        "id": "fire1",
+        "name": "fire",
+        "overrides": [
+          [
+            "Structure",
+            300
+          ],
+          [
+            "Vehicle",
+            50
+          ]
+        ],
+        "range_tiles": 1.25,
+        "targeting_unknown": false,
+        "type": "光束"
+      }
+    ]
+  },
   "faction": "NOD",
   "id": "unit_nod_avatar",
-  "name_en": "Avatar",
-  "name_zh": "圣灵",
   "pb": {
     "rarity": "Epic",
     "start_major": 5

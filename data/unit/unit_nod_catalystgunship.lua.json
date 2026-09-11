@@ -1,5 +1,6 @@
 {
   "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "_schema": 2,
   "config": {
     "combatStoreTuning": {
       "addIncreaseCountOnPurchase": true,
@@ -186,12 +187,93 @@
       }
     }
   },
-  "desc_en": "Launches a Tiberium gas grenade that leaves behind Tiberium gas on impact every 5 seconds. Deals bonus damage to a unit sitting in Tiberium gas.",
-  "desc_zh": "每5秒发射一发泰晶瓦斯榴弹，命中后会留下一片泰晶瓦斯。对处于泰晶瓦斯内的单位造成额外伤害。",
+  "derived": {
+    "_note": "已按引擎算法算好的最终值。消费方只读这里，不要解析 config。",
+    "attack": {
+      "composition": "parallel",
+      "cycle_ms": null,
+      "member_offset_ms": 0,
+      "tracks": [
+        {
+          "timing": {
+            "cycle_ms": 0,
+            "hits": 1,
+            "kind": "单发"
+          },
+          "weapon": "gasWeapon0"
+        },
+        {
+          "timing": {
+            "cycle_ms": 1600,
+            "hits": 1,
+            "kind": "单发"
+          },
+          "weapon": "catalystWeapon1"
+        }
+      ]
+    },
+    "dps": 168.75,
+    "health": {
+      "per_member": 1530,
+      "total": 1530,
+      "wave_size": 1
+    },
+    "notes": [
+      "武器 gasWeapon 找不到攻击间隔，时序留空",
+      "周期取自另一把武器的 catalystBurst；面板数值由伤害最高的那把决定",
+      "双武器：周期取自另一把武器（catalystBurst），面板数值由被引爆那把决定",
+      "索敌方式未知（descriptors 空表）",
+      "多武器并行（同时开火）"
+    ],
+    "primary": "gasWeapon0",
+    "weapons": [
+      {
+        "area": {
+          "kind": "none"
+        },
+        "can_attack": [
+          "Infantry",
+          "Vehicle",
+          "Structure",
+          "Harvester"
+        ],
+        "damage": 25,
+        "homing": true,
+        "id": "gasWeapon0",
+        "name": "gasWeapon",
+        "overrides": [
+          [
+            "Vehicle",
+            20
+          ]
+        ],
+        "range_tiles": 2.5,
+        "targeting_unknown": false,
+        "type": "弹道"
+      },
+      {
+        "area": {
+          "kind": "none"
+        },
+        "can_attack": [],
+        "damage": 270,
+        "homing": true,
+        "id": "catalystWeapon1",
+        "name": "catalystWeapon",
+        "overrides": [
+          [
+            "Vehicle",
+            50
+          ]
+        ],
+        "range_tiles": 2.5,
+        "targeting_unknown": true,
+        "type": "炸弹"
+      }
+    ]
+  },
   "faction": "NOD",
   "id": "unit_nod_catalystgunship",
-  "name_en": "Catalyst Gunship",
-  "name_zh": "催化剂武装直升机",
   "pb": {
     "rarity": "Rare",
     "start_major": 3

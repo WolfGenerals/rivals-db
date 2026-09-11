@@ -1,5 +1,6 @@
 {
   "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "_schema": 2,
   "config": {
     "combatStoreTuning": {
       "addIncreaseCountOnPurchase": true,
@@ -82,12 +83,58 @@
       "waveSize": 1
     }
   },
-  "desc_en": "Can also attack the enemy base. Flying.",
-  "desc_zh": "它还可以攻击敌军基地。飞行单位。",
+  "derived": {
+    "_note": "已按引擎算法算好的最终值。消费方只读这里，不要解析 config。",
+    "attack": {
+      "composition": "single",
+      "cycle_ms": null,
+      "member_offset_ms": 0,
+      "tracks": [
+        {
+          "timing": {
+            "cycle_ms": 1600,
+            "hits": 1,
+            "kind": "单发"
+          },
+          "weapon": "rocketLauncher"
+        }
+      ]
+    },
+    "dps": 365.625,
+    "health": {
+      "per_member": 1950,
+      "total": 1950,
+      "wave_size": 1
+    },
+    "notes": [],
+    "primary": "rocketLauncher",
+    "weapons": [
+      {
+        "area": {
+          "kind": "none"
+        },
+        "can_attack": [
+          "Aircraft",
+          "Structure"
+        ],
+        "damage": 585,
+        "homing": true,
+        "id": "rocketLauncher",
+        "name": "rocketLauncher",
+        "overrides": [
+          [
+            "Structure",
+            425
+          ]
+        ],
+        "range_tiles": 1.1,
+        "targeting_unknown": false,
+        "type": "弹道"
+      }
+    ]
+  },
   "faction": "GDI",
   "id": "unit_gdi_hammerhead",
-  "name_en": "Hammerhead",
-  "name_zh": "锤头鲨战机",
   "pb": {
     "rarity": "Common",
     "start_major": 1

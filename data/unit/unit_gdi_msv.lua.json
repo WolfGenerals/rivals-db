@@ -1,5 +1,6 @@
 {
   "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "_schema": 2,
   "config": {
     "combatStoreTuning": {
       "addIncreaseCountOnPurchase": true,
@@ -101,12 +102,51 @@
       "waveSize": 1
     }
   },
-  "desc_en": "Buffs allied vehicles' Attack Speed by <stat|BuffEffect2>% and increases Movement Speed slightly for <stat|BuffDuration> seconds.",
-  "desc_zh": "使友军载具的攻击速度提高<stat|BuffEffect2>%且移动速度稍微提升，持续<stat|BuffDuration>秒。",
+  "derived": {
+    "_note": "已按引擎算法算好的最终值。消费方只读这里，不要解析 config。",
+    "attack": {
+      "composition": "single",
+      "cycle_ms": null,
+      "member_offset_ms": 0,
+      "tracks": [
+        {
+          "timing": {
+            "cycle_ms": 3000,
+            "hits": 0,
+            "kind": "单发"
+          },
+          "weapon": "rockets"
+        }
+      ]
+    },
+    "dps": null,
+    "health": {
+      "per_member": 1750,
+      "total": 1750,
+      "wave_size": 1
+    },
+    "notes": [
+      "索敌方式未知（descriptors 空表）"
+    ],
+    "primary": "rockets",
+    "weapons": [
+      {
+        "area": {
+          "kind": "none"
+        },
+        "can_attack": [],
+        "damage": 0,
+        "id": "rockets",
+        "name": "rockets",
+        "overrides": [],
+        "range_tiles": 2.5,
+        "targeting_unknown": true,
+        "type": "弹道"
+      }
+    ]
+  },
   "faction": "GDI",
   "id": "unit_gdi_msv",
-  "name_en": "M.S.V.",
-  "name_zh": "M.S.V.",
   "pb": {
     "rarity": "Epic",
     "start_major": 5

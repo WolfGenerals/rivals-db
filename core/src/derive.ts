@@ -395,9 +395,11 @@ export function deriveAttack(unit: EntityRecord): DerivedAttack {
     }
   }
 
-  // ── 主武器：第一把**有伤害**的武器 ──
-  // （跳过 `orcabomber.targetSelector` 那种无伤害占位桩）
-  const primaryW = weapons.find((w) => w.damage > 0) ?? weapons[0];
+  // ── 主武器 ──
+  // `sequence` 的主武器是**末段**（稳态，面板显示的就是它）；
+  // 其余取第一把**有伤害**的武器（跳过 `orcabomber.targetSelector` 那种无伤害占位桩）。
+  const lastStage = weapons.filter((w) => w.damage > 0).at(-1);
+  const primaryW = (composition === "sequence" && lastStage) || weapons.find((w) => w.damage > 0) || weapons[0];
   const primary = primaryW?.id ?? "";
 
   // ── DPS：时序隐含值（主武器那条轨）──

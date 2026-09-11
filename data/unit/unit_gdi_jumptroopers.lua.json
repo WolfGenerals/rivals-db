@@ -1,5 +1,6 @@
 {
   "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "_schema": 2,
   "config": {
     "combatStoreTuning": {
       "addIncreaseCountOnPurchase": true,
@@ -91,12 +92,68 @@
       "waveSize": 4
     }
   },
-  "desc_en": "Can move over terrain and enemy units. Reveals adjacent stealthed units.",
-  "desc_zh": "可越过地形和敌军单位。可暴露相邻的隐形单位。",
+  "derived": {
+    "_note": "已按引擎算法算好的最终值。消费方只读这里，不要解析 config。",
+    "attack": {
+      "composition": "single",
+      "cycle_ms": null,
+      "member_offset_ms": 1250,
+      "tracks": [
+        {
+          "timing": {
+            "cycle_ms": 5000,
+            "hits": 1,
+            "kind": "单发"
+          },
+          "weapon": "rifle"
+        }
+      ]
+    },
+    "dps": 305.6,
+    "health": {
+      "per_member": 220,
+      "total": 880,
+      "wave_size": 4
+    },
+    "notes": [],
+    "primary": "rifle",
+    "squad": {
+      "member_offset_ms": 1250,
+      "wave_size": 4
+    },
+    "weapons": [
+      {
+        "area": {
+          "kind": "none"
+        },
+        "can_attack": [
+          "Infantry",
+          "Vehicle",
+          "Structure",
+          "Harvester"
+        ],
+        "damage": 382,
+        "homing": true,
+        "id": "rifle",
+        "name": "rifle",
+        "overrides": [
+          [
+            "Infantry",
+            40
+          ],
+          [
+            "Harvester",
+            350
+          ]
+        ],
+        "range_tiles": 2.5,
+        "targeting_unknown": false,
+        "type": "弹道"
+      }
+    ]
+  },
   "faction": "GDI",
   "id": "unit_gdi_jumptroopers",
-  "name_en": "Jump Jet Troopers",
-  "name_zh": "喷气飞行兵",
   "pb": {
     "rarity": "Epic",
     "start_major": 5

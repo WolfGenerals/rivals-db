@@ -1,5 +1,6 @@
 {
   "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "_schema": 2,
   "config": {
     "combatStoreTuning": {
       "purchaseCooldownMS": 60000
@@ -81,10 +82,60 @@
       "waveSize": 1
     }
   },
+  "derived": {
+    "_note": "已按引擎算法算好的最终值。消费方只读这里，不要解析 config。",
+    "attack": {
+      "composition": "single",
+      "cycle_ms": null,
+      "member_offset_ms": 0,
+      "tracks": [
+        {
+          "timing": {
+            "cycle_ms": 4000,
+            "hits": 1,
+            "kind": "单发"
+          },
+          "weapon": "guns"
+        }
+      ]
+    },
+    "dps": 750,
+    "health": {
+      "per_member": 5000,
+      "total": 5000,
+      "wave_size": 1
+    },
+    "notes": [],
+    "primary": "guns",
+    "weapons": [
+      {
+        "area": {
+          "kind": "none"
+        },
+        "can_attack": [
+          "Infantry",
+          "Vehicle",
+          "Structure",
+          "Harvester"
+        ],
+        "damage": 3000,
+        "homing": true,
+        "id": "guns",
+        "name": "guns",
+        "overrides": [
+          [
+            "Harvester",
+            500
+          ]
+        ],
+        "range_tiles": 2.5,
+        "targeting_unknown": false,
+        "type": "弹道"
+      }
+    ]
+  },
   "faction": "NOD",
   "id": "unit_nod_obelisk",
-  "name_en": "Obelisk of Light",
-  "name_zh": "激光方尖碑",
   "source": "gameplay/units/unit_nod_obelisk.lua",
   "variant": "obelisk"
 }

@@ -1,5 +1,6 @@
 {
   "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "_schema": 2,
   "config": {
     "combatStoreTuning": {
       "addIncreaseCountOnPurchase": true,
@@ -118,12 +119,101 @@
       "waveSize": 1
     }
   },
-  "desc_en": "Can attack while moving. Crushes infantry, killing them by moving over them.",
-  "desc_zh": "可以在移动时发动攻击。可碾杀步兵单位。",
+  "derived": {
+    "_note": "已按引擎算法算好的最终值。消费方只读这里，不要解析 config。",
+    "attack": {
+      "composition": "conditional",
+      "cycle_ms": null,
+      "member_offset_ms": 0,
+      "tracks": [
+        {
+          "timing": {
+            "cycle_ms": 4000,
+            "hits": 2,
+            "kind": "单发"
+          },
+          "weapon": "cannon0",
+          "when": {
+            "target": [
+              "Infantry",
+              "Vehicle",
+              "Structure",
+              "Harvester"
+            ]
+          }
+        },
+        {
+          "timing": {
+            "cycle_ms": 4000,
+            "hits": 1,
+            "kind": "单发"
+          },
+          "weapon": "rocketLauncher1",
+          "when": {
+            "target": [
+              "Aircraft",
+              "Structure"
+            ]
+          }
+        }
+      ]
+    },
+    "dps": 532.5,
+    "health": {
+      "per_member": 6900,
+      "total": 6900,
+      "wave_size": 1
+    },
+    "notes": [
+      "多武器按目标类型择一"
+    ],
+    "primary": "cannon0",
+    "weapons": [
+      {
+        "area": {
+          "kind": "none"
+        },
+        "can_attack": [
+          "Infantry",
+          "Vehicle",
+          "Structure",
+          "Harvester"
+        ],
+        "damage": 1065,
+        "homing": true,
+        "id": "cannon0",
+        "name": "cannon",
+        "overrides": [
+          [
+            "Infantry",
+            100
+          ]
+        ],
+        "range_tiles": 1.25,
+        "targeting_unknown": false,
+        "type": "弹道"
+      },
+      {
+        "area": {
+          "kind": "none"
+        },
+        "can_attack": [
+          "Aircraft",
+          "Structure"
+        ],
+        "damage": 200,
+        "homing": true,
+        "id": "rocketLauncher1",
+        "name": "rocketLauncher",
+        "overrides": [],
+        "range_tiles": 1.25,
+        "targeting_unknown": false,
+        "type": "弹道"
+      }
+    ]
+  },
   "faction": "GDI",
   "id": "unit_gdi_mammothtank",
-  "name_en": "Mammoth Tank",
-  "name_zh": "猛犸坦克",
   "pb": {
     "rarity": "Epic",
     "start_major": 5

@@ -1,5 +1,6 @@
 {
   "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "_schema": 2,
   "config": {
     "combatStoreTuning": {
       "addIncreaseCountOnPurchase": true,
@@ -122,12 +123,69 @@
       "waveSize": 1
     }
   },
-  "desc_en": "Unleashes an EMP that affects adjacent, enemy Vehicles and Aircraft upon breaking Stealth for 1.5 seconds. Flying.",
-  "desc_zh": "在解除隐形状态后发射一次电磁脉冲，影响相邻的敌方载具和飞机，持续1.5秒。飞行单位。",
+  "derived": {
+    "_note": "已按引擎算法算好的最终值。消费方只读这里，不要解析 config。",
+    "attack": {
+      "composition": "single",
+      "cycle_ms": null,
+      "member_offset_ms": 0,
+      "tracks": [
+        {
+          "timing": {
+            "clip": 8,
+            "interval_ms": 35,
+            "kind": "装填",
+            "reload_ms": 8000
+          },
+          "weapon": "rocketLauncher"
+        }
+      ]
+    },
+    "dps": 192,
+    "health": {
+      "per_member": 1233,
+      "total": 1233,
+      "wave_size": 1
+    },
+    "notes": [],
+    "primary": "rocketLauncher",
+    "weapons": [
+      {
+        "area": {
+          "kind": "none"
+        },
+        "can_attack": [
+          "Infantry",
+          "Vehicle",
+          "Structure",
+          "Harvester"
+        ],
+        "damage": 192,
+        "homing": true,
+        "id": "rocketLauncher",
+        "name": "rocketLauncher",
+        "overrides": [
+          [
+            "Infantry",
+            32
+          ],
+          [
+            "Harvester",
+            104
+          ],
+          [
+            "Structure",
+            125
+          ]
+        ],
+        "range_tiles": 2.5,
+        "targeting_unknown": false,
+        "type": "弹道"
+      }
+    ]
+  },
   "faction": "NOD",
   "id": "unit_nod_wraith",
-  "name_en": "Shade",
-  "name_zh": "飞影",
   "pb": {
     "rarity": "Epic",
     "start_major": 5

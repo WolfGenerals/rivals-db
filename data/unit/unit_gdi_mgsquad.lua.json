@@ -1,5 +1,6 @@
 {
   "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "_schema": 2,
   "config": {
     "combatStoreTuning": {
       "addIncreaseCountOnPurchase": true,
@@ -109,12 +110,60 @@
       "waveSize": 1
     }
   },
-  "desc_en": "Can attack up to <stat|ExtendedAttackRange> tiles away, but must set up first. Takes <stat|BuffEffect>% reduced damage when setup.",
-  "desc_zh": "攻击距离可以达到<stat|ExtendedAttackRange>格，但是必须事先进行部署。部署后受到的伤害减少<stat|BuffEffect>%。",
+  "derived": {
+    "_note": "已按引擎算法算好的最终值。消费方只读这里，不要解析 config。",
+    "attack": {
+      "composition": "single",
+      "cycle_ms": null,
+      "member_offset_ms": 0,
+      "tracks": [
+        {
+          "timing": {
+            "cycle_ms": 200,
+            "hits": 1,
+            "kind": "单发"
+          },
+          "weapon": "rockets"
+        }
+      ]
+    },
+    "dps": 140,
+    "health": {
+      "per_member": 400,
+      "total": 400,
+      "wave_size": 1
+    },
+    "notes": [],
+    "primary": "rockets",
+    "weapons": [
+      {
+        "area": {
+          "kind": "none"
+        },
+        "can_attack": [
+          "Infantry",
+          "Vehicle",
+          "Structure",
+          "Harvester"
+        ],
+        "damage": 28,
+        "homing": true,
+        "id": "rockets",
+        "name": "rockets",
+        "overrides": [
+          [
+            "Vehicle",
+            28
+          ]
+        ],
+        "range_tiles": 2.5,
+        "targeting_unknown": false,
+        "type": "弹道"
+      }
+    ]
+  },
   "faction": "GDI",
   "id": "unit_gdi_mgsquad",
-  "name_en": "MG Squad",
-  "name_zh": "机枪小队",
   "pb": {
     "rarity": "Rare",
     "start_major": 3

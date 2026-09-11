@@ -13,6 +13,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
+import { deriveAttack } from "../derive.ts";
 import type { EntityRecord } from "./extract.ts";
 
 export const FILE_NOTE =
@@ -92,9 +93,18 @@ function summarize(rec: EntityRecord): Record<string, unknown> {
   return out;
 }
 
-/** 单个实体的输出载荷。 */
+/**
+ * 单个实体的输出载荷。
+ *
+ * **两块**：
+ *   · `derived` —— 已决策的展示数据（武器 + 时序），**消费方只读这里**
+ *   · `config`  —— 原始树，保留供审计与再推导，消费方不应解析
+ *
+ * 见 `docs/data-schema.md`。
+ */
 export function payloadFor(rec: EntityRecord): Record<string, unknown> {
   const out: Record<string, unknown> = {
+    _schema: 2,
     _note: FILE_NOTE,
     id: rec.id,
     faction: rec.faction,
@@ -105,6 +115,26 @@ export function payloadFor(rec: EntityRecord): Record<string, unknown> {
   if (rec.pb) out.pb = rec.pb;
   if (rec.visual) out.visual = rec.visual;
   if (rec.warnings?.length) out.warnings = rec.warnings;
+
+  // 迁移：官方结构 → 我们的规范格式（武器 + 时序）
+  const { weapons, attack, primary, dps, notes } = deriveAttack(rec);
+  const cfg = rec.config;
+  const wave = cfg.squadTuning?.waveSize ?? 1;
+  const per = cfg.combatantTuning?.health;
+  out.derived = {
+    _note: "已按引擎算法算好的最终值。消费方只读这里，不要解析 config。",
+    health:
+      per === undefined
+        ? undefined
+        : { per_member: per, wave_size: wave, total: per * wave },
+    dps: dps > 0 ? Number(dps.toFixed(4)) : null,
+    squad: wave > 1 ? { wave_size: wave, member_offset_ms: attack.member_offset_ms } : undefined,
+    weapons,
+    attack,
+    primary,
+    notes,
+  };
+
   out.config = rec.config;
   return out;
 }

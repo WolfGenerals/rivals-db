@@ -1,5 +1,6 @@
 {
   "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "_schema": 2,
   "config": {
     "combatStoreTuning": {
       "addIncreaseCountOnPurchase": true,
@@ -106,12 +107,65 @@
       "waveSize": 1
     }
   },
-  "desc_en": "Can attack up to <stat|ExtendedAttackRange> tiles away, but must set up first.  Rapidly fires <stat|Clip> rockets, then must reload.",
-  "desc_zh": "攻击距离可以达到<stat|ExtendedAttackRange>格，但是必须事先进行部署。可快速发射<stat|Clip>枚火箭，事后须重新装填。",
+  "derived": {
+    "_note": "已按引擎算法算好的最终值。消费方只读这里，不要解析 config。",
+    "attack": {
+      "composition": "single",
+      "cycle_ms": null,
+      "member_offset_ms": 0,
+      "tracks": [
+        {
+          "timing": {
+            "clip": 3,
+            "interval_ms": 250,
+            "kind": "装填",
+            "reload_ms": 5000
+          },
+          "weapon": "rockets"
+        }
+      ]
+    },
+    "dps": 399.6,
+    "health": {
+      "per_member": 1500,
+      "total": 1500,
+      "wave_size": 1
+    },
+    "notes": [],
+    "primary": "rockets",
+    "weapons": [
+      {
+        "area": {
+          "kind": "none"
+        },
+        "can_attack": [
+          "Infantry",
+          "Vehicle",
+          "Structure",
+          "Harvester"
+        ],
+        "damage": 666,
+        "homing": true,
+        "id": "rockets",
+        "name": "rockets",
+        "overrides": [
+          [
+            "Infantry",
+            40
+          ],
+          [
+            "Structure",
+            1000
+          ]
+        ],
+        "range_tiles": 2.5,
+        "targeting_unknown": false,
+        "type": "弹道"
+      }
+    ]
+  },
   "faction": "GDI",
   "id": "unit_gdi_mlrs",
-  "name_en": "M.L.R.S.",
-  "name_zh": "多管火箭",
   "pb": {
     "rarity": "Epic",
     "start_major": 5

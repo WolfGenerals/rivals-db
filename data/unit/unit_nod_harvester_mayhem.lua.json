@@ -1,5 +1,6 @@
 {
   "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "_schema": 2,
   "config": {
     "combatStoreTuning": {
       "addIncreaseCountOnPurchase": true,
@@ -40,10 +41,26 @@
       "waveSize": 1
     }
   },
+  "derived": {
+    "_note": "已按引擎算法算好的最终值。消费方只读这里，不要解析 config。",
+    "attack": {
+      "composition": "single",
+      "cycle_ms": null,
+      "member_offset_ms": 0,
+      "tracks": []
+    },
+    "dps": null,
+    "health": {
+      "per_member": 3400,
+      "total": 3400,
+      "wave_size": 1
+    },
+    "notes": [],
+    "primary": "",
+    "weapons": []
+  },
   "faction": "NOD",
   "id": "unit_nod_harvester_mayhem",
-  "name_en": "Harvester",
-  "name_zh": "采集车",
   "source": "gameplay/units/unit_nod_harvester_mayhem.lua",
   "suffixes": [
     "mayhem"

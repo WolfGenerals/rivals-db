@@ -1,5 +1,6 @@
 {
   "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "_schema": 2,
   "config": {
     "combatStoreTuning": {
       "addIncreaseCountOnPurchase": true,
@@ -95,12 +96,63 @@
       "waveSize": 1
     }
   },
-  "desc_en": "Has an extremely high Attack Speed and 2 Attack Range.",
-  "desc_zh": "拥有极高的攻击速度和2格攻击距离。",
+  "derived": {
+    "_note": "已按引擎算法算好的最终值。消费方只读这里，不要解析 config。",
+    "attack": {
+      "composition": "single",
+      "cycle_ms": null,
+      "member_offset_ms": 0,
+      "tracks": [
+        {
+          "timing": {
+            "cycle_ms": 180,
+            "hits": 1,
+            "interval_ms": 180,
+            "kind": "单发"
+          },
+          "weapon": "cannon"
+        }
+      ]
+    },
+    "dps": 300,
+    "health": {
+      "per_member": 1500,
+      "total": 1500,
+      "wave_size": 1
+    },
+    "notes": [],
+    "primary": "cannon",
+    "weapons": [
+      {
+        "area": {
+          "kind": "none"
+        },
+        "can_attack": [
+          "Aircraft",
+          "Structure"
+        ],
+        "damage": 54,
+        "homing": true,
+        "id": "cannon",
+        "name": "cannon",
+        "overrides": [
+          [
+            "Structure",
+            25
+          ],
+          [
+            "Vehicle",
+            25
+          ]
+        ],
+        "range_tiles": 2.5,
+        "targeting_unknown": false,
+        "type": "弹道"
+      }
+    ]
+  },
   "faction": "GDI",
   "id": "unit_gdi_slingshot",
-  "name_en": "Slingshot",
-  "name_zh": "弹弓",
   "pb": {
     "rarity": "Rare",
     "start_major": 3
