@@ -105,6 +105,8 @@ const areaText = computed(() => {
 
 const minor = computed(() => {
   const out: Array<[string, string]> = [];
+  // 引擎内部的逐武器距离。**不是**面板的「攻击距离」（那个在单位总览行）—— 见 findings I126
+  if (props.weapon.range_tiles !== undefined) out.push(["武器射程（引擎值）", `${props.weapon.range_tiles} 格`]);
   if (props.weapon.homing !== undefined) out.push(["弹道", props.weapon.homing ? "追踪（难躲）" : "不追踪（可走位躲）"]);
   if (props.weapon.targeting_unknown) out.push(["索敌", "未知（数据缺失，不猜）"]);
   return out;
@@ -133,18 +135,15 @@ const minor = computed(() => {
         <span>DPS @{{ level.format() }}</span>
         <b>{{ levelDps?.toFixed(1) ?? "—" }}</b>
       </div>
-      <div class="key-item">
-        <StatIcon name="range" />
-        <span>武器射程</span>
-        <b>{{ weapon.range_tiles === undefined ? "—" : `${weapon.range_tiles} 格` }}</b>
-      </div>
     </div>
 
     <!--
-      ⚠️ 上面这个 `range_tiles` 来自 `weapon.maxRangeInTiles`，是**引擎内部字段** ——
-      `CombatTuningInfo.lua:439-449` 显示的攻击距离用的是 `squadTuning.maxAttackRangeInTiles`
-      （面板上叫「攻击距离」，≤1 时不显示）。全树搜 `weaponTuning.maxRangeInTiles`
-      只有赋值没有读取，所以 2.5 只是最常用的作画取值。见 findings I126。
+      ⚠️ **`weapon.range_tiles` 已从结论行撤到下面的小字行。**
+      它是 `weapon.maxRangeInTiles` —— 引擎内部字段。游戏面板显示的攻击距离用的是
+      `squadTuning.maxAttackRangeInTiles`（整数字数，≤1 不显示，见 findings I126/I127）。
+      两者不是同一个量：步枪兵 攻击距离 1 却射程 2.5、破坏者 攻击距离 2 却射程 1.25。
+      但**它不是伪造值**（4 个取值：2.5/1.25/1.1/3.5，与攻击距离松散相关），
+      Lua 侧无读取说明是 C++ 在读，所以**数据保留，只是不摆在结论行**。
     -->
 
     <!-- ② 时序 -->
