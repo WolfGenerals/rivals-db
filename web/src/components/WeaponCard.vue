@@ -135,10 +135,17 @@ const minor = computed(() => {
       </div>
       <div class="key-item">
         <StatIcon name="range" />
-        <span>射程</span>
+        <span>武器射程</span>
         <b>{{ weapon.range_tiles === undefined ? "—" : `${weapon.range_tiles} 格` }}</b>
       </div>
     </div>
+
+    <!--
+      ⚠️ 上面这个 `range_tiles` 来自 `weapon.maxRangeInTiles`，是**引擎内部字段** ——
+      `CombatTuningInfo.lua:439-449` 显示的攻击距离用的是 `squadTuning.maxAttackRangeInTiles`
+      （面板上叫「攻击距离」，≤1 时不显示）。全树搜 `weaponTuning.maxRangeInTiles`
+      只有赋值没有读取，所以 2.5 只是最常用的作画取值。见 findings I126。
+    -->
 
     <!-- ② 时序 -->
     <table v-if="tracks.length" class="timing">
