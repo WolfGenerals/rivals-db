@@ -103,17 +103,9 @@ function pick(side: "left" | "right", id: string) {
   margin: 0 0 10px;
 }
 .bar button {
-  padding: 2px 10px;
+  /* 底色/边框/字色交给全局 button 样式（那里保证"看得出能点"），这里只调尺寸 */
+  padding: 3px 12px;
   font-size: 12px;
-  color: #b9c4dc;
-  background: #1d2430;
-  border: 1px solid var(--line, #2b3038);
-  border-radius: 6px;
-  cursor: pointer;
-}
-.bar button:hover {
-  background: #26303f;
-  color: #fff;
 }
 
 .cols {
@@ -181,13 +173,8 @@ function pick(side: "left" | "right", id: string) {
 }
 .col-head button {
   margin-left: auto;
-  padding: 1px 8px;
+  padding: 2px 10px;
   font-size: 11px;
-  color: #b9c4dc;
-  background: #1d2430;
-  border: 1px solid var(--line, #2b3038);
-  border-radius: 5px;
-  cursor: pointer;
 }
 .muted {
   color: #7f8aa6;

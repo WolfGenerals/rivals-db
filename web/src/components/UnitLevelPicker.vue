@@ -126,25 +126,16 @@ const onToggle = (e: Event) => emit("update:independent", (e.target as HTMLInput
 
 .nav,
 .value {
+  /* 底色/边框/字色交给全局 button 样式（保证"看得出能点"），这里只定尺寸 */
   height: 20px;
   padding: 0 5px;
   font-size: 12px;
-  color: #b9c4dc;
-  background: #1d2430;
-  border: 1px solid var(--line, #2b3038);
-  border-radius: 4px;
-  cursor: pointer;
 }
 .nav {
   width: 20px;
   padding: 0;
   line-height: 1;
   font-size: 13px;
-}
-.nav:hover:not(:disabled),
-.value:hover:not(:disabled) {
-  background: #26303f;
-  color: #fff;
 }
 .nav:disabled,
 .value:disabled {

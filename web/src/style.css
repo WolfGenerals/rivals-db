@@ -121,17 +121,42 @@ label {
   align-items: center;
   white-space: nowrap;
 }
+/*
+ * 按钮 —— **要一眼看出来能点**。
+ *
+ * 之前的样式是 `background: var(--panel)` + `border: var(--line)` + 灰字，
+ * 而 `--panel`/`--line` 跟页面底色太接近，按钮看起来像标签（用户反馈"意识不到点哪里"）。
+ * 现在：底色比面板**明显亮一档**、字用亮色而非灰、边框可见、hover 有实感。
+ */
 button {
-  background: var(--panel);
-  color: var(--fg);
-  border: 1px solid var(--line);
+  background: #232c3a;
+  color: #e6ecf5;
+  border: 1px solid #3a4658;
   border-radius: 6px;
   padding: 4px 12px;
   font: inherit;
   cursor: pointer;
+  transition:
+    background 0.12s,
+    border-color 0.12s,
+    color 0.12s;
 }
-button:hover {
+button:hover:not(:disabled) {
+  background: #2e3a4d;
   border-color: var(--accent);
+  color: #fff;
+}
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+/* 键盘可达性：Tab 到时要有明显的焦点圈 */
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
 
 /* ── 表格 ─────────────────────────────────────────── */
