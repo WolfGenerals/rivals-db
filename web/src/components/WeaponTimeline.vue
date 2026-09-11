@@ -170,16 +170,24 @@ function segsOf(i: number): Array<Seg & { left: string; width: string; tickPct: 
     <div v-for="i in members" :key="i" class="row">
       <span class="who">{{ waveSize > 1 ? `队员 ${i + 1}` : "" }}</span>
       <div class="track">
-        <template v-for="(s, k) in segsOf(i)" :key="k">
+        <!--
+          段放在 `.bar` 里（它负责圆角与裁剪）；**开火标记放在 `.track` 上** ——
+          标记要伸出条子上下，放在被 `overflow:hidden` 裁剪的层里会被剪掉。
+        -->
+        <div class="bar">
           <span
+            v-for="(s, k) in segsOf(i)"
+            :key="k"
             class="seg"
             :class="s.kind"
             :style="{ left: s.left, width: s.width }"
             :title="s.title"
           />
+        </div>
+        <template v-for="(s, k) in segsOf(i)" :key="`t${k}`">
           <span
             v-for="(tp, m) in s.tickPct"
-            :key="`t${m}`"
+            :key="m"
             class="tick"
             :style="{ left: tp }"
             :title="s.title"
@@ -209,7 +217,8 @@ function segsOf(i: number): Array<Seg & { left: string; width: string; tickPct: 
   display: flex;
   align-items: center;
   gap: 6px;
-  height: 14px;
+  /* 高一点，让开火标记伸出的部分不会被相邻行挤到 */
+  height: 18px;
 }
 .who {
   width: 44px;
@@ -221,6 +230,12 @@ function segsOf(i: number): Array<Seg & { left: string; width: string; tickPct: 
   position: relative;
   flex: 1;
   height: 8px;
+  /* ⚠️ 这里**不能** overflow:hidden —— 开火标记要伸出条子上下 */
+}
+/* 圆角与裁剪在这一层，只作用于段 */
+.bar {
+  position: absolute;
+  inset: 0;
   background: #10131a;
   border-radius: 4px;
   overflow: hidden;
@@ -243,13 +258,19 @@ function segsOf(i: number): Array<Seg & { left: string; width: string; tickPct: 
 .seg.gap {
   background: #232a36;
 }
-/* 伤害落点 */
+/*
+ * 开火标记 —— **矩形，且比条子高**，让它在蓝条上跳出来。
+ * 原来是 1px 的竖线，在 8px 高的条子里几乎看不见（用户报"不显眼"）。
+ */
 .tick {
   position: absolute;
-  top: -2px;
-  width: 0;
-  height: 12px;
-  border-left: 1px solid #ffcc55;
+  top: -4px;
+  height: 16px; /* 条子 8px，上下各露出 4px */
+  width: 3px;
+  background: #ffcc55;
+  border-radius: 1px;
+  box-shadow: 0 0 3px #ffcc5588;
+  pointer-events: none;
 }
 
 .legend {
