@@ -645,14 +645,21 @@ function normalizeDamage(src: {
 /**
  * 这把武器的**有效伤害表** —— 逐目标伤害该读的那张。
  *
- * 伤害有**四个可能的位置**（findings I76 / I106）：
- *   ① `modifier_sequence.tuning` 的 `stage*.damageMain`（分段型，取**末段**，与 DPS 约定一致）
- *   ② 同上的扁平 `damageMain` / `damage`（火焰坦克、圣灵、黑寡妇…）
- *   ③ `projectile.modifier.tuning.damage`（爆炸类，如虎鲸轰炸机）
- *   ④ `weapon.damageTuning`（常规武器）
+ * 优先级（依据 `CombatTuningInfo.lua:660,686-696` —— 引擎自己就是 `damageTuning` 先进，
+ * 取不到才看 `modifier_shot` / `projectile.modifier`）：
  *
- * ⚠️ **序列存在时优先用序列** —— 那才是实际开火时算的伤害。万钧巨炮两处都有且**不一致**
- * （武器级写 Infantry 20，序列末段写 12）。**7 把武器的伤害只在序列里**，
+ *   ① `modifier_sequence.tuning` 的 `stage*.damageMain`（分段型取**末段**）/ `damageMain` / `damage`
+ *      —— 序列武器**实际开火时算的就是它**，优先级高于武器级的 `damageTuning`
+ *   ② `weapon.damageTuning`（常规武器）
+ *   ③ `modifier_shot.tuning.damage`（**只有泰坦机甲**，全库 1 把）
+ *   ④ `projectile.modifier.tuning.damage` / `damage1`（爆炸类：虎鲸轰炸机、地狱火）
+ *
+ * ⚠️ **③④ 必须排在 ② 之后**。反例（催化剂直升机，曾因此把 DPS 从 168.75 算成 31）：
+ * 它的 `catalystWeapon` 有 `damageTuning.default = 270`（主伤害），**同时**弹体带一个
+ * `damage = 50` 的**爆炸附加**。先查弹体就会取到 50。
+ *
+ * ⚠️ **① 必须排在 ② 之前**：万钧巨炮两处都有且**不一致**（武器级写 Infantry 20，
+ * 序列末段写 12），实际开火用的是序列的。且 **7 把武器的伤害只在序列里**，
  * 早先只读 `damageTuning` 会让它们逐目标伤害全显示 0。
  */
 export function effectiveDamage(weapon: WeaponTuning): DamageTuning | undefined {
@@ -665,8 +672,30 @@ export function effectiveDamage(weapon: WeaponTuning): DamageTuning | undefined 
     if (t.damageMain) return normalizeDamage(t.damageMain);
     if (t.damage) return normalizeDamage(t.damage);
   }
-  const pm = weapon.projectile?.modifier?.tuning?.damage;
-  if (pm) return normalizeDamage(pm);
+  if (weapon.damageTuning) return weapon.damageTuning;
+  /*
+   * `modifier_shot` —— **每发命中后生成的 modifier**，全库只有泰坦机甲用
+   * （`unit_gdi_titan.lua:37-54`，`ability_titan_energy_shot`，damage 2000 / 步兵 180）。
+   * 它的武器自身 `damageTuning` 是空的，不读这里泰坦的伤害就是 0。
+   */
+  const shot = (weapon as { modifier_shot?: { tuning?: { damage?: unknown } } }).modifier_shot;
+  if (shot?.tuning?.damage && typeof shot.tuning.damage === "object") {
+    return normalizeDamage(shot.tuning.damage as { default?: number; override?: unknown });
+  }
+  /*
+   * 弹体 modifier 的伤害。多数叫 `damage`，**地狱火叫 `damage1`/`damage2`**
+   * （两个值都是 2040/步兵500，另有 `SECOND_IMPACT_DELAY = 300`）。
+   *
+   * ⚠️ `damage1`/`damage2` 是「同一次攻击的两段命中」还是「主/副目标」**尚未确认** ——
+   * 先用 `damage1` 当每段伤害，**需要游戏内面板值来定论**（见 findings I109）。
+   */
+  const mt = weapon.projectile?.modifier?.tuning as
+    | { damage?: unknown; damage1?: unknown; damage2?: unknown }
+    | undefined;
+  const raw = mt?.damage ?? mt?.damage1;
+  if (raw && typeof raw === "object") {
+    return normalizeDamage(raw as { default?: number; override?: unknown });
+  }
   return weapon.damageTuning;
 }
 
@@ -711,7 +740,19 @@ export function baseDps(weapon: WeaponTuning, waveSize = 1, targetTag?: DamageOv
   const burst = weapon.burstTiming ?? {};
   const cooldown = burst.cooldown ?? 0;
   if (!cooldown) return 0;
-  return (damage * (burst.numToBurst ?? 1) * waveSize) / cooldown;
+  let mult = ((burst.numToBurst ?? 1) * waveSize) / cooldown;
+  /*
+   * `All` 时乘枪口数 —— **这是引擎的规则**（`CombatTuningInfo.lua:712-714`）。
+   *
+   * ⚠️ 早先把它删了，理由写的是"火焰坦克 All+muzzleCount=2 实测不乘"。那个实测**没错**，
+   * 但结论不能推广：火焰坦克有 `modifier_sequence`，**在序列分支就 return 了，根本走不到这里**。
+   * 本函数只服务**没有序列的 62 把常规武器**，对它们引擎就是会乘。
+   *
+   * 当前数据里常规武器带 `All` 的 8 把 `muzzleCount` 全是 1（msv 是 0、ticktank 未写），
+   * 所以这条**目前是 no-op**，但按语义该有。见 findings I110。
+   */
+  if (weapon.muzzleStrategy === "All") mult *= weapon.muzzleCount ?? 1;
+  return damage * mult;
 }
 
 /**

@@ -29,7 +29,7 @@
  * 精确数值不要塞进图形，交给表格。
  */
 
-import type { EntityRecord, SequenceTuning, WeaponTuning } from "./types.ts";
+import { effectiveDamage, type EntityRecord, type SequenceTuning, type WeaponTuning } from "./types.ts";
 
 /** 时序图与明细表共用的段 */
 export interface Phase {
@@ -86,19 +86,22 @@ export abstract class WeaponAttack {
    *   ② `projectile.modifier.tuning.damage.default`（爆炸类，**每发**）
    *   ③ `modifier_sequence.tuning.damageMain.default`（火焰坦克这类）
    */
+  /**
+   * 这把武器的**单发伤害**。
+   *
+   * ⚠️ **必须走 `effectiveDamage()`** —— 伤害有四个可能的位置，别在这里另写一条链。
+   * 早先这里自己串了一遍（只认 `damageTuning` / `projectile.modifier` / `damageMain`），
+   * 结果**漏了 `modifier_shot`（泰坦机甲）与 `damage1`（地狱火）**，
+   * 两把武器的伤害显示成 0。见 findings I111/I112。
+   */
   damage(): number {
-    const direct = this.weapon.damageTuning?.default;
-    if (direct !== undefined) return direct;
-    const t = this.tuning();
-    // `damageMain`（火焰坦克）与 `damage`（圣灵/寡妇的 `{damage, tickPeriodMs}`）都要认
-    return this.projectileDamage() ?? t.damageMain?.default ?? t.damage?.default ?? 0;
+    return effectiveDamage(this.weapon)?.default ?? 0;
   }
 
-  /** 伤害是否来自弹体的爆炸 modifier（那种是**每发**值，要乘发射数） */
+  /** 伤害是否来自**弹体的爆炸 modifier**（那种是每发值，要乘击打数） */
   protected projectileDamage(): number | undefined {
-    const mod = (this.weapon.projectile as { modifier?: { tuning?: { damage?: { default?: number } } } })
-      ?.modifier;
-    return mod?.tuning?.damage?.default;
+    const d = this.weapon.projectile?.modifier?.tuning?.damage;
+    return d && typeof d === "object" ? (d as { default?: number }).default : undefined;
   }
 
   /** `modifier_sequence.tuning`，能力序列武器的参数都在这 */
@@ -464,14 +467,15 @@ export class ScarabWeaponSequence extends BasicAttack {}
 /**
  * `ability_disruptor_weapon_sequence_behaviour` —— 破坏者
  *
- * 有 `FireEndlessBeam` / `FireLimitedBeam` 两种模式，但 `tuning` 里**只有 `initialChargeUpMs`**，
- * 没有周期参数，**公式未解**（也没有游戏内观测点）。如实标未知，不猜。
+ * 官方实现（该能力的 `TranslateToken("dps")`）：
+ * `Fixed32(self.tuning.damage.default) / (Fixed32(self.tuning.tickPeriodMs) / 1000)`
+ * —— 即 `damage ÷ tickPeriodMs_s`，与持续光束同式。
+ * 实测数据：`damage.default = 26`、`tickPeriodMs = 40` → **650**。
+ *
+ * 早先标成 `UnknownAttack` 是**错的** —— 当时 `tuning` 里只看到 `initialChargeUpMs`，
+ * 漏了 `damage` / `tickPeriodMs`（见 findings I109）。
  */
-export class DisruptorWeaponSequence extends UnknownAttack {
-  constructor(weapon: WeaponTuning, waveSize: number, hitsPerAttack: number) {
-    super(weapon, waveSize, hitsPerAttack, "破坏者的 Timeline 分无限/有限光束两模式，tuning 里没有周期参数");
-  }
-}
+export class DisruptorWeaponSequence extends TickAttack {}
 
 type BehaviourCtor = new (w: WeaponTuning, waveSize: number, hitsPerAttack: number) => WeaponAttack;
 
