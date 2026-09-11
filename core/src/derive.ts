@@ -364,6 +364,15 @@ export function deriveAttack(unit: EntityRecord): DerivedAttack {
     const cycle = isSeq
       ? (explicitPeriod ?? (hits > 1 ? hits * iv.interval : iv.interval))
       : iv.interval;
+    /*
+     * **蓄力时间要进时序。**
+     *
+     * 序列武器的 `initialChargeUpMs` 是每次开火前的固定蓄力（音波坦克 3000ms）。
+     * 之前只有**分段**那条分支设了 `charge_ms`，平铺序列这条漏了 —— 于是音波坦克的
+     * 时序只剩「每 40ms 一发，一轮 20 发」，**看起来是持续光束**，那 3 秒蓄力完全不可见
+     * （findings I164）。
+     */
+    const chargeMs = isSeq ? num(t["initialChargeUpMs"]) : undefined;
     if (isSeq && hits > 1 && explicitPeriod) {
       cycle_ms = explicitPeriod;
       tracks.push({
@@ -375,11 +384,13 @@ export function deriveAttack(unit: EntityRecord): DerivedAttack {
           interval_ms: iv.interval,
           gap_ms: Math.max(0, explicitPeriod - hits * iv.interval),
         },
+        charge_ms: chargeMs,
       });
     } else {
       tracks.push({
         weapon: id,
         timing: { kind: "单发", hits, cycle_ms: cycle, interval_ms: isSeq ? iv.interval : undefined },
+        charge_ms: chargeMs,
       });
     }
   });

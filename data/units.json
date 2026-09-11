@@ -793,6 +793,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "charge_ms": 3000,
               "timing": {
                 "cycle_ms": 800,
                 "hits": 20,
@@ -1230,6 +1231,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "charge_ms": 500,
               "timing": {
                 "cycle_ms": 2500,
                 "gap_ms": 1750,
@@ -1329,6 +1331,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 0,
                 "hits": 3,
@@ -1523,6 +1526,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "charge_ms": 500,
               "timing": {
                 "cycle_ms": 3000,
                 "hits": 1,
@@ -3337,6 +3341,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 4000,
                 "gap_ms": 1600,
@@ -3433,6 +3438,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 3000,
                 "gap_ms": 2580,
@@ -3718,6 +3724,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 180,
                 "hits": 1,
@@ -4177,6 +4184,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 190,
                 "hits": 1,
@@ -4653,6 +4661,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "charge_ms": 300,
               "timing": {
                 "cycle_ms": 250,
                 "hits": 1,
@@ -4662,6 +4671,7 @@
               "weapon": "laser0"
             },
             {
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 500,
                 "hits": 1,
@@ -5451,6 +5461,7 @@
           "member_offset_ms": 300,
           "tracks": [
             {
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 500,
                 "hits": 1,
@@ -5545,6 +5556,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 500,
                 "hits": 1,
@@ -5632,6 +5644,7 @@
           "member_offset_ms": 1000,
           "tracks": [
             {
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 400,
                 "hits": 1,
@@ -6223,6 +6236,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 500,
                 "hits": 1,
@@ -6316,6 +6330,7 @@
           "member_offset_ms": 666,
           "tracks": [
             {
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 2000,
                 "hits": 1,
@@ -7015,6 +7030,7 @@
           "member_offset_ms": 2000,
           "tracks": [
             {
+              "charge_ms": 100,
               "timing": {
                 "cycle_ms": 5000,
                 "hits": 1,
@@ -7850,6 +7866,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 500,
                 "hits": 1,

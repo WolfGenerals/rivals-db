@@ -98,6 +98,25 @@ function primaryWeapon(e: DatasetEntry): Weapon | undefined {
   return e.derived.weapons.find((w) => w.id === e.derived.primary) ?? e.derived.weapons[0];
 }
 
+/**
+ * 「一轮几下 · 两下之间多少毫秒」。
+ *
+ * 取主武器的轨道：单发看 `hits`/`interval_ms`，装填看 `clip`/`interval_ms`。
+ * 一轮只有 1 下、或没有间隔数据的，显示 `—`（没有"连击"可言）。
+ */
+function burstText(e: DatasetEntry): string {
+  const w = primaryWeapon(e);
+  if (!w) return "—";
+  const t = e.derived.attack.tracks.find((x) => x.weapon === w.id);
+  if (!t) return "—";
+  const tm = t.timing;
+  if (tm.kind === "一次") return "—"; // 一次性（自爆），没有"连击"可言
+  const hits = tm.kind === "装填" ? tm.clip : tm.hits;
+  const iv = tm.interval_ms;
+  if (!hits || hits <= 1) return "—";
+  return iv ? `${hits} 发 · ${iv}ms` : `${hits} 发`;
+}
+
 /** 按 `DAMAGE_CASCADE` 回退链算对某类目标的伤害（补正值已在 `overrides` 里） */
 function dmgVs(w: Weapon, t: T): number {
   for (const tag of DAMAGE_CASCADE[t] as DamageOverrideTag[]) {
@@ -121,6 +140,14 @@ interface Row {
   totalHP: number | null;
   range: number | undefined;
   dps: number | null;
+  /**
+   * **一轮打几下 × 两下之间的间隔** —— 用来区分「持续」与「爆发」。
+   *
+   * 只看 DPS 分不出音波坦克（20 发 @40ms，然后蓄力 3s）和普通持续光束：
+   * 它的 DPS 是**光束瞬时速率**，不是平均输出（见 findings I164）。
+   * 把「几下 / 多少毫秒一下」摆出来，读者一眼能判断。
+   */
+  burst: string;
   cells: Cell[];
 }
 
@@ -178,6 +205,7 @@ const rows = computed<Row[]>(() => {
       totalHP: h ? lv.hp(h.total) : null,
       range: u.derived.stats.attack_range_tiles,
       dps: base === null ? null : lv.dps(base),
+      burst: burstText(u),
       cells,
     };
   });
@@ -266,6 +294,7 @@ void startingMajorOfRarity;
         <th class="num sortable" @click="toggleSort('range')">
           射程<i class="arrow">{{ sortKey === "range" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
         </th>
+        <th title="一轮打几下 · 两下之间的间隔。用来区分持续与爆发">连击</th>
         <th v-for="t in TYPES" :key="t" class="num target sortable" @click="toggleSort(t)">
           {{ SHORT[t] }}<i class="arrow">{{ sortKey === t ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
         </th>
@@ -289,6 +318,7 @@ void startingMajorOfRarity;
         <td class="num">{{ r.totalHP?.toFixed(0) ?? "—" }}</td>
         <td class="num strong">{{ r.dps?.toFixed(0) ?? "—" }}</td>
         <td class="num">{{ r.range === undefined ? "—" : `${r.range} 格` }}</td>
+        <td class="burst">{{ r.burst }}</td>
         <td v-for="(c, i) in r.cells" :key="i" class="num target" :class="cellClass(c)">{{ c.text }}</td>
       </tr>
     </tbody>
@@ -329,6 +359,11 @@ void startingMajorOfRarity;
 
 .grid-table {
   width: 100%;
+}
+.burst {
+  font-size: 11px;
+  color: var(--dim);
+  white-space: nowrap;
 }
 /* 可排序表头：手型 + hover 提亮，让人知道能点 */
 th.sortable {
