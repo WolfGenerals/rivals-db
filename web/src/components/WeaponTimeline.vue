@@ -207,7 +207,7 @@ function segsOf(i: number): Array<Seg & { left: string; width: string; tickPct: 
             class="seg"
             :class="s.kind"
             :style="{ left: s.left, width: s.width }"
-            data-tip="s.title"
+            :data-tip="s.title"
             data-float
           />
         </div>
@@ -217,7 +217,7 @@ function segsOf(i: number): Array<Seg & { left: string; width: string; tickPct: 
             :key="m"
             class="tick"
             :style="{ left: tp }"
-            data-tip="s.title"
+            :data-tip="s.title"
             data-float
           />
         </template>
