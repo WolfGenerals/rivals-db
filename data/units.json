@@ -15,6 +15,9 @@
         "dps": null,
         "health": null,
         "primary": "",
+        "stats": {
+          "cost": 30
+        },
         "weapons": []
       },
       "faction": "GDI",
@@ -40,6 +43,9 @@
         "dps": null,
         "health": null,
         "primary": "",
+        "stats": {
+          "cost": 20
+        },
         "weapons": []
       },
       "faction": "GDI",
@@ -68,6 +74,9 @@
         "dps": null,
         "health": null,
         "primary": "",
+        "stats": {
+          "cost": 50
+        },
         "weapons": []
       },
       "desc_en": "Dr. Liang deploys his repair drones to care for injured equipment and shift the tide of battle.",
@@ -95,6 +104,9 @@
         "dps": null,
         "health": null,
         "primary": "",
+        "stats": {
+          "cost": 30
+        },
         "weapons": []
       },
       "desc_en": "Dr. Liang deploys his repair drones to care for injured equipment and shift the tide of battle.",
@@ -125,6 +137,9 @@
         "dps": null,
         "health": null,
         "primary": "",
+        "stats": {
+          "cost": 40
+        },
         "weapons": []
       },
       "desc_en": "Deploys a mine that will trigger when an enemy unit steps into its radius. Lasts for 10 seconds and reduces Attack Speed by 30% and Movement Speed by 40%.",
@@ -152,6 +167,9 @@
         "dps": null,
         "health": null,
         "primary": "",
+        "stats": {
+          "cost": 130
+        },
         "weapons": []
       },
       "desc_en": "A specialist in high-tech weaponry, Solomon annihilates his enemies with orbital bombardment from his Ion Cannon.",
@@ -179,6 +197,9 @@
         "dps": null,
         "health": null,
         "primary": "",
+        "stats": {
+          "cost": 40
+        },
         "weapons": []
       },
       "desc_en": "A specialist in high-tech weaponry, Solomon annihilates his enemies with orbital bombardment from his Ion Cannon.",
@@ -209,6 +230,9 @@
         "dps": null,
         "health": null,
         "primary": "",
+        "stats": {
+          "cost": 40
+        },
         "weapons": []
       },
       "faction": "GDI",
@@ -234,6 +258,9 @@
         "dps": null,
         "health": null,
         "primary": "",
+        "stats": {
+          "cost": 20
+        },
         "weapons": []
       },
       "faction": "GDI",
@@ -262,6 +289,9 @@
         "dps": null,
         "health": null,
         "primary": "",
+        "stats": {
+          "cost": 80
+        },
         "weapons": []
       },
       "faction": "NOD",
@@ -287,6 +317,9 @@
         "dps": null,
         "health": null,
         "primary": "",
+        "stats": {
+          "cost": 30
+        },
         "weapons": []
       },
       "faction": "NOD",
@@ -315,6 +348,9 @@
         "dps": null,
         "health": null,
         "primary": "",
+        "stats": {
+          "cost": 110
+        },
         "weapons": []
       },
       "faction": "NOD",
@@ -340,6 +376,9 @@
         "dps": null,
         "health": null,
         "primary": "",
+        "stats": {
+          "cost": 40
+        },
         "weapons": []
       },
       "faction": "NOD",
@@ -368,6 +407,9 @@
         "dps": null,
         "health": null,
         "primary": "",
+        "stats": {
+          "cost": 40
+        },
         "weapons": []
       },
       "faction": "NOD",
@@ -393,6 +435,9 @@
         "dps": null,
         "health": null,
         "primary": "",
+        "stats": {
+          "cost": 30
+        },
         "weapons": []
       },
       "faction": "NOD",
@@ -418,6 +463,9 @@
         "dps": null,
         "health": null,
         "primary": "",
+        "stats": {
+          "cost": 0
+        },
         "weapons": []
       },
       "faction": "NOD",
@@ -445,6 +493,9 @@
         "dps": null,
         "health": null,
         "primary": "",
+        "stats": {
+          "cost": 70
+        },
         "weapons": []
       },
       "faction": "NOD",
@@ -470,6 +521,9 @@
         "dps": null,
         "health": null,
         "primary": "",
+        "stats": {
+          "cost": 60
+        },
         "weapons": []
       },
       "faction": "NOD",
@@ -498,6 +552,7 @@
         "dps": null,
         "health": null,
         "primary": "",
+        "stats": {},
         "weapons": []
       },
       "faction": "UNKNOWN",
@@ -537,6 +592,21 @@
           "wave_size": 1
         },
         "primary": "cannon",
+        "stats": {
+          "cost": 90,
+          "preferred_targets": [
+            "Aircraft",
+            "Infantry"
+          ],
+          "range_tiles": 2.5,
+          "speed": 4.5,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -603,6 +673,20 @@
           "wave_size": 1
         },
         "primary": "cannon",
+        "stats": {
+          "cost": 90,
+          "preferred_targets": [
+            "Structure"
+          ],
+          "range_tiles": 2.5,
+          "speed": 3.958857,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -672,6 +756,21 @@
           "wave_size": 1
         },
         "primary": "cannon",
+        "stats": {
+          "cost": 120,
+          "preferred_targets": [
+            "Infantry",
+            "Structure"
+          ],
+          "range_tiles": 1.25,
+          "speed": 3.958857,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -745,6 +844,20 @@
           "member_offset_ms": 300,
           "wave_size": 5
         },
+        "stats": {
+          "cost": 20,
+          "preferred_targets": [
+            "Infantry"
+          ],
+          "range_tiles": 2.5,
+          "speed": 8,
+          "tags": [
+            "Aircraft",
+            "override_aircraft"
+          ],
+          "unit_type": "Aircraft",
+          "vision_tiles": 3
+        },
         "weapons": [
           {
             "area": {
@@ -814,6 +927,20 @@
           "member_offset_ms": 880,
           "wave_size": 3
         },
+        "stats": {
+          "cost": 70,
+          "preferred_targets": [
+            "Vehicle"
+          ],
+          "range_tiles": 2.5,
+          "speed": 6.9,
+          "tags": [
+            "Infantry",
+            "override_infantry"
+          ],
+          "unit_type": "Infantry",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -882,6 +1009,20 @@
           "wave_size": 1
         },
         "primary": "rocketLauncher",
+        "stats": {
+          "cost": 90,
+          "preferred_targets": [
+            "Aircraft"
+          ],
+          "range_tiles": 1.1,
+          "speed": 9.237333,
+          "tags": [
+            "Aircraft",
+            "override_aircraft"
+          ],
+          "unit_type": "Aircraft",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -936,6 +1077,17 @@
           "wave_size": 1
         },
         "primary": "",
+        "stats": {
+          "cost": 60,
+          "speed": 3.958857,
+          "tags": [
+            "Vehicle",
+            "override_harvester",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 1
+        },
         "weapons": []
       },
       "desc_en": "Harvests Tiberium on the battlefield.",
@@ -963,6 +1115,17 @@
           "wave_size": 1
         },
         "primary": "",
+        "stats": {
+          "cost": 60,
+          "speed": 6.928,
+          "tags": [
+            "Vehicle",
+            "override_harvester",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 1
+        },
         "weapons": []
       },
       "desc_en": "Harvests Tiberium on the battlefield.",
@@ -1004,6 +1167,24 @@
           "wave_size": 1
         },
         "primary": "rockets",
+        "stats": {
+          "cost": 120,
+          "deploy_ms": 5000,
+          "preferred_targets": [
+            "Infantry",
+            "Vehicle",
+            "Structure"
+          ],
+          "range_tiles": 3.5,
+          "speed": 5.5424,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "undeploy_ms": 2000,
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -1077,6 +1258,24 @@
           "wave_size": 1
         },
         "primary": "rockets",
+        "stats": {
+          "cost": 120,
+          "deploy_ms": 3000,
+          "preferred_targets": [
+            "Infantry",
+            "Vehicle",
+            "Structure"
+          ],
+          "range_tiles": 3.5,
+          "speed": 5.5424,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "undeploy_ms": 1500,
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -1154,6 +1353,20 @@
           "member_offset_ms": 1250,
           "wave_size": 4
         },
+        "stats": {
+          "cost": 40,
+          "preferred_targets": [
+            "Vehicle"
+          ],
+          "range_tiles": 2.5,
+          "speed": 9.237333,
+          "tags": [
+            "Infantry",
+            "override_infantry"
+          ],
+          "unit_type": "Infantry",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -1224,6 +1437,20 @@
           "wave_size": 1
         },
         "primary": "rocketLauncher",
+        "stats": {
+          "cost": 130,
+          "preferred_targets": [
+            "Vehicle"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Aircraft",
+            "override_aircraft"
+          ],
+          "unit_type": "Aircraft",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -1317,6 +1544,21 @@
           "多武器按目标类型择一"
         ],
         "primary": "cannon0",
+        "stats": {
+          "cost": 230,
+          "preferred_targets": [
+            "Vehicle",
+            "Infantry"
+          ],
+          "range_tiles": 1.25,
+          "speed": 3,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -1399,6 +1641,23 @@
           "wave_size": 1
         },
         "primary": "rockets",
+        "stats": {
+          "cost": 30,
+          "deploy_ms": 5000,
+          "preferred_targets": [
+            "Vehicle",
+            "Infantry"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Infantry",
+            "override_infantry"
+          ],
+          "undeploy_ms": 2000,
+          "unit_type": "Infantry",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -1468,6 +1727,23 @@
           "wave_size": 1
         },
         "primary": "rockets",
+        "stats": {
+          "cost": 70,
+          "deploy_ms": 2000,
+          "preferred_targets": [
+            "Vehicle",
+            "Structure"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "undeploy_ms": 500,
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -1537,6 +1813,20 @@
           "wave_size": 1
         },
         "primary": "rocketLauncher",
+        "stats": {
+          "cost": 50,
+          "preferred_targets": [
+            "Vehicle"
+          ],
+          "range_tiles": 2.5,
+          "speed": 6.923326,
+          "tags": [
+            "Aircraft",
+            "override_aircraft"
+          ],
+          "unit_type": "Aircraft",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -1606,6 +1896,20 @@
           "wave_size": 1
         },
         "primary": "rocketLauncher",
+        "stats": {
+          "cost": 50,
+          "preferred_targets": [
+            "Vehicle"
+          ],
+          "range_tiles": 2.5,
+          "speed": 6.923326,
+          "tags": [
+            "Aircraft",
+            "override_aircraft"
+          ],
+          "unit_type": "Aircraft",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -1679,6 +1983,19 @@
           "索敌方式未知（descriptors 空表）"
         ],
         "primary": "rockets",
+        "stats": {
+          "cost": 40,
+          "deploy_ms": 3000,
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "undeploy_ms": 1100,
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -1737,6 +2054,20 @@
           "wave_size": 1
         },
         "primary": "missile",
+        "stats": {
+          "cost": 70,
+          "preferred_targets": [
+            "Vehicle"
+          ],
+          "range_tiles": 1.1,
+          "speed": 8,
+          "tags": [
+            "Aircraft",
+            "override_aircraft"
+          ],
+          "unit_type": "Aircraft",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -1815,6 +2146,20 @@
           "索敌方式未知（descriptors 空表）"
         ],
         "primary": "bomb1",
+        "stats": {
+          "cost": 100,
+          "preferred_targets": [
+            "Vehicle"
+          ],
+          "range_tiles": 2.5,
+          "speed": 8,
+          "tags": [
+            "Aircraft",
+            "override_aircraft"
+          ],
+          "unit_type": "Aircraft",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -1923,6 +2268,21 @@
           "wave_size": 1
         },
         "primary": "cannon",
+        "stats": {
+          "cost": 40,
+          "preferred_targets": [
+            "Vehicle",
+            "Aircraft"
+          ],
+          "range_tiles": 1.25,
+          "speed": 6.928,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -1989,6 +2349,20 @@
           "wave_size": 1
         },
         "primary": "cannon",
+        "stats": {
+          "cost": 70,
+          "preferred_targets": [
+            "Vehicle"
+          ],
+          "range_tiles": 1.25,
+          "speed": 3.958857,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -2055,6 +2429,20 @@
         "squad": {
           "member_offset_ms": 100,
           "wave_size": 3
+        },
+        "stats": {
+          "cost": 50,
+          "preferred_targets": [
+            "Infantry"
+          ],
+          "range_tiles": 2.5,
+          "speed": 6.928,
+          "tags": [
+            "Infantry",
+            "override_infantry"
+          ],
+          "unit_type": "Infantry",
+          "vision_tiles": 2
         },
         "weapons": [
           {
@@ -2125,6 +2513,20 @@
           "wave_size": 1
         },
         "primary": "machineGun",
+        "stats": {
+          "cost": 60,
+          "preferred_targets": [
+            "Infantry"
+          ],
+          "range_tiles": 1.25,
+          "speed": 6.9,
+          "tags": [
+            "Aircraft",
+            "override_aircraft"
+          ],
+          "unit_type": "Aircraft",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -2201,6 +2603,16 @@
           "索敌方式未知（descriptors 空表）"
         ],
         "primary": "guns",
+        "stats": {
+          "range_tiles": 2.5,
+          "speed": 3,
+          "tags": [
+            "Aircraft",
+            "override_aircraft"
+          ],
+          "unit_type": "Aircraft",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -2252,6 +2664,16 @@
           "索敌方式未知（descriptors 空表）"
         ],
         "primary": "guns",
+        "stats": {
+          "range_tiles": 2.5,
+          "speed": 9.237333,
+          "tags": [
+            "Aircraft",
+            "override_aircraft"
+          ],
+          "unit_type": "Aircraft",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -2303,6 +2725,21 @@
           "wave_size": 1
         },
         "primary": "cannon",
+        "stats": {
+          "cost": 30,
+          "preferred_targets": [
+            "Infantry",
+            "Aircraft"
+          ],
+          "range_tiles": 2.5,
+          "speed": 8,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 3
+        },
         "weapons": [
           {
             "area": {
@@ -2377,6 +2814,20 @@
           "member_offset_ms": 344,
           "wave_size": 5
         },
+        "stats": {
+          "cost": 10,
+          "preferred_targets": [
+            "Infantry"
+          ],
+          "range_tiles": 2.5,
+          "speed": 6.928,
+          "tags": [
+            "Infantry",
+            "override_infantry"
+          ],
+          "unit_type": "Infantry",
+          "vision_tiles": 3
+        },
         "weapons": [
           {
             "area": {
@@ -2445,6 +2896,20 @@
         "squad": {
           "member_offset_ms": 300,
           "wave_size": 4
+        },
+        "stats": {
+          "cost": 10,
+          "preferred_targets": [
+            "Infantry"
+          ],
+          "range_tiles": 2.5,
+          "speed": 8,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 3
         },
         "weapons": [
           {
@@ -2515,6 +2980,21 @@
           "member_offset_ms": 1250,
           "wave_size": 4
         },
+        "stats": {
+          "cost": 20,
+          "preferred_targets": [
+            "Vehicle",
+            "Aircraft"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Infantry",
+            "override_infantry"
+          ],
+          "unit_type": "Infantry",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -2584,6 +3064,21 @@
         "squad": {
           "member_offset_ms": 800,
           "wave_size": 4
+        },
+        "stats": {
+          "cost": 20,
+          "preferred_targets": [
+            "Vehicle",
+            "Aircraft"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Infantry",
+            "override_infantry"
+          ],
+          "unit_type": "Infantry",
+          "vision_tiles": 2
         },
         "weapons": [
           {
@@ -2656,6 +3151,21 @@
           "wave_size": 1
         },
         "primary": "cannon",
+        "stats": {
+          "cost": 130,
+          "preferred_targets": [
+            "Vehicle",
+            "Aircraft"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -2731,6 +3241,21 @@
           "wave_size": 1
         },
         "primary": "cannon",
+        "stats": {
+          "cost": 130,
+          "preferred_targets": [
+            "Vehicle",
+            "Aircraft"
+          ],
+          "range_tiles": 2.5,
+          "speed": 8,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -2807,6 +3332,21 @@
           "wave_size": 1
         },
         "primary": "cannon",
+        "stats": {
+          "cost": 50,
+          "preferred_targets": [
+            "Infantry",
+            "Structure"
+          ],
+          "range_tiles": 2.5,
+          "speed": 6.928,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -2884,6 +3424,21 @@
           "member_offset_ms": 666,
           "wave_size": 3
         },
+        "stats": {
+          "cost": 40,
+          "preferred_targets": [
+            "Infantry",
+            "Structure"
+          ],
+          "range_tiles": 2.5,
+          "speed": 6.925,
+          "tags": [
+            "Infantry",
+            "override_infantry"
+          ],
+          "unit_type": "Infantry",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -2952,6 +3507,20 @@
           "wave_size": 1
         },
         "primary": "cannon",
+        "stats": {
+          "cost": 60,
+          "preferred_targets": [
+            "Aircraft"
+          ],
+          "range_tiles": 2.5,
+          "speed": 6.928,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -3044,6 +3613,21 @@
           "多武器按目标类型择一"
         ],
         "primary": "machineGun0",
+        "stats": {
+          "cost": 30,
+          "preferred_targets": [
+            "Infantry",
+            "Aircraft"
+          ],
+          "range_tiles": 2.5,
+          "speed": 8,
+          "tags": [
+            "Aircraft",
+            "override_aircraft"
+          ],
+          "unit_type": "Aircraft",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -3124,6 +3708,20 @@
           "wave_size": 1
         },
         "primary": "laser",
+        "stats": {
+          "cost": 130,
+          "preferred_targets": [
+            "Vehicle"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -3192,6 +3790,19 @@
           "wave_size": 1
         },
         "primary": "guns",
+        "stats": {
+          "preferred_targets": [
+            "Infantry",
+            "Aircraft"
+          ],
+          "range_tiles": 2.5,
+          "tags": [
+            "Structure",
+            "override_structure"
+          ],
+          "unit_type": "Structure",
+          "vision_tiles": 1
+        },
         "weapons": [
           {
             "area": {
@@ -3247,6 +3858,19 @@
           "wave_size": 1
         },
         "primary": "guns",
+        "stats": {
+          "preferred_targets": [
+            "Infantry",
+            "Aircraft"
+          ],
+          "range_tiles": 2.5,
+          "tags": [
+            "Structure",
+            "override_structure"
+          ],
+          "unit_type": "Structure",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -3319,6 +3943,21 @@
           "wave_size": 1
         },
         "primary": "guns",
+        "stats": {
+          "cost": 80,
+          "preferred_targets": [
+            "Infantry",
+            "Aircraft"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -3393,6 +4032,21 @@
           "member_offset_ms": 1500,
           "wave_size": 2
         },
+        "stats": {
+          "cost": 120,
+          "preferred_targets": [
+            "Vehicle",
+            "Aircraft"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Infantry",
+            "override_infantry"
+          ],
+          "unit_type": "Infantry",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -3466,6 +4120,21 @@
           "member_offset_ms": 1500,
           "wave_size": 2
         },
+        "stats": {
+          "cost": 120,
+          "preferred_targets": [
+            "Vehicle",
+            "Aircraft"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Infantry",
+            "override_infantry"
+          ],
+          "unit_type": "Infantry",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -3536,6 +4205,24 @@
           "wave_size": 1
         },
         "primary": "rockets",
+        "stats": {
+          "cost": 110,
+          "deploy_ms": 4000,
+          "preferred_targets": [
+            "Infantry",
+            "Vehicle",
+            "Structure"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "undeploy_ms": 500,
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -3608,6 +4295,21 @@
         "squad": {
           "member_offset_ms": 250,
           "wave_size": 3
+        },
+        "stats": {
+          "cost": 30,
+          "preferred_targets": [
+            "Vehicle",
+            "Aircraft"
+          ],
+          "range_tiles": 2.5,
+          "speed": 9.237333,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
         },
         "weapons": [
           {
@@ -3700,6 +4402,22 @@
           "多武器并行（同时开火）"
         ],
         "primary": "laser0",
+        "stats": {
+          "cost": 230,
+          "preferred_targets": [
+            "Vehicle",
+            "Infantry",
+            "Structure"
+          ],
+          "range_tiles": 1.25,
+          "speed": 4.5,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -3797,6 +4515,21 @@
           "wave_size": 1
         },
         "primary": "rocketLauncher",
+        "stats": {
+          "cost": 30,
+          "preferred_targets": [
+            "Vehicle",
+            "Aircraft"
+          ],
+          "range_tiles": 2.5,
+          "speed": 8,
+          "tags": [
+            "Aircraft",
+            "override_aircraft"
+          ],
+          "unit_type": "Aircraft",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -3880,6 +4613,21 @@
           "wave_size": 1
         },
         "primary": "rocketLauncher0-stage2",
+        "stats": {
+          "cost": 120,
+          "preferred_targets": [
+            "Vehicle",
+            "Structure"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Aircraft",
+            "override_aircraft"
+          ],
+          "unit_type": "Aircraft",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -3998,6 +4746,21 @@
           "wave_size": 1
         },
         "primary": "cannon0-stage3",
+        "stats": {
+          "cost": 80,
+          "preferred_targets": [
+            "Vehicle",
+            "Structure"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -4116,6 +4879,21 @@
           "wave_size": 1
         },
         "primary": "cannon",
+        "stats": {
+          "cost": 30,
+          "preferred_targets": [
+            "Infantry",
+            "Aircraft"
+          ],
+          "range_tiles": 2.5,
+          "speed": 9.237333,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 3
+        },
         "weapons": [
           {
             "area": {
@@ -4199,6 +4977,20 @@
           "多武器并行（同时开火）"
         ],
         "primary": "gasWeapon0",
+        "stats": {
+          "cost": 60,
+          "preferred_targets": [
+            "Infantry"
+          ],
+          "range_tiles": 2.5,
+          "speed": 8,
+          "tags": [
+            "Aircraft",
+            "override_aircraft"
+          ],
+          "unit_type": "Aircraft",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -4286,6 +5078,20 @@
           "wave_size": 1
         },
         "primary": "laser",
+        "stats": {
+          "cost": 100,
+          "preferred_targets": [
+            "Vehicle"
+          ],
+          "range_tiles": 2.5,
+          "speed": 6.928,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -4356,6 +5162,20 @@
           "member_offset_ms": 300,
           "wave_size": 3
         },
+        "stats": {
+          "cost": 60,
+          "preferred_targets": [
+            "Infantry"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Infantry",
+            "override_infantry"
+          ],
+          "unit_type": "Infantry",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -4425,6 +5245,20 @@
           "wave_size": 1
         },
         "primary": "cannon",
+        "stats": {
+          "cost": 60,
+          "preferred_targets": [
+            "Infantry"
+          ],
+          "range_tiles": 1.25,
+          "speed": 6.928,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -4497,6 +5331,21 @@
         "squad": {
           "member_offset_ms": 1000,
           "wave_size": 3
+        },
+        "stats": {
+          "cost": 100,
+          "preferred_targets": [
+            "Infantry",
+            "Aircraft"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Infantry",
+            "override_infantry"
+          ],
+          "unit_type": "Infantry",
+          "vision_tiles": 2
         },
         "weapons": [
           {
@@ -4575,6 +5424,20 @@
           "member_offset_ms": 375,
           "wave_size": 4
         },
+        "stats": {
+          "cost": 10,
+          "preferred_targets": [
+            "Infantry"
+          ],
+          "range_tiles": 2.5,
+          "speed": 8,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 3
+        },
         "weapons": [
           {
             "area": {
@@ -4642,6 +5505,21 @@
           "member_offset_ms": 1000,
           "wave_size": 2
         },
+        "stats": {
+          "cost": 130,
+          "preferred_targets": [
+            "Vehicle",
+            "Aircraft"
+          ],
+          "range_tiles": 2.5,
+          "speed": 6.928,
+          "tags": [
+            "Infantry",
+            "override_infantry"
+          ],
+          "unit_type": "Infantry",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -4702,6 +5580,18 @@
           "wave_size": 1
         },
         "primary": "",
+        "stats": {
+          "cost": 70,
+          "preferred_targets": [
+            "Infantry"
+          ],
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": []
       },
       "desc_en": "Agile ground vehicle good at ambushing enemy infantry.",
@@ -4729,6 +5619,18 @@
           "wave_size": 1
         },
         "primary": "",
+        "stats": {
+          "cost": 70,
+          "preferred_targets": [
+            "Infantry"
+          ],
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": []
       },
       "desc_en": "Agile ground vehicle good at ambushing enemy infantry.",
@@ -4771,6 +5673,20 @@
         "squad": {
           "member_offset_ms": 750,
           "wave_size": 3
+        },
+        "stats": {
+          "cost": 30,
+          "preferred_targets": [
+            "Infantry"
+          ],
+          "range_tiles": 2.5,
+          "speed": 6.928,
+          "tags": [
+            "Infantry",
+            "override_infantry"
+          ],
+          "unit_type": "Infantry",
+          "vision_tiles": 2
         },
         "weapons": [
           {
@@ -4841,6 +5757,22 @@
           "wave_size": 1
         },
         "primary": "missile",
+        "stats": {
+          "cost": 100,
+          "preferred_targets": [
+            "Infantry",
+            "Structure",
+            "Vehicle"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Aircraft",
+            "override_aircraft"
+          ],
+          "unit_type": "Aircraft",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -4910,6 +5842,21 @@
           "wave_size": 1
         },
         "primary": "cannon",
+        "stats": {
+          "cost": 90,
+          "preferred_targets": [
+            "Infantry",
+            "Structure"
+          ],
+          "range_tiles": 2.5,
+          "speed": 6.928,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -4988,6 +5935,21 @@
           "member_offset_ms": 666,
           "wave_size": 3
         },
+        "stats": {
+          "cost": 40,
+          "preferred_targets": [
+            "Infantry",
+            "Structure"
+          ],
+          "range_tiles": 2.5,
+          "speed": 6.925,
+          "tags": [
+            "Infantry",
+            "override_infantry"
+          ],
+          "unit_type": "Infantry",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -5046,6 +6008,17 @@
           "wave_size": 1
         },
         "primary": "",
+        "stats": {
+          "cost": 60,
+          "speed": 3.958857,
+          "tags": [
+            "Vehicle",
+            "override_harvester",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 1
+        },
         "weapons": []
       },
       "faction": "NOD",
@@ -5071,6 +6044,17 @@
           "wave_size": 1
         },
         "primary": "",
+        "stats": {
+          "cost": 60,
+          "speed": 6.928,
+          "tags": [
+            "Vehicle",
+            "override_harvester",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 1
+        },
         "weapons": []
       },
       "faction": "NOD",
@@ -5111,6 +6095,20 @@
         "squad": {
           "member_offset_ms": 400,
           "wave_size": 4
+        },
+        "stats": {
+          "cost": 20,
+          "preferred_targets": [
+            "Vehicle"
+          ],
+          "range_tiles": 2.5,
+          "speed": 8,
+          "tags": [
+            "Aircraft",
+            "override_aircraft"
+          ],
+          "unit_type": "Aircraft",
+          "vision_tiles": 3
         },
         "weapons": [
           {
@@ -5187,6 +6185,20 @@
           "member_offset_ms": 344,
           "wave_size": 5
         },
+        "stats": {
+          "cost": 10,
+          "preferred_targets": [
+            "Infantry"
+          ],
+          "range_tiles": 2.5,
+          "speed": 6.928,
+          "tags": [
+            "Infantry",
+            "override_infantry"
+          ],
+          "unit_type": "Infantry",
+          "vision_tiles": 3
+        },
         "weapons": [
           {
             "area": {
@@ -5256,6 +6268,20 @@
           "member_offset_ms": 1000,
           "wave_size": 3
         },
+        "stats": {
+          "cost": 60,
+          "preferred_targets": [
+            "Vehicle"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Infantry",
+            "override_infantry"
+          ],
+          "unit_type": "Infantry",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -5322,6 +6348,19 @@
           "wave_size": 1
         },
         "primary": "guns",
+        "stats": {
+          "preferred_targets": [
+            "Vehicle",
+            "Infantry"
+          ],
+          "range_tiles": 2.5,
+          "tags": [
+            "Structure",
+            "override_structure"
+          ],
+          "unit_type": "Structure",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -5381,6 +6420,19 @@
           "wave_size": 1
         },
         "primary": "guns",
+        "stats": {
+          "preferred_targets": [
+            "Vehicle",
+            "Infantry"
+          ],
+          "range_tiles": 2.5,
+          "tags": [
+            "Structure",
+            "override_structure"
+          ],
+          "unit_type": "Structure",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -5444,6 +6496,22 @@
           "wave_size": 1
         },
         "primary": "rifle",
+        "stats": {
+          "cost": 120,
+          "deploy_ms": 2000,
+          "preferred_targets": [
+            "Vehicle"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "undeploy_ms": 2000,
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -5520,6 +6588,23 @@
           "member_offset_ms": 2000,
           "wave_size": 2
         },
+        "stats": {
+          "cost": 40,
+          "deploy_ms": 2000,
+          "preferred_targets": [
+            "Infantry",
+            "Vehicle",
+            "Aircraft"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Infantry",
+            "override_infantry"
+          ],
+          "unit_type": "Infantry",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -5593,6 +6678,21 @@
           "member_offset_ms": 1333,
           "wave_size": 3
         },
+        "stats": {
+          "cost": 30,
+          "preferred_targets": [
+            "Vehicle",
+            "Aircraft"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.4,
+          "tags": [
+            "Infantry",
+            "override_infantry"
+          ],
+          "unit_type": "Infantry",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -5663,6 +6763,20 @@
           "wave_size": 1
         },
         "primary": "cannon",
+        "stats": {
+          "cost": 70,
+          "preferred_targets": [
+            "Vehicle"
+          ],
+          "range_tiles": 1.25,
+          "speed": 5.5424,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -5727,6 +6841,21 @@
           "wave_size": 1
         },
         "primary": "cannon",
+        "stats": {
+          "cost": 100,
+          "preferred_targets": [
+            "Vehicle",
+            "Aircraft"
+          ],
+          "range_tiles": 2.5,
+          "speed": 9.237333,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -5804,6 +6933,21 @@
           "member_offset_ms": 1250,
           "wave_size": 4
         },
+        "stats": {
+          "cost": 20,
+          "preferred_targets": [
+            "Vehicle",
+            "Aircraft"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Infantry",
+            "override_infantry"
+          ],
+          "unit_type": "Infantry",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -5873,6 +7017,21 @@
         "squad": {
           "member_offset_ms": 800,
           "wave_size": 4
+        },
+        "stats": {
+          "cost": 40,
+          "preferred_targets": [
+            "Vehicle",
+            "Aircraft"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Infantry",
+            "override_infantry"
+          ],
+          "unit_type": "Infantry",
+          "vision_tiles": 2
         },
         "weapons": [
           {
@@ -5954,6 +7113,22 @@
           "索敌方式未知（descriptors 空表）"
         ],
         "primary": "cannon0",
+        "stats": {
+          "cost": 70,
+          "deploy_ms": 2000,
+          "preferred_targets": [
+            "Vehicle"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "undeploy_ms": 500,
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -6035,6 +7210,20 @@
           "wave_size": 1
         },
         "primary": "machineGun",
+        "stats": {
+          "cost": 30,
+          "preferred_targets": [
+            "Infantry"
+          ],
+          "range_tiles": 2.5,
+          "speed": 8,
+          "tags": [
+            "Aircraft",
+            "override_aircraft"
+          ],
+          "unit_type": "Aircraft",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -6103,6 +7292,20 @@
           "wave_size": 1
         },
         "primary": "rocketLauncher",
+        "stats": {
+          "cost": 100,
+          "preferred_targets": [
+            "Aircraft"
+          ],
+          "range_tiles": 1.1,
+          "speed": 9.237333,
+          "tags": [
+            "Aircraft",
+            "override_aircraft"
+          ],
+          "unit_type": "Aircraft",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -6178,6 +7381,22 @@
           "多武器并行（同时开火）"
         ],
         "primary": "flamethrower0",
+        "stats": {
+          "cost": 80,
+          "preferred_targets": [
+            "Infantry",
+            "Aircraft",
+            "Structure"
+          ],
+          "range_tiles": 2.5,
+          "speed": 5.5424,
+          "tags": [
+            "Vehicle",
+            "override_vehicle"
+          ],
+          "unit_type": "Vehicle",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -6268,6 +7487,20 @@
           "wave_size": 1
         },
         "primary": "rocketLauncher",
+        "stats": {
+          "cost": 70,
+          "preferred_targets": [
+            "Vehicle"
+          ],
+          "range_tiles": 2.5,
+          "speed": 8,
+          "tags": [
+            "Aircraft",
+            "override_aircraft"
+          ],
+          "unit_type": "Aircraft",
+          "vision_tiles": 2
+        },
         "weapons": [
           {
             "area": {
@@ -6328,6 +7561,7 @@
         "dps": null,
         "health": null,
         "primary": "",
+        "stats": {},
         "weapons": []
       },
       "faction": "UNKNOWN",
@@ -6351,6 +7585,7 @@
         "dps": null,
         "health": null,
         "primary": "",
+        "stats": {},
         "weapons": []
       },
       "faction": "UNKNOWN",

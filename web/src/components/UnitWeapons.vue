@@ -9,13 +9,13 @@
 import { computed } from "vue";
 
 import { UnitAttack } from "@rivals/core/attack";
-import type { EntityRecord } from "@rivals/core/types";
+import type { DatasetEntry } from "@rivals/core/derive";
 import type { Level } from "@rivals/core/levels";
 
 import WeaponCard from "./WeaponCard.vue";
 
 const props = defineProps<{
-  unit: EntityRecord;
+  unit: DatasetEntry;
   level: Level;
 }>();
 

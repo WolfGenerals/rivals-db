@@ -14,6 +14,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
 import { deriveAttack } from "../derive.ts";
+import { baseUnitType, modifierIntroMs, modifierOutroMs } from "../types.ts";
 import type { EntityRecord } from "./extract.ts";
 
 export const FILE_NOTE =
@@ -120,6 +121,7 @@ export function payloadFor(rec: EntityRecord): Record<string, unknown> {
   const derived: Record<string, unknown> = {
     health: per === undefined ? null : { per_member: per, wave_size: wave, total: per * wave },
     dps: dps > 0 ? Number(dps.toFixed(4)) : null,
+    stats: statsOf(rec),
     weapons,
     attack,
     primary,
@@ -128,6 +130,36 @@ export function payloadFor(rec: EntityRecord): Record<string, unknown> {
   if (notes.length) derived.notes = notes;
   out.derived = derived;
   return out;
+}
+
+/**
+ * 固有属性 —— 组件要展示的那些，**从原始树里摘出来**。
+ * 缺的字段不出现（不写 null，省得消费方判断两种"空"）。
+ */
+function statsOf(rec: EntityRecord): Record<string, unknown> {
+  const cfg = rec.config;
+  const s: Record<string, unknown> = {};
+  const put = (k: string, v: unknown) => {
+    if (v !== undefined && v !== null) s[k] = v;
+  };
+  put("unit_type", baseUnitType(rec));
+  put("cost", cfg.combatStoreTuning?.tiberiumCost);
+  put("speed", cfg.combatantTuning?.speed);
+  put("vision_tiles", cfg.squadTuning?.visionRangeInTiles);
+  if (cfg.combatantTuning?.tags?.length) put("tags", cfg.combatantTuning.tags);
+  // 官方文案里的"强于 XXX" —— **AI 索敌意图，不是伤害克制**
+  if (cfg.combatantTuning?.goodAgainstTags?.length) {
+    put("preferred_targets", cfg.combatantTuning.goodAgainstTags);
+  }
+  // 架设/收起时间：对全部武器取最大（巨无霸/MLRS 这类要展开才能打）
+  const wts = cfg.combatantTuning?.weaponTunings ?? [];
+  const dep = Math.max(0, ...wts.map(modifierIntroMs));
+  if (dep) s.deploy_ms = dep;
+  const und = Math.max(0, ...wts.map(modifierOutroMs));
+  if (und) s.undeploy_ms = und;
+  const ranges = wts.map((w) => w.maxRangeInTiles).filter((x): x is number => typeof x === "number");
+  if (ranges.length) s.range_tiles = Math.max(...ranges);
+  return s;
 }
 
 /**

@@ -10,24 +10,24 @@
  */
 import { computed, ref, watch } from "vue";
 
-import { squadHealth, unitBaseDps, type EntityRecord } from "@rivals/core/types";
+import { squadHealth, unitBaseDps, type DatasetEntry } from "@rivals/core/types";
 
 import UnitCard from "../components/UnitCard.vue";
-import { loadAllRecords } from "../data.ts";
+import { loadDataset } from "../data.ts";
 import { displayLevel } from "../state.ts";
 import { useData } from "../useData.ts";
 
 const props = defineProps<{ commandersOnly?: boolean }>();
 const data = useData();
 
-const records = ref<EntityRecord[]>([]);
+const records = ref<DatasetEntry[]>([]);
 const loading = ref(true);
 
 watch(
   data,
   async (d) => {
     if (!d) return;
-    records.value = await loadAllRecords(d);
+    records.value = await loadDataset(d);
     loading.value = false;
   },
   { immediate: true },
@@ -41,11 +41,11 @@ const sort = ref<"cost" | "name" | "hp" | "dps">("cost");
 const RARITY_ORDER: Record<string, number> = { Common: 1, Rare: 2, Epic: 3 };
 
 /** 该条目在当前等级设置下应显示的等级（「相对起始」模式下每个单位不同）。 */
-function levelOf(rec: EntityRecord) {
+function levelOf(rec: DatasetEntry) {
   return displayLevel({ rarity: rec.pb?.rarity });
 }
 
-function sortKey(rec: EntityRecord): number {
+function sortKey(rec: DatasetEntry): number {
   switch (sort.value) {
     case "hp":
       return squadHealth(rec) ?? -1;
@@ -54,7 +54,7 @@ function sortKey(rec: EntityRecord): number {
     case "name":
       return 0;
     default:
-      return rec.config.combatStoreTuning?.tiberiumCost ?? 9999;
+      return rec.derived.stats.cost ?? 9999;
   }
 }
 
@@ -79,8 +79,8 @@ const shown = computed(() => {
       return (a.name_zh ?? a.name_en ?? a.id).localeCompare(b.name_zh ?? b.name_en ?? b.id, "zh");
     }
     if (by === "cost") {
-      const ca = a.config.combatStoreTuning?.tiberiumCost ?? 9999;
-      const cb = b.config.combatStoreTuning?.tiberiumCost ?? 9999;
+      const ca = a.derived.stats.cost ?? 9999;
+      const cb = b.derived.stats.cost ?? 9999;
       if (ca !== cb) return ca - cb;
       return (a.name_zh ?? a.id).localeCompare(b.name_zh ?? b.id, "zh");
     }
@@ -97,7 +97,7 @@ const total = computed(() =>
 const costSpread = computed(() => {
   const map = new Map<number, number>();
   for (const rec of shown.value) {
-    const c = rec.config.combatStoreTuning?.tiberiumCost;
+    const c = rec.derived.stats.cost;
     if (c === undefined) continue;
     map.set(c, (map.get(c) ?? 0) + 1);
   }

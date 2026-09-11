@@ -22,7 +22,7 @@ import { computed, ref } from "vue";
 
 import { level as makeLevel, startingMajorOfRarity, type Level } from "@rivals/core/levels";
 import { UnitAttack } from "@rivals/core/attack";
-import { modifierIntroMs, modifierOutroMs, squadHealth, type EntityRecord } from "@rivals/core/types";
+import { modifierIntroMs, modifierOutroMs, squadHealth, type DatasetEntry } from "@rivals/core/types";
 
 import StatIcon from "./StatIcon.vue";
 import TypeIcon from "./TypeIcon.vue";
@@ -32,7 +32,7 @@ import UnitLevelPicker from "./UnitLevelPicker.vue";
 import UnitWeapons from "./UnitWeapons.vue";
 
 const props = defineProps<{
-  unit: EntityRecord;
+  unit: DatasetEntry;
   /** 全局等级；开了「独立等级」后本面板会用自己的那套 */
   level: Level;
 }>();
@@ -72,9 +72,9 @@ const unitType = computed(() => {
  * 本地化文本里的 `<stat|X>` 是**游戏运行时替换的数值占位符**（全库仅 14 种、37 处，
  * 集中在指挥官技能描述）。能算的算，算不出的换 `—`。
  */
-const STAT_TOKENS: Record<string, (r: EntityRecord) => string | undefined> = {
+const STAT_TOKENS: Record<string, (r: DatasetEntry) => string | undefined> = {
   VisionRange: (r) => {
-    const v = r.config.squadTuning?.visionRangeInTiles;
+    const v = r.derived.stats.vision_tiles;
     return v === undefined ? undefined : `${v} 格`;
   },
   ExtendedAttackRange: (r) => {

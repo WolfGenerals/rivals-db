@@ -12,7 +12,7 @@ import { RouterLink } from "vue-router";
 import { baseDps, type UnitSummary } from "@rivals/core/types";
 import { level, startingMajorOfRarity, type Level } from "@rivals/core/levels";
 
-import { loadRecord } from "../data.ts";
+import { findEntryById } from "../data.ts";
 import { detailPath } from "../router.ts";
 import { displayLevel } from "../state.ts";
 import { useData } from "../useData.ts";
@@ -98,7 +98,7 @@ watch(
     const next = new Map(exactDps.value);
     await Promise.all(
       pending.map(async (u) => {
-        const rec = await loadRecord(u.id);
+        const rec = await findEntryById(u.id);
         if (!rec) return;
         const dps = exactBaseDpsOf(rec.config ?? {});
         if (dps > 0) next.set(u.id, dps);

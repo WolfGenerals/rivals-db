@@ -11,17 +11,17 @@
 import { computed, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
 
-import type { EntityRecord } from "@rivals/core/types";
+import type { DatasetEntry } from "@rivals/core/derive";
 
 import UnitPanel from "../components/UnitPanel.vue";
-import { findSummary, loadRecord } from "../data.ts";
+import { findEntryById } from "../data.ts";
 import { displayLevel } from "../state.ts";
 import { useData } from "../useData.ts";
 
 const props = defineProps<{ id: string }>();
 
 const data = useData();
-const rec = ref<EntityRecord | null>(null);
+const rec = ref<DatasetEntry | null>(null);
 const loading = ref(true);
 
 watch(

@@ -436,3 +436,75 @@ export function deriveAttack(unit: EntityRecord): DerivedAttack {
 
   return { weapons, attack: { composition, tracks, cycle_ms, member_offset_ms: sep }, primary, dps, notes };
 }
+
+// ── 数据集（产物 data/units.json 的形状）──────────────────────────
+
+/** 固有属性。**缺的字段不出现**，消费方不该判断两种"空" */
+export interface DerivedStats {
+  unit_type?: string;
+  cost?: number;
+  speed?: number;
+  vision_tiles?: number;
+  tags?: string[];
+  /** 官方文案里的"强于 XXX" —— **AI 索敌意图，不是伤害克制** */
+  preferred_targets?: string[];
+  deploy_ms?: number;
+  undeploy_ms?: number;
+  range_tiles?: number;
+}
+
+export interface DerivedHealth {
+  /** ⚠️ 游戏里 health 是**每员**血量，总血 = per_member × wave_size */
+  per_member: number;
+  wave_size: number;
+  total: number;
+}
+
+export interface Derived {
+  health: DerivedHealth | null;
+  /** 1-0 级；主武器的；与游戏内面板一致 */
+  dps: number | null;
+  stats: DerivedStats;
+  weapons: Weapon[];
+  attack: Attack;
+  /** 主武器 id */
+  primary: string;
+  squad?: { wave_size: number; member_offset_ms: number };
+  notes?: string[];
+}
+
+/** `data/units.json` 里的一条记录 */
+export interface DatasetEntry {
+  _schema: number;
+  id: string;
+  faction: string;
+  variant: string;
+  suffixes?: string[];
+  source: string;
+  pb?: { rarity?: string; [k: string]: unknown };
+  name_zh?: string;
+  name_en?: string;
+  desc_zh?: string;
+  desc_en?: string;
+  warnings?: string[];
+  derived: Derived;
+}
+
+/** `data/units.json` 整体 */
+export interface Dataset {
+  _schema: number;
+  unit_count: number;
+  commander_count: number;
+  units: DatasetEntry[];
+  commanders: DatasetEntry[];
+}
+
+/** 按 id 找一条 */
+export function findEntry(ds: Dataset, id: string): DatasetEntry | undefined {
+  return ds.units.find((e) => e.id === id) ?? ds.commanders.find((e) => e.id === id);
+}
+
+/** 全部条目（单位 + 指挥官） */
+export function allEntries(ds: Dataset): DatasetEntry[] {
+  return [...ds.units, ...ds.commanders];
+}

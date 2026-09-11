@@ -12,16 +12,16 @@
  */
 import { computed } from "vue";
 
-import type { EntityRecord, WeaponTuning } from "@rivals/core/types";
+import type { DatasetEntry, WeaponTuning } from "@rivals/core/types";
 
 import { TARGET_LABELS, TARGET_TYPES, TIERS, targetDamage, type TargetDamage } from "../damageTiers.ts";
 import TypeIcon from "./TypeIcon.vue";
 
-const props = defineProps<{ unit: EntityRecord }>();
+const props = defineProps<{ unit: DatasetEntry }>();
 
 const weapons = computed<WeaponTuning[]>(() => props.unit.config.combatantTuning?.weaponTunings ?? []);
 
-const intent = computed(() => new Set<string>(props.unit.config.combatantTuning?.goodAgainstTags ?? []));
+const intent = computed(() => new Set<string>(props.unit.derived.stats.preferred_targets ?? []));
 
 const cells = computed<TargetDamage[]>(() => TARGET_TYPES.map((t) => targetDamage(weapons.value, t)));
 

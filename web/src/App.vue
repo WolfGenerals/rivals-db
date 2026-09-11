@@ -8,7 +8,7 @@ import { computed, onMounted, provide, ref } from "vue";
 import { RouterLink, RouterView, useRoute } from "vue-router";
 
 import LevelControls from "./components/LevelControls.vue";
-import { loadIndex, type LoadedData } from "./data.ts";
+import { loadDataset, type LoadedData } from "./data.ts";
 import { DATA_KEY } from "./useData.ts";
 
 const data = ref<LoadedData | null>(null);
@@ -17,7 +17,7 @@ const route = useRoute();
 
 onMounted(async () => {
   try {
-    data.value = await loadIndex();
+    data.value = await loadDataset();
   } catch (err) {
     error.value = err instanceof Error ? err.message : String(err);
   }
@@ -26,8 +26,8 @@ onMounted(async () => {
 // 子组件通过 useData() 注入拿索引，省得逐层传 prop
 provide(DATA_KEY, data);
 
-const unitCount = computed(() => data.value?.unitIndex.unit_count ?? 0);
-const commanderCount = computed(() => data.value?.commanderIndex?.commander_count ?? 0);
+const unitCount = computed(() => data.value?.dataset.unit_count ?? 0);
+const commanderCount = computed(() => data.value?.dataset?.commander_count ?? 0);
 const activeNav = computed(() => (String(route.name ?? "").startsWith("commander") ? "commanders" : "units"));
 </script>
 

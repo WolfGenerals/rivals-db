@@ -8,6 +8,7 @@
     "./types": "./src/types.ts",
     "./levels": "./src/levels.ts",
     "./attack": "./src/attack.ts",
+    "./derive": "./src/derive.ts",
     "./query": "./src/query.ts",
     "./extract": "./src/extract/index.ts"
   },

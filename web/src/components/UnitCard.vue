@@ -28,7 +28,8 @@
 import { computed, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
 
-import { baseUnitType, type EntityRecord } from "@rivals/core/types";
+import { baseUnitType } from "@rivals/core/types";
+import type { DatasetEntry } from "@rivals/core/derive";
 import type { Level } from "@rivals/core/levels";
 
 import { factionIconUrl, tiberiumIconUrl, unitIconUrl } from "../assets.ts";
@@ -40,7 +41,7 @@ export type CardField = "type" | "level" | "faction" | "cost" | "name";
 
 const props = withDefaults(
   defineProps<{
-    unit: EntityRecord;
+    unit: DatasetEntry;
     /** 可选：不传则连 `fields` 里有 "level" 也不画角标 */
     level?: Level;
     /** 默认只露「名称 + 造价」，就是游戏商店里那张卡的样子 */
@@ -57,7 +58,7 @@ const has = (f: CardField) => props.fields.includes(f);
  * 直接用 `baseUnitType()` 会得到 Vehicle，但游戏里运矿车有单独的图标。
  */
 const unitType = computed(() => {
-  const tags = props.unit.config.combatantTuning?.tags ?? [];
+  const tags = props.unit.derived.stats.tags ?? [];
   if (tags.includes("override_harvester")) return "Harvester";
   return baseUnitType(props.unit) ?? "";
 });
@@ -69,7 +70,7 @@ const nameEn = computed(() => props.unit.name_en ?? "");
 const showNameEn = computed(() => has("name") && nameEn.value.length > 0 && nameEn.value !== name.value);
 
 const rarity = computed(() => props.unit.pb?.rarity ?? "");
-const cost = computed(() => props.unit.config.combatStoreTuning?.tiberiumCost);
+const cost = computed(() => props.unit.derived.stats.cost);
 
 /**
  * 卡面缺失时回退。
