@@ -18,7 +18,8 @@ import { DAMAGE_CASCADE, type DamageOverrideTag } from "@rivals/core/types";
 import { startingMajorOfRarity, type Level } from "@rivals/core/levels";
 
 import { detailPath } from "../router.ts";
-import { displayLevel } from "../state.ts";
+import { unitBaseDps } from "../dps.ts";
+import { displayLevel, dpsMode } from "../state.ts";
 // 排序状态放 `state.ts` 的模块级单例 —— 组件内的 ref 会在路由切换时被重置
 import { useData } from "../useData.ts";
 
@@ -184,7 +185,8 @@ const rows = computed<Row[]>(() => {
     const lv = displayLevel(u);
     const h = u.derived.health;
     const w = primaryWeapon(u);
-    const base = u.derived.dps;
+    // 按顶栏选的 DPS 口径（原先写死 `derived.dps`，切口径时表格不动）
+    const base = unitBaseDps(u, dpsMode.value);
 
     const cells = TYPES.map<Cell>((t) => {
       if (!w) return { reach: false, text: "—", ratio: 0 };

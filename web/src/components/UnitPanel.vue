@@ -22,6 +22,8 @@ import { computed, ref } from "vue";
 
 import { level as makeLevel, startingMajorOfRarity, type Level } from "@rivals/core/levels";
 import type { DatasetEntry } from "@rivals/core/derive";
+import { unitBaseDps } from "../dps.ts";
+import { dpsMode } from "../state.ts";
 
 import StatIcon from "./StatIcon.vue";
 import TypeIcon from "./TypeIcon.vue";

@@ -14,6 +14,7 @@
 import { computed } from "vue";
 
 import type { Track, Weapon } from "@rivals/core/derive";
+import { weaponDps } from "../dps.ts";
 import { DPS_MODES, dpsMode } from "../state.ts";
 import type { Level } from "@rivals/core/levels";
 
@@ -57,46 +58,14 @@ const props = defineProps<{
  * 音波坦克最能说明差别：`game`/`burst` = 650，`avg` = **137**（3 秒蓄力摊进去）。
  * 见 findings I164。
  */
-interface DpsSet {
-  /** 单轮总伤害（1-0 基准） */
-  volley: number;
-  /** 一轮打几下 */
-  hits: number;
-  burst: number;
-  avg: number;
-}
+const dpsSet = computed(() => weaponDps(props.weapon, props.tracks, props.waveSize ?? 1));
 
-const dpsSet = computed<DpsSet>(() => {
-  const wave = props.waveSize ?? 1;
-  let volley = 0;
-  let hits = 0;
-  let burst = 0;
-  let avg = 0;
-  for (const t of props.tracks) {
-    const tm = t.timing;
-    if (tm.kind === "一次") continue; // 一次性不计持续输出
-    const h = tm.kind === "装填" ? tm.clip : tm.hits;
-    const iv = tm.interval_ms ?? (tm.kind === "单发" ? tm.cycle_ms : 0);
-    const cycle =
-      tm.kind === "装填" ? tm.clip * iv + tm.reload_ms : tm.cycle_ms;
-    const dmg = props.weapon.damage;
-    /* ⚠️ **单轮总伤害要乘人数** —— 小队每个成员各打各的。5 个步枪兵各打一发 38，一轮是 190 而不是 38 */
-    volley += dmg * h * wave;
-    hits += h;
-    // 爆发：射击期间的速率。单发（hits=1）时"期间"就是它的间隔
-    if (iv > 0) burst = Math.max(burst, (dmg * h * wave * 1000) / (h * iv));
-    // 平均：完整周期。蓄力在周期外时（`chargeInCycle === false`）要加进去
-    const full = t.chargeInCycle === false ? cycle + (t.charge_ms ?? 0) : cycle;
-    if (full > 0) avg = Math.max(avg, (dmg * h * wave * 1000) / full);
-  }
-  return { volley, hits, burst, avg };
-});
-
-/** 按当前口径取 1-0 基准 DPS */
+/** 按顶栏选的 DPS 口径取 1-0 基准值（`game` 用面板值） */
 const baseDps = computed(() => {
   if (props.primaryDps != null && dpsMode.value === "game") return props.primaryDps;
   return dpsMode.value === "avg" ? dpsSet.value.avg : dpsSet.value.burst;
 });
+
 const levelDps = computed(() => (baseDps.value > 0 ? props.level.dps(baseDps.value) : undefined));
 
 /** 当前口径的显示名，用在 DPS 标签上 */
