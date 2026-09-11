@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 伤害档位 —— 「敌人应对」和武器卡里的「逐目标伤害」共用同一套。
  *
  * **倍率必须逐武器除以它自己的 `default`**，不能拿所有武器的最大 default
@@ -10,6 +10,7 @@ import {
   canAttackTarget,
   targetingUnknown,
   damageAgainstTarget,
+  effectiveDamage,
   type DamageOverrideTag,
   type WeaponTuning,
 } from "@rivals/core/types";
@@ -65,9 +66,14 @@ export function tierOf(ratio: number): (typeof TIERS)[number] {
  * 见 docs/findings.md I51。
  *
  * 所以基准是**逐武器取它自己的 `default`**。
+ *
+ * ⚠️ **必须走 `effectiveDamage()`，不能直接读 `damageTuning`** ——
+ * **7 把武器的伤害只在 `modifier_sequence` 里**（神像机甲、蛇怪、黑寡妇…），
+ * 它们的 `damageTuning` 是空的。直接读会让基准变成 0，于是**每一类目标的百分比都是 0%**，
+ * 看着就像"伤害有值但补正是 0"（用户发现）。见 findings I107。
  */
 function weaponBaseline(w: WeaponTuning): number {
-  return w.damageTuning?.default ?? 0;
+  return effectiveDamage(w)?.default ?? 0;
 }
 
 /**

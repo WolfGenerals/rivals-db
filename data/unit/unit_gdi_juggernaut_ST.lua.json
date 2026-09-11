@@ -85,8 +85,14 @@
                 "damage": {
                   "default": 250,
                   "override": [
-                    "Structure",
-                    "Infantry"
+                    [
+                      "Structure",
+                      250
+                    ],
+                    [
+                      "Infantry",
+                      55
+                    ]
                   ]
                 }
               }

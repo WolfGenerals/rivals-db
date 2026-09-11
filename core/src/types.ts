@@ -163,7 +163,20 @@ export interface ProjectileTuning {
   minRangeTimeToHit?: number;
   maxRangeTimeToHit?: number;
   calculateSpeedFromTimeToHit?: boolean;
-  modifier?: { name?: string; [k: string]: unknown };
+  /**
+   * 弹体命中后生成的 modifier。**爆炸类武器的真实伤害写在这里的 `tuning.damage`**
+   * （`damageTuning` 是空的），另有 `damageFalloff` / `damageRadius`（如虎鲸轰炸机）。
+   */
+  modifier?: {
+    name?: string;
+    tuning?: {
+      damage?: { default?: number; override?: unknown };
+      damageFalloff?: { distances?: Array<{ distance?: number; percent?: number }>; isRamped?: boolean };
+      damageRadius?: number;
+      [k: string]: unknown;
+    };
+    [k: string]: unknown;
+  };
 }
 
 export interface TargetingTuning {
@@ -610,9 +623,56 @@ export function canAttackTarget(weapon: WeaponTuning, target: DamageOverrideTag)
   return bits.includes(DESCRIPTOR_GROUND);
 }
 
+/**
+ * 归一化一张伤害表：**序列里的块用 `override`（单数），`damageTuning` 用 `overrides`（复数）**，
+ * 形状都是 `[[标签, 值], ...]`。统一成 `DamageTuning`。
+ *
+ * 历史坑：`MakeOverride(标签, 值)` 曾被当成「透传第一个参数」的建表函数，
+ * 于是值被丢掉、只剩标签名 —— 见 findings I106。
+ */
+function normalizeDamage(src: {
+  default?: number;
+  override?: unknown;
+  overrides?: unknown;
+}): DamageTuning {
+  const raw = src.overrides ?? src.override ?? [];
+  const overrides = Array.isArray(raw)
+    ? raw.filter((e): e is [DamageOverrideTag, number] => Array.isArray(e) && e.length === 2)
+    : [];
+  return { default: src.default, overrides };
+}
+
+/**
+ * 这把武器的**有效伤害表** —— 逐目标伤害该读的那张。
+ *
+ * 伤害有**四个可能的位置**（findings I76 / I106）：
+ *   ① `modifier_sequence.tuning` 的 `stage*.damageMain`（分段型，取**末段**，与 DPS 约定一致）
+ *   ② 同上的扁平 `damageMain` / `damage`（火焰坦克、圣灵、黑寡妇…）
+ *   ③ `projectile.modifier.tuning.damage`（爆炸类，如虎鲸轰炸机）
+ *   ④ `weapon.damageTuning`（常规武器）
+ *
+ * ⚠️ **序列存在时优先用序列** —— 那才是实际开火时算的伤害。万钧巨炮两处都有且**不一致**
+ * （武器级写 Infantry 20，序列末段写 12）。**7 把武器的伤害只在序列里**，
+ * 早先只读 `damageTuning` 会让它们逐目标伤害全显示 0。
+ */
+export function effectiveDamage(weapon: WeaponTuning): DamageTuning | undefined {
+  const t = weapon.modifier_sequence?.tuning;
+  if (t) {
+    for (const s of ["stage4", "stage3", "stage2", "stage1"] as const) {
+      const main = t[s]?.damageMain;
+      if (main) return normalizeDamage(main);
+    }
+    if (t.damageMain) return normalizeDamage(t.damageMain);
+    if (t.damage) return normalizeDamage(t.damage);
+  }
+  const pm = weapon.projectile?.modifier?.tuning?.damage;
+  if (pm) return normalizeDamage(pm);
+  return weapon.damageTuning;
+}
+
 /** 按 `DAMAGE_CASCADE` 回退链算这把武器对某类目标的伤害。 */
 export function damageAgainstTarget(weapon: WeaponTuning, target: DamageOverrideTag): number {
-  const dt = weapon.damageTuning;
+  const dt = effectiveDamage(weapon);
   const fallback = dt?.default ?? 0;
   for (const tag of DAMAGE_CASCADE[target]) {
     const hit = (dt?.overrides ?? []).find((e) => e[0] === tag);

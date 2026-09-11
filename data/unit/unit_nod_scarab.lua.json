@@ -78,7 +78,10 @@
                 "damage": {
                   "default": 2000,
                   "override": [
-                    "Vehicle"
+                    [
+                      "Vehicle",
+                      2000
+                    ]
                   ]
                 },
                 "durationMs": -1

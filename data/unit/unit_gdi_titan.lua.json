@@ -49,7 +49,10 @@
               "damage": {
                 "default": 2000,
                 "override": [
-                  "Infantry"
+                  [
+                    "Infantry",
+                    180
+                  ]
                 ]
               },
               "durationMs": 1000

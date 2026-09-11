@@ -20,15 +20,27 @@
       "damageMain": {
         "default": 2500,
         "override": [
-          "Harvester",
-          "Structure"
+          [
+            "Harvester",
+            500
+          ],
+          [
+            "Structure",
+            2500
+          ]
         ]
       },
       "damageSide": {
         "default": 3000,
         "override": [
-          "Harvester",
-          "Structure"
+          [
+            "Harvester",
+            500
+          ],
+          [
+            "Structure",
+            2500
+          ]
         ]
       }
     },
@@ -43,8 +55,14 @@
       "damage": {
         "default": 3500,
         "override": [
-          "Harvester",
-          "Structure"
+          [
+            "Harvester",
+            500
+          ],
+          [
+            "Structure",
+            2500
+          ]
         ]
       },
       "rocket": {

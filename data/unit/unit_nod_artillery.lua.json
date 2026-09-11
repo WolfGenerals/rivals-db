@@ -79,8 +79,14 @@
                 "damage": {
                   "default": 1000,
                   "override": [
-                    "Structure",
-                    "Infantry"
+                    [
+                      "Structure",
+                      3000
+                    ],
+                    [
+                      "Infantry",
+                      285
+                    ]
                   ]
                 },
                 "radius": 6

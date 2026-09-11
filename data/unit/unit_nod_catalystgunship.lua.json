@@ -131,8 +131,14 @@
                 "damage": {
                   "default": 50,
                   "override": [
-                    "Structure",
-                    "Infantry"
+                    [
+                      "Structure",
+                      396
+                    ],
+                    [
+                      "Infantry",
+                      50
+                    ]
                   ]
                 },
                 "radius": 6
@@ -168,8 +174,14 @@
       "damageMain": {
         "default": 800,
         "override": [
-          "Structure",
-          "Infantry"
+          [
+            "Structure",
+            800
+          ],
+          [
+            "Infantry",
+            300
+          ]
         ]
       }
     }

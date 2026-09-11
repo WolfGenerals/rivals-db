@@ -51,7 +51,10 @@
                 "damageMain": {
                   "default": 50,
                   "override": [
-                    "Infantry"
+                    [
+                      "Infantry",
+                      20
+                    ]
                   ]
                 },
                 "tickPeriodMs": 250
@@ -60,7 +63,10 @@
                 "damageMain": {
                   "default": 175,
                   "override": [
-                    "Infantry"
+                    [
+                      "Infantry",
+                      50
+                    ]
                   ]
                 },
                 "tickPeriodMs": 250

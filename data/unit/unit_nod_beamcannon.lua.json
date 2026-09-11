@@ -63,7 +63,10 @@
                 "damageMain": {
                   "default": 45,
                   "override": [
-                    "Infantry"
+                    [
+                      "Infantry",
+                      5
+                    ]
                   ]
                 },
                 "tickPeriodMs": 250
@@ -73,13 +76,19 @@
                 "damageMain": {
                   "default": 90,
                   "override": [
-                    "Infantry"
+                    [
+                      "Infantry",
+                      8
+                    ]
                   ]
                 },
                 "damageSide": {
                   "default": 40,
                   "override": [
-                    "Infantry"
+                    [
+                      "Infantry",
+                      5
+                    ]
                   ]
                 },
                 "sideTargetCount": 2,
@@ -89,13 +98,19 @@
                 "damageMain": {
                   "default": 150,
                   "override": [
-                    "Infantry"
+                    [
+                      "Infantry",
+                      12
+                    ]
                   ]
                 },
                 "damageSide": {
                   "default": 50,
                   "override": [
-                    "Infantry"
+                    [
+                      "Infantry",
+                      10
+                    ]
                   ]
                 },
                 "sideTargetCount": 3,

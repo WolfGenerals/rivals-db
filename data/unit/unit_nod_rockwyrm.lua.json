@@ -56,8 +56,14 @@
               "damage": {
                 "default": 90,
                 "override": [
-                  "Vehicle",
-                  "Structure"
+                  [
+                    "Vehicle",
+                    750
+                  ],
+                  [
+                    "Structure",
+                    0
+                  ]
                 ]
               },
               "durationMs": 2000,
@@ -84,8 +90,14 @@
               "damage": {
                 "default": 2000,
                 "override": [
-                  "Infantry",
-                  "Structure"
+                  [
+                    "Infantry",
+                    90
+                  ],
+                  [
+                    "Structure",
+                    500
+                  ]
                 ]
               }
             }

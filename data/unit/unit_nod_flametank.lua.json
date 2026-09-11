@@ -50,15 +50,27 @@
               "damageMain": {
                 "default": 380,
                 "override": [
-                  "Structure",
-                  "Vehicle"
+                  [
+                    "Structure",
+                    300
+                  ],
+                  [
+                    "Vehicle",
+                    72
+                  ]
                 ]
               },
               "damageSide": {
                 "default": 380,
                 "override": [
-                  "Structure",
-                  "Vehicle"
+                  [
+                    "Structure",
+                    425
+                  ],
+                  [
+                    "Vehicle",
+                    72
+                  ]
                 ]
               },
               "initialChargeUpMs": 0

@@ -28,13 +28,19 @@
           "healFlat": {
             "default": -4,
             "override": [
-              "Infantry"
+              [
+                "Infantry",
+                -4
+              ]
             ]
           },
           "healFullTimeMs": {
             "default": 27000,
             "override": [
-              "Infantry"
+              [
+                "Infantry",
+                32000
+              ]
             ]
           },
           "healMaxUnitModifier": [

@@ -27,17 +27,31 @@
 `tmp/` 是 gitignore 的，装着游戏原始资产（约 3 GB，含 `tmp/ghidra`）。
 只读，不删，不移。
 
-### 3. 写文件不要带 BOM
+### 3. **Lua 代码块（TS 模板字符串）里绝对不能出现反引号**
+
+`luaRuntime.ts` 的 `BOOTSTRAP`、`trace-ability.ts` 的 `harness()` 都是**用 TS 模板字符串装的 Lua**。
+在里面的 Lua 注释或字符串中写一个反引号，就会**提前终止模板字符串**，报
+`ERR_INVALID_TYPESCRIPT_SYNTAX` 且**行号指向那行注释本身**，很难看出是引号问题。
+
+**已踩 4 次**（findings I34 / I96 附近）。写 Lua 注释时描述代码用引号或书名号，**不要用反引号**。
+
+改完跑一次自检（应为 2 —— 只有定界符；`${...map((n) => \`...\`)}` 里的属于插值表达式，合法）：
+
+```powershell
+node --experimental-strip-types -e "import('./core/src/extract/luaRuntime.ts').then(()=>console.log('ok')).catch(e=>console.log(e.message.split('\n')[0]))"
+```
+
+### 4. 写文件不要带 BOM
 
 Windows PowerShell 5 的 `Set-Content -Encoding UTF8` 会写 BOM，
 会让 Vite / PostCSS 报 `Unexpected token ''`。用 edit/write 工具，或 `-Encoding utf8NoBOM`。
 
-### 4. TS import 必须带 `.ts` 扩展名
+### 5. TS import 必须带 `.ts` 扩展名
 
 Node 24 的原生 type-stripping 要求如此，`tsconfig.base.json` 已开
 `allowImportingTsExtensions`。
 
-### 5. 产物字段有真伪之分
+### 6. 产物字段有真伪之分
 
 `docs/data-semantics.md` 里标注为占位值的字段（如 `descriptors` 的位掩码数字）
 **不可当作真实数据使用**。新增字段时同样要在文档里标明来源。

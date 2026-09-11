@@ -46,8 +46,14 @@
               "damage": {
                 "default": 140,
                 "override": [
-                  "Structure",
-                  "Vehicle"
+                  [
+                    "Structure",
+                    300
+                  ],
+                  [
+                    "Vehicle",
+                    50
+                  ]
                 ]
               },
               "initialChargeUpMs": 0,

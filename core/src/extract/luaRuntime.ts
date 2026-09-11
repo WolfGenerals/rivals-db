@@ -19,7 +19,9 @@ const TABLE_FUNCTIONS = [
   "Fixed16",
   "GetFixed16OrNil",
   "ItemTuning",
-  "MakeOverride",
+  // ⚠️ `MakeOverride` **不在这里** —— 它不是「透传第一个参数」，
+  // 而是 `MakeOverride(标签, 值)` 造一条伤害补正。放进这个列表会让值被丢掉，
+  // 见下方 BOOTSTRAP 里的专门定义与 findings I106。
   "RequiredHash",
   "SetupCombatAbility",
   "SetupCombatStoreTuning",
@@ -133,6 +135,13 @@ local NAMESPACES = {${NAMESPACES.map((n) => `"${n}"`).join(", ")}}
 
 for _, n in ipairs(TABLE_FNS) do _G[n] = stubfn end
 for _, n in ipairs(NOOP_FNS) do _G[n] = noop end
+
+-- 伤害补正条目：MakeOverride(DamageOverride.Infantry, 5) 得到 { "Infantry", 5 }。
+--
+-- ⚠️ **不能当成普通的「透传第一个参数」的建表函数** —— 那样会只留下标签名、把值丢掉，
+-- 导致所有能力序列武器的逐目标伤害全错（见 findings I106）。返回的形状与
+-- damageTuning.overrides 的 [标签, 值] 一致，消费方只需认一种。
+MakeOverride = function(tag, value) return { tag, value } end
 -- 枚举命名空间用 autoattr：字段名（UnitTag.Infantry -> "Infantry"）是真实语义
 for _, n in ipairs(ENUM_NS) do _G[n] = autoattr() end
 for _, n in ipairs(NAMESPACES) do _G[n] = {} end

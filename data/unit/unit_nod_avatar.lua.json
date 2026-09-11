@@ -35,7 +35,10 @@
               "damage": {
                 "default": 1700,
                 "override": [
-                  "Infantry"
+                  [
+                    "Infantry",
+                    300
+                  ]
                 ]
               },
               "timeMs": 3000
@@ -68,8 +71,14 @@
               "damage": {
                 "default": 160,
                 "override": [
-                  "Infantry",
-                  "Harvester"
+                  [
+                    "Infantry",
+                    35
+                  ],
+                  [
+                    "Harvester",
+                    140
+                  ]
                 ]
               },
               "initialChargeUpMs": 300,
@@ -120,8 +129,14 @@
               "damage": {
                 "default": 140,
                 "override": [
-                  "Structure",
-                  "Vehicle"
+                  [
+                    "Structure",
+                    300
+                  ],
+                  [
+                    "Vehicle",
+                    50
+                  ]
                 ]
               },
               "initialChargeUpMs": 0,
