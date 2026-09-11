@@ -185,21 +185,23 @@ const squadRows = computed(() => {
         <UnitCard :unit="unit" :level="lv" :fields="['type', 'level', 'faction', 'cost']" />
       </div>
       <div class="hero-info">
-        <h2 class="title">{{ name }}</h2>
+        <!-- 等级选择器与标题**同一行**（它只有 26px 高，不该独占一行） -->
+        <div class="title-row">
+          <h2 class="title">{{ name }}</h2>
+          <UnitLevelPicker
+            :level="lv"
+            :global-level="level"
+            :independent="independent"
+            @update:independent="independent = $event"
+            @update:level="onLevelChange"
+          />
+        </div>
         <p v-if="nameEn && nameEn !== name" class="subtitle">{{ nameEn }}</p>
         <p class="chips">
           <span class="chip">{{ unit.faction }}</span>
           <span v-if="rarity" class="chip">{{ rarity }}</span>
           <span v-if="startMajor !== null" class="chip">起始 {{ makeLevel(startMajor, 0).format() }}</span>
         </p>
-
-        <UnitLevelPicker
-          :level="lv"
-          :global-level="level"
-          :independent="independent"
-          @update:independent="independent = $event"
-          @update:level="onLevelChange"
-        />
 
         <!--
           血量 / DPS 与基本信息**并排**：前者随等级变、后者不变，
@@ -271,6 +273,13 @@ const squadRows = computed(() => {
 }
 .hero-info .title {
   margin: 0;
+}
+/* 标题 + 紧凑等级选择器同一行；选择器自带 `margin-left:auto` 靠右 */
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
 }
 .subtitle {
   margin: 2px 0 8px;
