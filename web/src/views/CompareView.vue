@@ -61,7 +61,7 @@ function pick(side: "left" | "right", id: string) {
         <div class="col-head">
           <span>左</span>
           <b v-if="left">{{ left.replace(/^unit_/, "") }}</b>
-          <button v-if="left && !pickingLeft" type="button" @click="pickingLeft = true">换</button>
+          <button v-if="left && !pickingLeft" type="button" @click="pickingLeft = true">换一个</button>
         </div>
         <div v-if="pickingLeft" key="l-wall" class="wall"><Arsenal pickable :picked="picked" @pick="pick('left', $event)" /></div>
         <UnitDetail v-else-if="left" key="l-detail" :id="left" embedded />
@@ -72,7 +72,7 @@ function pick(side: "left" | "right", id: string) {
         <div class="col-head">
           <span>右</span>
           <b v-if="right">{{ right.replace(/^unit_/, "") }}</b>
-          <button v-if="right && !pickingRight" type="button" @click="pickingRight = true">换</button>
+          <button v-if="right && !pickingRight" type="button" @click="pickingRight = true">换一个</button>
         </div>
         <div v-if="pickingRight" key="r-wall" class="wall"><Arsenal pickable :picked="picked" @pick="pick('right', $event)" /></div>
         <UnitDetail v-else-if="right" key="r-detail" :id="right" embedded />
@@ -173,8 +173,16 @@ function pick(side: "left" | "right", id: string) {
 }
 .col-head button {
   margin-left: auto;
-  padding: 2px 10px;
-  font-size: 11px;
+  /*
+   * 「换」原先 `padding: 2px 10px; font-size: 11px` 缩在右角、和旁边的灰字一个色系，
+   * 用户反映"经常找不到这个按钮"。现在：字号加大 + 用强调色底/边框，
+   * 并显式写出「换一个」而不是单个"换"字。
+   */
+  padding: 3px 12px;
+  font-size: 12px;
+  background: var(--accent-soft, #1d3a5c);
+  border-color: var(--accent, #4da8ff);
+  color: #cfe4ff;
 }
 .muted {
   color: #7f8aa6;

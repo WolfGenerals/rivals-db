@@ -45,6 +45,17 @@ function step(d: number) {
   const c = Math.max(0, Math.min(max, n));
   emit("update:level", makeLevel(Math.floor(c / (MINOR_MAX + 1)) + 1, c % (MINOR_MAX + 1)));
 }
+/**
+ * 点数值这个按钮。
+ *
+ * ⚠️ **任何时候都要能点** —— 之前未勾「独立」时它是 `disabled`，点了毫无反应，
+ * 用户会以为"这个数字不可点"（反馈：「把对比旁边的等级当成可以点的」）。
+ * 现在：未勾独立时点它**自动勾上独立并展开网格** —— 点了就有效果，符合直觉。
+ */
+function openGrid() {
+  if (!props.independent) emit("update:independent", true);
+  open.value = !open.value;
+}
 const onToggle = (e: Event) => emit("update:independent", (e.target as HTMLInputElement).checked);
 </script>
 
@@ -60,12 +71,11 @@ const onToggle = (e: Event) => emit("update:independent", (e.target as HTMLInput
     <button
       type="button"
       class="value"
-      :disabled="!independent"
-      :title="independent ? '点击选择等级' : '未勾选独立，当前跟随全局'"
-      @click="open = !open"
+      :title="independent ? '点击选择等级' : '点击改用本单位独立等级'"
+      @click="openGrid"
     >
       <span :class="{ dim: !independent }">{{ label }}</span>
-      <i v-if="independent" class="caret">▾</i>
+      <i class="caret">▾</i>
     </button>
 
     <button type="button" class="nav" :disabled="!independent" title="升一级" @click="step(1)">+</button>
