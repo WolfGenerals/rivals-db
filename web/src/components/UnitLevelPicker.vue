@@ -1,25 +1,24 @@
 <script setup lang="ts">
 /**
- * 等级选择器 —— **单行紧凑版**。
+ * 等级选择器 —— 紧凑 + **可精确选择**。
  *
- * 设计取舍：
- *   · **一个滑块（按序数 0~59）、一对步进按钮、一个数值** —— 取代原来的两个滑块。
- *     大级/小级用滑块各调一次很别扭（滑完大级再滑小级），而**序数**是一条连续轴，
- *     拖一下就能到任意等级。
- *   · **步进 `−`/`+` 走序数** —— 精确选 `15-3` 这类边界值比拖滑块可靠。
- *   · 数值永远是 `大级-小级`，与游戏内写法一致。
+ * 为什么不用滑块：有效等级只有 **60 个**（大级 1~15 × 小级 0~3），而滑块再宽也会把
+ * 相邻等级压到不足 2px，**落点天生不可能准**。改成**点开一张 15×4 的网格直接点** ——
+ * 一次点击选中，还能一眼看到全部等级。
  *
- * 默认**跟随全局**（顶栏那个），勾「独立」后本单位用自己的等级，便于同页横向比较。
+ * 三个控件各司其职：
+ *   `−` / `+`  快速微调（相邻一两级）
+ *   `5-3`      当前值，**点它展开网格**（远距离跳转）
+ *   `独立`      是否脱离顶栏的全局等级
  */
-import { computed } from "vue";
+import { computed, ref } from "vue";
 
-import { fromOrdinal, level as makeLevel, MAX_ORDINAL, MINOR_MAX } from "@rivals/core/levels";
+import { level as makeLevel, MAX_MAJOR, MINOR_MAX } from "@rivals/core/levels";
 
 const props = defineProps<{
-  /** 当前生效的等级 */
   level: { major: number; minor: number };
   independent: boolean;
-  /** 跟随全局时的等级（未勾独立时用来提示现在实际是多少） */
+  /** 跟随全局时的等级（未勾独立时提示实际生效值） */
   globalLevel: { major: number; minor: number };
 }>();
 
@@ -28,18 +27,24 @@ const emit = defineEmits<{
   (e: "update:level", v: ReturnType<typeof makeLevel>): void;
 }>();
 
-/** 每大级有 `MINOR_MAX + 1` 个小级（0 也算一级） */
-const PER_MAJOR = MINOR_MAX + 1;
+/** 大级 1..MAX_MAJOR；小级从高到低排，符合"往下越长"的直觉 */
+const MAJORS = Array.from({ length: MAX_MAJOR }, (_, i) => i + 1);
+const MINORS = Array.from({ length: MINOR_MAX + 1 }, (_, i) => MINOR_MAX - i);
 
-/** 当前等级在连续轴上的位置 */
-const ordinal = computed(() => (props.level.major - 1) * PER_MAJOR + props.level.minor);
+const open = ref(false);
 
-const atMax = computed(() => ordinal.value >= MAX_ORDINAL);
+const label = computed(() => `${props.level.major}-${props.level.minor}`);
 
-function go(n: number) {
-  emit("update:level", fromOrdinal(Math.max(0, Math.min(MAX_ORDINAL, n))));
+function pick(major: number, minor: number) {
+  emit("update:level", makeLevel(major, minor));
+  open.value = false;
 }
-const onSlide = (e: Event) => go(Number((e.target as HTMLInputElement).value));
+function step(d: number) {
+  const n = (props.level.major - 1) * (MINOR_MAX + 1) + props.level.minor + d;
+  const max = (MAX_MAJOR - 1) * (MINOR_MAX + 1) + MINOR_MAX;
+  const c = Math.max(0, Math.min(max, n));
+  emit("update:level", makeLevel(Math.floor(c / (MINOR_MAX + 1)) + 1, c % (MINOR_MAX + 1)));
+}
 const onToggle = (e: Event) => emit("update:independent", (e.target as HTMLInputElement).checked);
 </script>
 
@@ -50,40 +55,55 @@ const onToggle = (e: Event) => emit("update:independent", (e.target as HTMLInput
       <span>独立</span>
     </label>
 
-    <div class="stepper">
-      <button type="button" :disabled="!independent || ordinal <= 0" title="降一级" @click="go(ordinal - 1)">
-        −
-      </button>
-      <b :class="{ dim: !independent }">
-        {{ level.major }}-{{ level.minor }}
-        <em v-if="atMax" title="已到满级上限">满</em>
-      </b>
-      <button type="button" :disabled="!independent || atMax" title="升一级" @click="go(ordinal + 1)">
-        +
-      </button>
-    </div>
+    <button type="button" class="nav" :disabled="!independent" title="降一级" @click="step(-1)">−</button>
 
-    <input
-      class="slide"
-      type="range"
-      min="0"
-      :max="MAX_ORDINAL"
-      :value="ordinal"
+    <button
+      type="button"
+      class="value"
       :disabled="!independent"
-      :title="`0 – ${MAX_ORDINAL}`"
-      @input="onSlide"
-    />
+      :title="independent ? '点击选择等级' : '未勾选独立，当前跟随全局'"
+      @click="open = !open"
+    >
+      <span :class="{ dim: !independent }">{{ label }}</span>
+      <i v-if="independent" class="caret">▾</i>
+    </button>
 
-    <span v-if="!independent" class="note">跟随全局 {{ globalLevel.major }}-{{ globalLevel.minor }}</span>
+    <button type="button" class="nav" :disabled="!independent" title="升一级" @click="step(1)">+</button>
+
+    <span v-if="!independent" class="note">全局 {{ globalLevel.major }}-{{ globalLevel.minor }}</span>
+
+    <!-- 网格：15 列（大级）× 4 行（小级） -->
+    <template v-if="open">
+      <div class="backdrop" @click="open = false" />
+      <div class="grid">
+        <div class="grid-head">
+          <span class="corner" />
+          <span v-for="m in MAJORS" :key="m" class="col">{{ m }}</span>
+        </div>
+        <div v-for="mi in MINORS" :key="mi" class="grid-row">
+          <span class="row-cap">{{ mi }}</span>
+          <button
+            v-for="m in MAJORS"
+            :key="m"
+            type="button"
+            class="cell"
+            :class="{ on: m === level.major && mi === level.minor }"
+            @click="pick(m, mi)"
+          >
+            {{ m }}-{{ mi }}
+          </button>
+        </div>
+      </div>
+    </template>
   </div>
 </template>
 
 <style scoped>
-/* 单行、低矮 —— 这一块不该占掉一整行 */
 .picker {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   height: 26px;
   margin-left: auto; /* 靠右，不抢单位名的位置 */
   font-variant-numeric: tabular-nums;
@@ -104,61 +124,116 @@ const onToggle = (e: Event) => emit("update:independent", (e.target as HTMLInput
   height: 12px;
 }
 
-.stepper {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-.stepper button {
-  width: 18px;
-  height: 18px;
-  padding: 0;
-  line-height: 1;
-  font-size: 13px;
+.nav,
+.value {
+  height: 20px;
+  padding: 0 5px;
+  font-size: 12px;
   color: #b9c4dc;
   background: #1d2430;
   border: 1px solid var(--line, #2b3038);
   border-radius: 4px;
   cursor: pointer;
 }
-.stepper button:hover:not(:disabled) {
+.nav {
+  width: 20px;
+  padding: 0;
+  line-height: 1;
+  font-size: 13px;
+}
+.nav:hover:not(:disabled),
+.value:hover:not(:disabled) {
   background: #26303f;
   color: #fff;
 }
-.stepper button:disabled {
-  opacity: 0.3;
+.nav:disabled,
+.value:disabled {
+  opacity: 0.35;
   cursor: default;
 }
-.stepper b {
-  min-width: 42px;
-  text-align: center;
-  font-size: 14px;
-  color: #e6ecf5;
+.value {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 46px;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
 }
-.stepper b.dim {
-  color: #6b7a99; /* 跟随全局时压暗，一眼看出这个数不由自己控制 */
+.value .dim {
+  color: #6b7a99;
 }
-.stepper em {
-  margin-left: 3px;
+.caret {
   font-style: normal;
-  font-size: 9px;
-  color: #d8a13c;
-  vertical-align: super;
-}
-
-/* 比原来两个 128px 滑块窄得多，但仍能拖到任意等级 */
-.slide {
-  width: 96px;
-  height: 14px;
-  accent-color: #4a9eff;
-}
-.slide:disabled {
-  opacity: 0.35;
+  font-size: 8px;
+  color: #6b7a99;
 }
 
 .note {
   font-size: 10px;
   color: #6b7a99;
   white-space: nowrap;
+}
+
+/* 点空白关闭 */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+}
+.grid {
+  position: absolute;
+  top: 24px;
+  right: 0;
+  z-index: 21;
+  padding: 6px;
+  background: #131820;
+  border: 1px solid var(--line, #2b3038);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px #000a;
+}
+.grid-head,
+.grid-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.grid-head {
+  margin-bottom: 2px;
+}
+.corner,
+.row-cap {
+  width: 16px;
+  font-size: 9px;
+  color: #6b7a99;
+  text-align: center;
+}
+.col {
+  width: 26px;
+  font-size: 9px;
+  color: #6b7a99;
+  text-align: center;
+}
+.cell {
+  width: 26px;
+  height: 16px;
+  margin: 1px 0;
+  padding: 0;
+  font-size: 9px;
+  color: #7f8aa6;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+.cell:hover {
+  background: #26303f;
+  color: #e6ecf5;
+}
+.cell.on {
+  background: #1d3a5c;
+  border-color: #4a9eff;
+  color: #8fc4ff;
 }
 </style>
