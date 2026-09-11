@@ -28,6 +28,18 @@ const q = ref("");
 const faction = ref("");
 const rarity = ref("");
 const sort = ref<"cost" | "name" | "hp" | "dps">("cost");
+/** 分组维度。默认**按类型** —— 一屏里同类单位挨在一起才好比。 */
+const group = ref<"none" | "type" | "faction">("type");
+
+/** 类型分组的显示顺序与中文名。`derived.stats.unit_type` 的取值就是这些 */
+const TYPE_ORDER = ["Infantry", "Vehicle", "Aircraft", "Structure", "Harvester"];
+const TYPE_LABEL: Record<string, string> = {
+  Infantry: "步兵",
+  Vehicle: "载具",
+  Aircraft: "空军",
+  Structure: "建筑",
+  Harvester: "运矿车",
+};
 
 const RARITY_ORDER: Record<string, number> = { Common: 1, Rare: 2, Epic: 3 };
 
@@ -84,6 +96,34 @@ const total = computed(() =>
   records.value.filter((r) => Boolean(props.commandersOnly) === r.id.startsWith("cmdr_")).length,
 );
 
+/**
+ * 分组后的分节。`group === "none"` 时返回 `null`（走平铺那条路）。
+ *
+ * 组的顺序按 `TYPE_ORDER` 固定（步兵→载具→空军→建筑→运矿车），不按数量排 ——
+ * 顺序固定，翻页/筛选时才不会跳来跳去。**组内用当前排序**（默认按造价）。
+ * 未知类型（如总部那种 `unit_type` 缺失的）排最后。
+ */
+const sections = computed(() => {
+  if (group.value === "none") return null;
+  const keyOf = (r: DatasetEntry) =>
+    group.value === "faction" ? r.faction : (r.derived.stats.unit_type ?? "");
+  const map = new Map<string, DatasetEntry[]>();
+  for (const rec of shown.value) {
+    const k = keyOf(rec);
+    const arr = map.get(k);
+    if (arr) arr.push(rec);
+    else map.set(k, [rec]);
+  }
+  const order = group.value === "faction" ? ["GDI", "NOD"] : TYPE_ORDER;
+  const known = order.filter((k) => map.has(k));
+  const rest = [...map.keys()].filter((k) => !order.includes(k)).sort();
+  return [...known, ...rest].map((k) => ({
+    key: k || "（无类型）",
+    label: group.value === "faction" ? k : (TYPE_LABEL[k] ?? (k || "其他")),
+    items: map.get(k)!,
+  }));
+});
+
 /** 顶部汇总：当前筛选下每档造价的单位数，方便一眼看出曲线形状。 */
 const costSpread = computed(() => {
   const map = new Map<number, number>();
@@ -116,6 +156,11 @@ const costSpread = computed(() => {
       <option value="hp">按总血</option>
       <option value="dps">按 DPS</option>
     </select>
+    <select v-model="group">
+      <option value="type">按类型分组</option>
+      <option value="faction">按阵营分组</option>
+      <option value="none">不分组</option>
+    </select>
   </div>
 
   <p v-if="loading" class="muted">正在加载 {{ total }} 个条目…</p>
@@ -129,6 +174,25 @@ const costSpread = computed(() => {
     </p>
 
     <p v-if="!shown.length" class="muted">没有符合筛选条件的条目。</p>
+
+    <!-- 分组：每节一个小标题 + 数量，节内仍是一张网格 -->
+    <template v-else-if="sections">
+      <section v-for="s in sections" :key="s.key" class="section">
+        <h3 class="sec-head">
+          {{ s.label }}<span class="sec-count">{{ s.items.length }}</span>
+        </h3>
+        <div class="grid">
+          <UnitCard
+            v-for="rec in s.items"
+            :key="rec.id"
+            :unit="rec"
+            :level="levelOf(rec)"
+            :fields="['type', 'level', 'faction', 'cost', 'name']"
+          />
+        </div>
+      </section>
+    </template>
+
     <div v-else class="grid">
       <UnitCard
         v-for="rec in shown"
