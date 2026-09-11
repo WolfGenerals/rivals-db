@@ -151,17 +151,42 @@ const pct = (ms: number) => `${(ms / spanMs.value) * 100}%`;
 /** 每个队员一条 */
 const members = computed(() => Array.from({ length: Math.max(1, props.waveSize) }, (_, i) => i));
 
-/** 该队员的段（整体后移 `i × separationMs`） */
+/**
+ * 该队员的段（整体后移 `i × separationMs`，**并按周期重复若干轮**）。
+ *
+ * ⚠️ **必须重复**：`错开 × 人数` 超过一个周期时（狂热者 750×4=3000 vs 周期 850），
+ * 第一个人**先转回第二轮**而最后一个人还没打第一轮 —— 只画一轮就看不到这种交叠。
+ * 重复的轮次**故意画超出横轴**，由 `.bar` 的 `overflow: hidden` 裁掉
+ * （用户给的方案："不管够不够都使劲往后面加时序，超出截断"）。
+ */
 function segsOf(i: number): Array<Seg & { left: string; width: string; tickPct: string[] }> {
   const shift = i * props.separationMs;
-  return baseSegs.value
-    .map((s) => ({
-      ...s,
-      left: pct(s.at + shift),
-      width: pct(s.ms),
-      tickPct: (s.ticks ?? []).map((x) => pct(x + shift)),
-    }))
-    .filter((s) => s.ms > 0);
+  const cyc = cycleMs.value;
+  const reps = cyc > 0 ? Math.ceil((spanMs.value - shift) / cyc) + 1 : 1;
+  const out: Array<Seg & { left: string; width: string; tickPct: string[] }> = [];
+  for (let k = 0; k < reps; k++) {
+    const off = shift + k * cyc;
+    for (const s of baseSegs.value) {
+      if (s.ms <= 0) continue;
+      /*
+       * ⚠️ **刻度要按横轴过滤掉超出的**，不能只靠 CSS 裁 ——
+       * 第 2 轮之后的刻度 `left` 会大于 100%，绝对定位元素会**把页面撑出横向滚动条**
+       * （用户报"飞出去了"）。段本身在 `.bar` 里被 `overflow:hidden` 裁掉没问题，
+       * 但刻度挂在 `.track` 上（为了伸出条子上下），所以必须在生成时就剔除。
+       */
+      const ticks = (s.ticks ?? []).map((x) => x + off).filter((x) => x <= spanMs.value);
+      // 段整体在横轴右侧之外的，连段也不用生成
+      if (s.at + off > spanMs.value) continue;
+      out.push({
+        ...s,
+        left: pct(s.at + off),
+        // 段宽也不超过横轴剩余部分
+        width: pct(Math.max(0, Math.min(s.ms, spanMs.value - (s.at + off)))),
+        tickPct: ticks.map((x) => pct(x)),
+      });
+    }
+  }
+  return out;
 }
 </script>
 
@@ -230,7 +255,11 @@ function segsOf(i: number): Array<Seg & { left: string; width: string; tickPct: 
   position: relative;
   flex: 1;
   height: 8px;
-  /* ⚠️ 这里**不能** overflow:hidden —— 开火标记要伸出条子上下 */
+  /*
+   * ⚠️ 这里**不能** `overflow: hidden` —— 开火标记要伸出条子上下。
+   * 横向的越界由**生成时过滤**解决（见 `segsOf`），不靠 CSS 裁：
+   * `overflow-x: hidden` + `overflow-y: visible` 在 CSS 里是无效组合。
+   */
 }
 /* 圆角与裁剪在这一层，只作用于段 */
 .bar {

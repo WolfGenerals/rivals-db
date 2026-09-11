@@ -80,7 +80,8 @@ const dpsSet = computed<DpsSet>(() => {
     const cycle =
       tm.kind === "装填" ? tm.clip * iv + tm.reload_ms : tm.cycle_ms;
     const dmg = props.weapon.damage;
-    volley += dmg * h;
+    /* ⚠️ **单轮总伤害要乘人数** —— 小队每个成员各打各的。5 个步枪兵各打一发 38，一轮是 190 而不是 38 */
+    volley += dmg * h * wave;
     hits += h;
     // 爆发：射击期间的速率。单发（hits=1）时"期间"就是它的间隔
     if (iv > 0) burst = Math.max(burst, (dmg * h * wave * 1000) / (h * iv));
