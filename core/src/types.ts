@@ -362,6 +362,12 @@ export type Rarity = "Common" | "Rare" | "Epic";
 
 /** 一个单位或指挥官的产物文件。 */
 export interface EntityRecord {
+  /**
+   * GetStatInfo 里的**多格伤害图案**（CreateMultiHexDamage(StyleID.X, N)）。
+   * **无衰减**的范围伤害 —— 与"圆形范围 + 距离衰减"是两种不同机制。全库 9 个单位有。
+   */
+  multiHex?: { shape: string; size: number };
+
   /** Lua 全局名，等于源文件名去掉 `.lua` */
   id: string;
   faction: Faction;

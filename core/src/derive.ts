@@ -27,7 +27,11 @@ export type WeaponType = "炸弹" | "光束" | "弹道" | "自爆";
 
 /** 范围伤害机制。与时序无关，所以挂在武器上 */
 export interface Area {
-  kind: "none" | "side_targets" | "radius" | "side_damage";
+  kind: "none" | "side_targets" | "radius" | "side_damage" | "multi_hex";
+  /** multi_hex：图案形状（Circle / Diamond / Line） */
+  shape?: string;
+  /** multi_hex：图案尺寸参数 */
+  size?: number;
   /** `side_targets`：溅射目标数 */
   targets?: number;
   /** `radius`：半径（格） */
@@ -173,7 +177,7 @@ function weaponTypeOf(w: WeaponTuning): WeaponType {
 }
 
 /** 范围伤害机制 */
-function areaOf(w: WeaponTuning, stage?: string): Area {
+function areaOf(w: WeaponTuning, stage?: string, multiHex?: { shape: string; size: number }): Area {
   const t = seqTuning(w);
   const st = stage ? (t[stage] as SeqTuning | undefined) : undefined;
   const splash = num(st?.["sideTargetCount"]) ?? num(t["sideTargetCount"]);
@@ -194,11 +198,13 @@ function areaOf(w: WeaponTuning, stage?: string): Area {
   }
   const side = (st?.["damageSide"] as { default?: number } | undefined)?.default ?? (t["damageSide"] as { default?: number } | undefined)?.default;
   if (num(side)) return { kind: "side_damage", side_value: side };
+  // 单位级的「多格伤害图案」（GetStatInfo 里声明）—— **无衰减**
+  if (multiHex) return { kind: "multi_hex", shape: multiHex.shape, size: multiHex.size };
   return { kind: "none" };
 }
 
 /** 由单把武器 + 可选阶段，造一个「武器」条目 */
-function makeWeapon(w: WeaponTuning, id: string, stage?: string): Weapon {
+function makeWeapon(w: WeaponTuning, id: string, stage?: string, multiHex?: { shape: string; size: number }): Weapon {
   const t = seqTuning(w);
   const st = stage ? (t[stage] as SeqTuning | undefined) : undefined;
   const dm = st?.["damageMain"] as { default?: number; override?: unknown } | undefined;
@@ -220,7 +226,7 @@ function makeWeapon(w: WeaponTuning, id: string, stage?: string): Weapon {
     targeting_unknown: targetingUnknown(w),
     range_tiles: w.maxRangeInTiles,
     homing: w.projectile?.homing,
-    area: areaOf(w, stage),
+    area: areaOf(w, stage, multiHex),
   };
 }
 
@@ -270,7 +276,7 @@ export function deriveAttack(unit: EntityRecord): DerivedAttack {
       let first = true;
       for (const s of stages) {
         const id = `${w.name ?? "w"}${wi}-${s}`;
-        const wp = makeWeapon(w, id, s);
+        const wp = makeWeapon(w, id, s, unit.multiHex);
         weapons.push(wp);
         const st = t[s] as SeqTuning;
         const count = num(st["attackCount"]);
@@ -303,7 +309,7 @@ export function deriveAttack(unit: EntityRecord): DerivedAttack {
 
     // ── 情形 B：单把武器 ──
     const id = `${w.name ?? "w"}${ws.length > 1 ? wi : ""}`;
-    weapons.push(makeWeapon(w, id));
+    weapons.push(makeWeapon(w, id, undefined, unit.multiHex));
 
     // 节奏
     if (w.reloadTuning?.clipSize && w.reloadTuning.reloadTimeMs) {

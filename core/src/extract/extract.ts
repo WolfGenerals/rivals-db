@@ -415,6 +415,20 @@ export async function extractAll(opts: ExtractOptions): Promise<ExtractResult> {
       }
     };
 
+    /**
+     * `GetStatInfo` 里的**多格伤害图案**。
+     *
+     * 有 9 个单位在自己的 `GetStatInfo` 里写 `CombatTuningInfo.CreateMultiHexDamage(StyleID.X, N)`
+     * —— 这是一种**无衰减**的范围伤害：格子图案内的目标全吃全额伤害。
+     * 与"圆形范围 + 距离衰减"（虎鲸轰炸机的 `damageRadius`/`damageFalloff`）是**两种不同机制**。
+     *
+     * 静态解析即可：调用是字面量，不用跑 Lua。见 findings I125。
+     */
+    const attachMultiHex = (rec: EntityRecord, text: string): void => {
+      const m = /CreateMultiHexDamage\(\s*StyleID\.(\w+)\s*,\s*(\d+)\s*\)/.exec(text);
+      if (m) (rec as { multiHex?: unknown }).multiHex = { shape: m[1]!, size: Number(m[2]!) };
+    };
+
     const collect = (sources: SourceFile[]): EntityRecord[] => {
       const out: EntityRecord[] = [];
       for (const src of sources) {
@@ -422,6 +436,7 @@ export async function extractAll(opts: ExtractOptions): Promise<ExtractResult> {
         try {
           const rec = buildRecord(src, lua.get(src.stem), pbByLuaName, []);
           attachBehaviour(rec, src.text);
+          attachMultiHex(rec, src.text);
           const visual = visualOf(src.stem);
           if (visual) rec.visual = visual;
           out.push(rec);

@@ -95,6 +95,11 @@ const areaText = computed(() => {
     return `半径 ${a.radius_tiles} 格${f}`;
   }
   if (a.kind === "side_damage") return `相邻格 ${a.side_value}`;
+  // 多格伤害图案：**格内全额、无衰减** —— 与 `radius` 的渐衰机制不同（findings I125）
+  if (a.kind === "multi_hex") {
+    const SHAPE: Record<string, string> = { Circle: "圆", Diamond: "菱形", Line: "直线" };
+    return `${SHAPE[a.shape ?? ""] ?? a.shape} 图案，尺寸 ${a.size}（格内全额、无衰减）`;
+  }
   return null;
 });
 
