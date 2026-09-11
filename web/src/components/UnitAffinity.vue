@@ -40,7 +40,8 @@ const hasAny = computed(() => intent.value.size > 0 || cells.value.some((c) => c
           class="slot"
           :class="c.tier"
           :style="{ '--c': c.color }"
-          :title="
+          data-float
+          data-tip="
             c.reachable
               ? `${TARGET_LABELS[c.type]}：${c.damage}（该武器正常的 ${(c.ratio * 100).toFixed(0)}%）${c.from ? ` ← ${c.from}` : ''}`
               : `${TARGET_LABELS[c.type]}：打不到`
@@ -63,7 +64,8 @@ const hasAny = computed(() => intent.value.size > 0 || cells.value.some((c) => c
           :key="t"
           class="slot intent"
           :class="{ on: intent.has(t) }"
-          :title="`${TARGET_LABELS[t]}${intent.has(t) ? '：AI 优先攻击' : ''}`"
+          data-float
+          data-tip="`${TARGET_LABELS[t]}${intent.has(t) ? '：AI 优先攻击' : ''}`"
         >
           <TypeIcon :type="t.toLowerCase()" />
         </span>

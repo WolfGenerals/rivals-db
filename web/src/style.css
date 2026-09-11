@@ -166,6 +166,72 @@ button:focus-visible {
   outline-offset: 1px;
 }
 
+/* ── 悬停提示 ─────────────────────────────────────── */
+
+/*
+ * 通用 tooltip —— 任何元素加 `data-tip="文本"` 即可。
+ *
+ * 为什么不用原生 `title`：延迟约 1 秒、样式不可控、且**不会跟着鼠标**——
+ * 时序条的段很窄，原生提示几乎没法用。
+ *
+ * 纯 CSS 实现（`::after` + `attr()`），不需要 JS 定位；`position: absolute` 相对
+ * 加了 `data-tip` 的元素。**带浮入动画**：从下方 4px 处淡入并上移到位。
+ */
+[data-tip] {
+  position: relative;
+}
+[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  z-index: 40;
+  padding: 5px 9px;
+  max-width: 280px;
+  width: max-content;
+  font-size: 11px;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #eef1f6;
+  background: #0b0e14;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  box-shadow: 0 6px 18px #000c;
+  white-space: pre-line;
+  pointer-events: none;
+  /* 浮入：从下方 4px 处淡入上移 */
+  animation: tip-in 0.12s ease-out;
+}
+@keyframes tip-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 4px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+/* 让 `transform` 参与动画终态（否则动画结束后会回跳） */
+[data-tip]:hover::after {
+  transform: translate(-50%, 0);
+}
+
+/*
+ * **悬浮抬升** —— 加 `data-float` 的元素在悬停时轻微上浮 + 发光，
+ * 让人知道"这里可以看/可以点"。
+ */
+[data-float] {
+  transition:
+    transform 0.12s ease-out,
+    filter 0.12s ease-out;
+}
+[data-float]:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.18);
+  z-index: 5;
+}
+
 /* ── 表格 ─────────────────────────────────────────── */
 
 table {

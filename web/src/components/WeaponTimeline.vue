@@ -32,6 +32,7 @@ const props = defineProps<{
 
 interface Seg {
   kind: "charge" | "fire" | "gap" | "reload";
+
   /** 左边界（毫秒，相对该队员的时间轴起点） */
   at: number;
   /** 宽度（毫秒） */
@@ -206,7 +207,8 @@ function segsOf(i: number): Array<Seg & { left: string; width: string; tickPct: 
             class="seg"
             :class="s.kind"
             :style="{ left: s.left, width: s.width }"
-            :title="s.title"
+            data-tip="s.title"
+            data-float
           />
         </div>
         <template v-for="(s, k) in segsOf(i)" :key="`t${k}`">
@@ -215,7 +217,8 @@ function segsOf(i: number): Array<Seg & { left: string; width: string; tickPct: 
             :key="m"
             class="tick"
             :style="{ left: tp }"
-            :title="s.title"
+            data-tip="s.title"
+            data-float
           />
         </template>
       </div>
@@ -267,7 +270,10 @@ function segsOf(i: number): Array<Seg & { left: string; width: string; tickPct: 
   inset: 0;
   background: #10131a;
   border-radius: 4px;
-  overflow: hidden;
+  /*
+   * ⚠️ **不能 `overflow: hidden`** —— 段的 tooltip 会被剪掉。
+   * 段宽已经在 `segsOf` 里夹到横轴以内，越界元素也过滤掉了，所以不需要裁。
+   */
 }
 .seg {
   position: absolute;

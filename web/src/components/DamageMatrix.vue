@@ -75,7 +75,8 @@ const rows = computed<Row[]>(() => {
       class="cell"
       :class="{ dead: !r.reachable && !r.unknown, unknown: r.unknown }"
       :style="{ '--c': r.color }"
-      :title="r.title"
+      :data-tip="r.title"
+            data-float
     >
       <span class="icon">
         <TypeIcon :type="r.type" />
