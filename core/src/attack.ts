@@ -1,17 +1,35 @@
 /**
- * 攻击类型 —— 用多态处理 22 把「能力序列武器」与 61 把常规武器的开火节奏。
+ * 攻击类型 —— 用多态处理 83 把武器的开火节奏。
  *
- * 设计见 `docs/attack-mechanics.md`，验证点见其第 3 节。
+ * 设计见 `docs/attack-mechanics.md`，验证点见 `core/test/attack-verify.ts`（15/15）。
  *
- * **两层**：
- *   `WeaponAttack`（武器级）—— 各族的公式与 `phases()`
- *   `UnitAttack`（单位级）  —— 聚合：双武器**取最大**（不求和）、小队信息
+ * ## 分层
+ *
+ * ```
+ * 62 把常规武器   引擎内置默认序列（C++ 侧），参数读 burstTiming    → BasicAttack
+ * 21 把特殊武器   gameplay/abilities/*.lua 的 Timeline/OnUpdate    → 15 个行为类
+ *                                    ↑ 按 modifier_sequence.behaviourName 精确派发
+ * ```
+ *
+ * **为什么按 behaviour 名派发**：22 把特殊武器的实现在 Lua 函数体里，
+ * 与参数表（`tuning`）是两回事。靠 `if ("stage1" in tuning)` 嗅探形状已经错过多次
+ * （漏 `TickAttack`、`muzzleFactor` 搞错、`damage()` 少两支）。名字派发是精确的，
+ * 且类名直接对应 Lua 文件，便于审计。见 findings I94。
+ *
+ * `UnitAttack`（单位级）负责聚合：双武器**取最大**（不求和）、催化炮艇的跨武器规则、小队信息。
+ *
+ * ## `WeaponAttack` 的职责
+ *
+ *   1. 持有输入 —— `weapon` / `waveSize` / `patternLength`
+ *   2. 声明契约 —— `label` / `dps()` / `phases()`（抽象）
+ *   3. 解析伤害来源 —— `damage()` 的三源回退链 + `projectileDamage()`
+ *   4. 读参数表 —— `tuning()`（强类型 `SequenceTuning`）
  *
  * **`phases()` 是给展示用的**（形状），`dps()` 是给排序/对比用的（数字）。
  * 精确数值不要塞进图形，交给表格。
  */
 
-import type { EntityRecord, WeaponTuning } from "./types.ts";
+import type { EntityRecord, SequenceTuning, WeaponTuning } from "./types.ts";
 
 /** 时序图与明细表共用的段 */
 export interface Phase {
@@ -72,7 +90,7 @@ export abstract class WeaponAttack {
   damage(): number {
     const direct = this.weapon.damageTuning?.default;
     if (direct !== undefined) return direct;
-    const t = this.tuning() as { damageMain?: { default?: number }; damage?: { default?: number } };
+    const t = this.tuning();
     // `damageMain`（火焰坦克）与 `damage`（圣灵/寡妇的 `{damage, tickPeriodMs}`）都要认
     return this.projectileDamage() ?? t.damageMain?.default ?? t.damage?.default ?? 0;
   }
@@ -85,20 +103,10 @@ export abstract class WeaponAttack {
   }
 
   /** `modifier_sequence.tuning`，能力序列武器的参数都在这 */
-  protected tuning(): Record<string, unknown> {
-    const ms = (this.weapon as { modifier_sequence?: { tuning?: Record<string, unknown> } })
-      .modifier_sequence;
-    return ms?.tuning ?? {};
+  protected tuning(): SequenceTuning {
+    return this.weapon.modifier_sequence?.tuning ?? {};
   }
 
-  /**
-   * **固定为 1** —— muzzleCount 不参与 DPS 计算。
-   * 实测：火焰坦克 muzzleStrategy=All + muzzleCount=2，但面板 DPS 是 380/0.5 = 760（×1），
-   * 乘 2 会得到 1520。早先 aseDps 里的 strategy===""All"" 就乘 muzzleCount` 那条是错的。
-   */
-  protected muzzleFactor(): number {
-    return 1;
-  }
 }
 
 /** A 族 · 持续射击：`damage × waveSize ÷ burstCooldown_s` */
@@ -107,7 +115,7 @@ export class ContinuousAttack extends WeaponAttack {
     return "持续射击";
   }
   private intervalMs(): number {
-    const t = this.tuning() as { burstCooldown?: number };
+    const t = this.tuning();
     if (t.burstCooldown) return t.burstCooldown;
     const spawn = (this.weapon as { modifier_spawn?: { tuning?: { burstTuning?: { shotCooldownMs?: number } } } }).modifier_spawn;
     return spawn?.tuning?.burstTuning?.shotCooldownMs ?? 0;
@@ -115,10 +123,10 @@ export class ContinuousAttack extends WeaponAttack {
   dps(): number {
     const ms = this.intervalMs();
     if (!ms) return 0;
-    return (this.damage() * this.waveSize * this.muzzleFactor() * 1000) / ms;
+    return (this.damage() * this.waveSize * 1000) / ms;
   }
   phases(): Phase[] {
-    const cu = (this.tuning() as { chargeUpDuration?: number }).chargeUpDuration ?? 0;
+    const cu = this.tuning().chargeUpDuration ?? 0;
     const out: Phase[] = [];
     if (cu > 0) out.push({ kind: "charge", label: "前摇", ms: cu * 1000 });
     out.push({
@@ -138,9 +146,9 @@ export class StagedAttack extends WeaponAttack {
     return "分段光束";
   }
   private stages(): Array<{ name: string; dmg: number; side?: number; count?: number; splash?: number; tick: number }> {
-    const t = this.tuning() as Record<string, { damageMain?: { default?: number }; damageSide?: { default?: number }; attackCount?: number; sideTargetCount?: number; tickPeriodMs?: number }>;
+    const t = this.tuning();
     const out = [];
-    for (const name of ["stage1", "stage2", "stage3", "stage4"]) {
+    for (const name of ["stage1", "stage2", "stage3", "stage4"] as const) {
       const s = t[name];
       if (!s) continue;
       out.push({
@@ -161,7 +169,7 @@ export class StagedAttack extends WeaponAttack {
     return (last.dmg * 1000) / last.tick;
   }
   phases(): Phase[] {
-    const t = this.tuning() as { initialChargeUpMs?: number };
+    const t = this.tuning();
     const out: Phase[] = [];
     const cu = t.initialChargeUpMs ?? 0;
     if (cu > 0) out.push({ kind: "charge", label: "前摇", ms: cu });
@@ -192,10 +200,7 @@ export class PourAttack extends WeaponAttack {
   }
   /** 目标小队数 → 该档参数；[1] 是单目标档 */
   private tiers(): Array<{ squads: number; count: number; per: number }> {
-    const t = this.tuning() as {
-      perTargetCount?: Record<string, { missileCount?: number; timePerMissile?: number }>;
-    };
-    const ptc = t.perTargetCount ?? {};
+    const ptc = this.tuning().perTargetCount ?? {};
     return Object.keys(ptc)
       .map(Number)
       .sort((a, b) => a - b)
@@ -206,14 +211,14 @@ export class PourAttack extends WeaponAttack {
       }));
   }
   dps(): number {
-    const t = this.tuning() as { burstCooldown?: number };
+    const t = this.tuning();
     const cyc = t.burstCooldown ?? 0;
     const one = this.tiers()[0];
     if (!cyc || !one) return 0;
     return (one.count * this.damage() * 1000) / cyc;
   }
   phases(): Phase[] {
-    const t = this.tuning() as { burstCooldown?: number };
+    const t = this.tuning();
     const cyc = t.burstCooldown ?? 0;
     const out: Phase[] = [];
     for (const tier of this.tiers()) {
@@ -249,7 +254,7 @@ export class DetonateAttack extends WeaponAttack {
   }
   private cycleMs(): number {
     if (this.cycleOverride) return this.cycleOverride;
-    const t = this.tuning() as { catalystBurst?: { cooldown?: number } };
+    const t = this.tuning();
     return t.catalystBurst?.cooldown ?? 0;
   }
   dps(): number {
@@ -258,7 +263,7 @@ export class DetonateAttack extends WeaponAttack {
     return (this.damage() * 1000) / cd;
   }
   phases(): Phase[] {
-    const t = this.tuning() as { catalystBurst?: { cooldown?: number }; gasBurst?: { cooldown?: number } };
+    const t = this.tuning();
     const out: Phase[] = [];
     if (t.gasBurst?.cooldown) out.push({ kind: "reload", label: "铺瓦斯", ms: t.gasBurst.cooldown });
     if (t.catalystBurst?.cooldown)
@@ -273,7 +278,7 @@ export class VolleyAttack extends WeaponAttack {
     return "齐射";
   }
   protected cycleMs(): number {
-    const t = this.tuning() as { durationBetweenVolley?: number };
+    const t = this.tuning();
     return t.durationBetweenVolley ?? 0;
   }
   dps(): number {
@@ -282,7 +287,7 @@ export class VolleyAttack extends WeaponAttack {
     return (this.damage() * this.waveSize * 1000) / cyc;
   }
   phases(): Phase[] {
-    const t = this.tuning() as { delayAfterShot?: number; initialChargeUpMs?: number };
+    const t = this.tuning();
     const out: Phase[] = [];
     if (t.initialChargeUpMs) out.push({ kind: "charge", label: "前摇", ms: t.initialChargeUpMs });
     out.push({
@@ -308,7 +313,7 @@ export class TickAttack extends WeaponAttack {
     return "持续光束";
   }
   private tickMs(): number {
-    return (this.tuning() as { tickPeriodMs?: number }).tickPeriodMs ?? 0;
+    return this.tuning().tickPeriodMs ?? 0;
   }
   dps(): number {
     const tick = this.tickMs();
@@ -316,7 +321,7 @@ export class TickAttack extends WeaponAttack {
     return (this.damage() * 1000) / tick;
   }
   phases(): Phase[] {
-    const t = this.tuning() as { initialChargeUpMs?: number };
+    const t = this.tuning();
     const out: Phase[] = [];
     if (t.initialChargeUpMs) out.push({ kind: "charge", label: "前摇", ms: t.initialChargeUpMs });
     out.push({ kind: "fire", label: "持续光束", ms: null, damage: this.damage(), intervalMs: this.tickMs() });
@@ -354,7 +359,7 @@ export class BasicAttack extends WeaponAttack {
     const cd = this.cooldownS();
     if (!cd) return 0;
     const num = (this.weapon.burstTiming as { numToBurst?: number })?.numToBurst ?? 1;
-    return (this.damage() * num * this.waveSize * this.muzzleFactor()) / cd;
+    return (this.damage() * num * this.waveSize) / cd;
   }
   phases(): Phase[] {
     const bt = this.weapon.burstTiming as { chargeUpDuration?: number; numToBurst?: number };

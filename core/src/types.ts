@@ -67,6 +67,58 @@ export interface DamageTuning {
   overrides?: DamageOverrideEntry[];
 }
 
+/**
+ * `modifier_sequence.tuning` / `modifier_spawn.tuning` 的参数表。
+ *
+ * 这些字段**不是统一的**，各实现只认其中几个（见 `docs/attack-mechanics.md` 第 9 节）：
+ *   · 持续型（弹弓/狼獾/火焰坦克/生化/深岩巨虫）→ `burstCooldown`、`chargeUpDuration`
+ *   · 倾泻型（沙暴）→ `burstCooldown` + `perTargetCount[目标数] = { missileCount, timePerMissile }`
+ *   · 分段型（万钧巨炮/蛇怪）→ `stage1/2/3 = { attackCount, damageMain, damageSide, sideTargetCount, tickPeriodMs }`
+ *   · 齐射型（科迪亚克/神像）→ `durationBetweenVolley`、`delayAfterShot`、`volleyChargeUpTime`
+ *   · 引爆型（催化炮艇）→ `catalystBurst` / `gasBurst`
+ *   · 投弹型（虎鲸轰炸机）→ 节奏在 `modifier_spawn.tuning.burstTuning.shotCooldownMs`
+ *
+ * ⚠️ 字段值是**毫秒**（与 `burstTiming.cooldown` 的**秒**不同），别混。
+ */
+export interface SequenceStageTuning {
+  attackCount?: number;
+  damageMain?: { default?: number; override?: string[] };
+  damageSide?: { default?: number; override?: string[] };
+  /** 溅射目标数（随阶段递增） */
+  sideTargetCount?: number;
+  tickPeriodMs?: number;
+  [k: string]: unknown;
+}
+
+export interface SequenceTuning {
+  /** 毫秒 */
+  burstCooldown?: number;
+  /** 毫秒 */
+  initialChargeUpMs?: number;
+  /** 秒（这个字段是全表唯一的秒值） */
+  chargeUpDuration?: number;
+  /** 毫秒 */
+  tickPeriodMs?: number;
+  durationBetweenVolley?: number;
+  delayAfterShot?: number;
+  volleyChargeUpTime?: number;
+  storeChargeTimeMs?: number;
+  /** 毒雾生成间隔（毫秒）—— **不计入 DPS** */
+  spawnGasTimeMs?: number;
+  perTargetCount?: Record<string, { missileCount?: number; timePerMissile?: number }>;
+  catalystBurst?: { cooldown?: number; initialChargeUpMs?: number };
+  gasBurst?: { cooldown?: number; initialChargeUpMs?: number };
+  burstTuning?: { shotCooldownMs?: number; initialChargeUpMs?: number };
+  damageMain?: { default?: number; override?: string[] };
+  damageSide?: { default?: number; override?: string[] };
+  damage?: { default?: number; override?: string[] };
+  stage1?: SequenceStageTuning;
+  stage2?: SequenceStageTuning;
+  stage3?: SequenceStageTuning;
+  stage4?: SequenceStageTuning;
+  [k: string]: unknown;
+}
+
 export interface BurstTiming {
   /** 每轮发数（83/83 个武器都有） */
   numToBurst?: number;
@@ -139,8 +191,12 @@ export interface WeaponTuning {
   /** 射程（格） */
   maxRangeInTiles?: number;
   /**
-   * 枪口数。**只有 `muzzleStrategy === "All"` 时才计入 DPS**，
-   * 所以多数单位写了它也不生效（见 docs/data-semantics.md 第 5 节）。
+   * 枪口数。
+   *
+   * ⚠️ **它从不参与 DPS 计算**，只决定「多发怎么分配」（`All` = 每口各一发，
+   * 否则轮转）。早先写的「只有 `muzzleStrategy === "All"` 时才计入」是**错的**：
+   * 火焰坦克 `All` + `muzzleCount=2`，实测面板 380/0.5 = 760（×1），乘 2 会得 1520。
+   * 见 docs/attack-mechanics.md 9.1。
    */
   muzzleCount?: number;
   /** 仅 15/83 个武器有，取值 `All` */
@@ -151,6 +207,24 @@ export interface WeaponTuning {
   targetSelector?: string;
   /** ⚠ 位掩码占位值，不可用 */
   descriptors?: Placeholder;
+
+  /**
+   * 开火序列 —— **22 把特殊武器靠它覆盖引擎的默认开火逻辑**（见 `docs/attack-mechanics.md` 第 9 节）。
+   *
+   * 三个子字段职责不同，别混：
+   *   · `name` —— **单位专属的参数键**，`tuning` 是这个键下的参数
+   *   · `behaviourName` —— **共享的实现名**，直接对应 `gameplay/abilities/<名>.lua`，
+   *     共 15 份实现（22 把武器共用）。由提取器从源码补入，**精确派发就靠它**
+   *   · `behaviour` —— Lua 里是函数，序列化后是空表，**没有用**
+   */
+  modifier_sequence?: {
+    name?: string;
+    behaviourName?: string;
+    tuning?: SequenceTuning;
+    [k: string]: unknown;
+  };
+  /** 弹体命中后生成的 modifier（爆炸类武器的伤害常写在这里） */
+  modifier_spawn?: { name?: string; tuning?: SequenceTuning; [k: string]: unknown };
 
   // ── 架设 / 收起 / 动画（与「每次攻击前摇」是不同概念）─────────
 
