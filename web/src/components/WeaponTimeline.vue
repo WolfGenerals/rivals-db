@@ -86,13 +86,17 @@ const baseSegs = computed<Seg[]>(() => {
     // 单发
     const iv = tm.interval_ms ?? tm.cycle_ms;
     /*
-     * ⚠️ **`hits === 1` 也要画出来。**
+     * **条子表达「阶段结构」，不是「占空比」。**
      *
-     * 单发武器的"打一下"是瞬时的（宽度理应 0），但宽度 0 就等于**什么都没画** ——
-     * 弹弓、狼獾这类绝大多数常规武器整条会变成空的（用户报"好多单位的条搞坏了"）。
-     * 给一个可见的最小宽度，真正的"打在哪一刻"靠金色刻度线表达。
+     * `hits === 1` 的武器（弹弓、狼獾…）只有**攻击一个阶段** —— 那 180ms 本身就是
+     * 攻击节奏，不存在"等待"阶段。按占空比画成「8% 蓝 + 92% 空」是**凭空造了一个
+     * 不存在的阶段**（用户指出："弹弓只有攻击一个行为，应该满条都是攻击"）。
+     * 速率由文字说（"每 0.18s 一发"），条子只管阶段。
+     *
+     * `hits > 1` 才是真有结构：一轮 `hits × interval` 打完，剩下的空档是**另一个阶段**
+     * （沙暴"打 12 发然后停 1.6s"），那时才该分段。
      */
-    const fireMs = tm.hits > 1 ? tm.hits * iv : Math.max(1, tm.cycle_ms * 0.04);
+    const fireMs = tm.hits > 1 ? tm.hits * iv : tm.cycle_ms;
     const ticks = Array.from(
       { length: Math.max(1, tm.hits) },
       (_, i) => start + charge + (tm.hits > 1 ? i * iv : 0),
@@ -105,7 +109,7 @@ const baseSegs = computed<Seg[]>(() => {
       title:
         tm.hits > 1
           ? `连打 ${tm.hits} 发（每 ${fmt(iv)} 一发，共 ${fmt(tm.hits * iv)}）`
-          : `开火（周期 ${fmt(tm.cycle_ms)}）`,
+          : `持续攻击（每 ${fmt(tm.cycle_ms)} 一发）`,
     });
     if (t.chargeInCycle && charge > 0) {
       // 周期**末尾**的前摇：画在末尾，段总长仍等于周期
