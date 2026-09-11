@@ -94,6 +94,15 @@ export interface Track {
   when?: { target?: DamageOverrideTag[] };
   /** 该轨开火前的蓄力 */
   charge_ms?: number;
+  /**
+   * **蓄力是否包含在周期之内** —— 决定展示时用「含」还是「→」。
+   *
+   *   `true`  —— 普通武器的 `burstTiming.chargeUpDuration`：前摇在 `cooldown` **之内**，
+   *              周期不因它变长。表述：`每 3.44s 一发（含前摇 0.60s）`
+   *   `false` —— 序列武器的 `initialChargeUpMs`：前摇在连打**之前**，时间**相加**。
+   *              表述：`每轮：前摇 3.00s → 连打 20 发（共 0.80s）`
+   */
+  chargeInCycle?: boolean;
 }
 
 export type Composition = "single" | "sequence" | "conditional" | "parallel";
@@ -367,12 +376,20 @@ export function deriveAttack(unit: EntityRecord): DerivedAttack {
     /*
      * **蓄力时间要进时序。**
      *
-     * 序列武器的 `initialChargeUpMs` 是每次开火前的固定蓄力（音波坦克 3000ms）。
-     * 之前只有**分段**那条分支设了 `charge_ms`，平铺序列这条漏了 —— 于是音波坦克的
-     * 时序只剩「每 40ms 一发，一轮 20 发」，**看起来是持续光束**，那 3 秒蓄力完全不可见
-     * （findings I164）。
+     * 两种字段**单位与语义都不同**：
+     *   · 序列武器 `tuning.initialChargeUpMs`（**毫秒**）—— 前摇在连打**之前**，时间相加
+     *   · 普通武器 `burstTiming.chargeUpDuration`（**秒**）—— 前摇在周期**之内**
+     *     （`docs/data-semantics.md` §5：`cooldown` 是开火周期，`chargeUpDuration` 是该周期
+     *     末尾的前摇，**两者不相加**）
+     *
+     * 早先只有**分段**那条分支设了 `charge_ms`，另两种都漏了 —— 于是音波坦克（findings I164）
+     * 和掠食者坦克的前摇完全不可见。`WeaponCard` 靠 `chargeInCycle` 区分这两种关系。
      */
-    const chargeMs = isSeq ? num(t["initialChargeUpMs"]) : undefined;
+    const chargeMs = isSeq
+      ? num(t["initialChargeUpMs"])
+      : num(w.burstTiming?.chargeUpDuration) !== undefined
+        ? num(w.burstTiming?.chargeUpDuration)! * 1000 // 秒 → 毫秒
+        : undefined;
     if (isSeq && hits > 1 && explicitPeriod) {
       cycle_ms = explicitPeriod;
       tracks.push({
@@ -385,12 +402,15 @@ export function deriveAttack(unit: EntityRecord): DerivedAttack {
           gap_ms: Math.max(0, explicitPeriod - hits * iv.interval),
         },
         charge_ms: chargeMs,
+        // 普通武器的前摇在周期**之内**（`cooldown` 不因它变长），序列武器的在**之前**
+        chargeInCycle: chargeMs !== undefined ? !isSeq : undefined,
       });
     } else {
       tracks.push({
         weapon: id,
         timing: { kind: "单发", hits, cycle_ms: cycle, interval_ms: isSeq ? iv.interval : undefined },
         charge_ms: chargeMs,
+        chargeInCycle: chargeMs !== undefined ? !isSeq : undefined,
       });
     }
   });

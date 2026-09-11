@@ -18,6 +18,7 @@ import type { Level } from "@rivals/core/levels";
 
 import DamageMatrix from "./DamageMatrix.vue";
 import StatIcon from "./StatIcon.vue";
+import WeaponTimeline from "./WeaponTimeline.vue";
 
 const props = defineProps<{
   weapon: Weapon;
@@ -27,8 +28,28 @@ const props = defineProps<{
   /** 是否是单位的主武器 —— 面板 DPS 显示的是它 */
   primary?: boolean;
   level: Level;
+  /** 小队人数与成员错开 —— 时序条要按它们画每条队员的轴 */
   waveSize?: number;
+  separationMs?: number;
 }>();
+
+/**
+ * 该不该画时序条 —— 只在**单一轨道且前摇在周期内**时画。
+ *
+ * `WeaponTimeline` 的模型就是「一个周期 + 周期**末尾**的前摇」（它自己的注释里写着：
+ * 前摇是周期末尾那一段，不是前置相加）—— 正好对应普通武器，而且**空间上就区分开了
+ * "前摇在不在周期内"**，不需要任何措辞。
+ *
+ * `sequence`（万钧巨炮那种多段接替）与「前摇在周期外」（音波坦克的 3 秒蓄力）
+ * 超出它的模型，仍走文字描述。
+ */
+const singleCycle = computed(() => {
+  const ts = props.tracks;
+  if (ts.length !== 1) return null;
+  const t = ts[0]!;
+  if (t.timing.kind !== "单发" || !t.chargeInCycle) return null;
+  return { cycle: t.timing.cycle_ms / 1000, chargeUp: (t.charge_ms ?? 0) / 1000 };
+});
 
 /**
  * 一把武器的 DPS —— **统一式子**：
@@ -78,13 +99,13 @@ const fmtSec = (ms: number) => `${(ms / 1000).toFixed(ms % 1000 === 0 ? 1 : 2)}s
 /**
  * 把一条时序**按顺序读成一句话**。
  *
- * 原先是一张「时序 / 时机 / 节奏」三列表格，三个格子之间要读者自己拼 —— 但时序本来就是
- * **一条时间线**，读成句子才自然：
+ * ⚠️ **必须说清前摇与周期的关系** —— 用户指出"光说前摇+冷却让人不知道前摇是否在冷却内"。
+ * 靠两个符号区分，不靠形容词：
  *
- * ```
- * 每 250ms 一发，一轮 12 发（3.00s）
- * 每 500ms 投一发，弹夹 6 发，打空后装填 12.00s
- * ```
+ *   · **`含`** —— 前摇**在周期之内**（普通武器的 `chargeUpDuration`，周期不因它变长）
+ *     `每 3.44s 一发（含前摇 0.60s）`
+ *   · **`→`** —— 前摇在连打**之前**，时间**相加**（序列武器的 `initialChargeUpMs`）
+ *     `前摇 3.00s → 连打 20 发（每 40ms 一发，共 0.80s）`
  */
 function describeTiming(tm: Track["timing"]): string {
   if (tm.kind === "一次") return `蓄力 ${fmtMs(tm.charge_ms)} 后一次性`;
@@ -97,7 +118,7 @@ function describeTiming(tm: Track["timing"]): string {
     return `每 ${fmtSec(tm.cycle_ms)} 一发`;
   }
   const span = tm.hits * (tm.interval_ms ?? tm.cycle_ms);
-  const head = `每 ${fmtMs(tm.interval_ms ?? tm.cycle_ms)} 一发，一轮 ${tm.hits} 发（${fmtSec(span)}）`;
+  const head = `连打 ${tm.hits} 发（每 ${fmtMs(tm.interval_ms ?? tm.cycle_ms)} 一发，共 ${fmtSec(span)}）`;
   return tm.gap_ms ? `${head}，然后停 ${fmtSec(tm.gap_ms)}（周期 ${fmtSec(tm.cycle_ms)}）` : head;
 }
 
@@ -105,6 +126,14 @@ function describeTiming(tm: Track["timing"]): string {
 function describeWhen(t: Track): string {
   const parts: string[] = [];
   if (t.charge_ms) parts.push(`前摇 ${fmtMs(t.charge_ms)}`);
+  /*
+   * 前摇用 `含` 还是 `→` 由 `chargeInCycle` 决定：
+   *   · 含 —— 在周期内，周期不因它变长（普通武器的 `chargeUpDuration`）
+   *   · →  —— 在连打之前，与连打时间相加（序列武器的 `initialChargeUpMs`）
+   */
+  if (t.charge_ms) {
+    parts.push(t.chargeInCycle ? `（含前摇 ${fmtMs(t.charge_ms)}）` : `前摇 ${fmtMs(t.charge_ms)} →`);
+  }
   if (t.after_ms !== undefined && t.after_ms > 0) parts.push(`${fmtSec(t.after_ms)} 起`);
   if (t.lasts_ms === null) parts.push("之后持续");
   else if (t.lasts_ms !== undefined) parts.push(`持续 ${fmtSec(t.lasts_ms)}`);
@@ -116,7 +145,11 @@ function describeWhen(t: Track): string {
 function describeTrack(t: Track): string {
   const when = describeWhen(t);
   const what = describeTiming(t.timing);
-  return when ? `${when}：${what}` : what;
+  if (!when) return what;
+  // 前摇在周期**内**时，`（含…）` 要贴在周期后面才读得通，所以放句尾
+  if (t.chargeInCycle) return `${what}${when}`;
+  // 前摇在连打**之前**：`前摇 3.00s → 连打 …`
+  return `${when} ${what}`;
 }
 
 /** 范围伤害机制 */
@@ -185,7 +218,19 @@ const minor = computed(() => {
       Lua 侧无读取说明是 C++ 在读，所以**数据保留，只是不摆在结论行**。
     -->
 
-    <!-- ② 时序 —— 按顺序读成句子，不用表格 -->
+    <!--
+      ② 时序条 —— **前摇画在周期条内还是条外，看一眼就知道**，不需要任何措辞。
+      这正是当初画它要解决的问题。每个队员一条（小队行为只画一条就看不见了）。
+    -->
+    <WeaponTimeline
+      v-if="singleCycle"
+      :cycle="singleCycle.cycle"
+      :charge-up="singleCycle.chargeUp"
+      :wave-size="waveSize ?? 1"
+      :separation-ms="separationMs ?? 0"
+    />
+
+    <!-- ② 时序 —— 图给形状、字给数字，互补而不互相替代 -->
     <ul v-if="tracks.length" class="timing">
       <li v-for="(t, i) in tracks" :key="i">
         <span class="step">{{ tracks.length > 1 ? i + 1 : "" }}</span>

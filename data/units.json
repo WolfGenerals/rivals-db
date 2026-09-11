@@ -586,6 +586,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 500,
               "timing": {
                 "cycle_ms": 850,
                 "hits": 1,
@@ -671,6 +673,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 1200,
               "timing": {
                 "cycle_ms": 3000,
                 "hits": 1,
@@ -793,6 +797,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": false,
               "charge_ms": 3000,
               "timing": {
                 "cycle_ms": 800,
@@ -883,6 +888,8 @@
           "member_offset_ms": 300,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 1500,
                 "hits": 1,
@@ -971,6 +978,8 @@
           "member_offset_ms": 880,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 2640,
                 "hits": 1,
@@ -1064,6 +1073,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 1600,
                 "hits": 1,
@@ -1231,6 +1242,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": false,
               "charge_ms": 500,
               "timing": {
                 "cycle_ms": 2500,
@@ -1331,6 +1343,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": false,
               "charge_ms": 0,
               "timing": {
                 "cycle_ms": 0,
@@ -1432,6 +1445,8 @@
           "member_offset_ms": 1250,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 250,
               "timing": {
                 "cycle_ms": 5000,
                 "hits": 1,
@@ -1526,6 +1541,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": false,
               "charge_ms": 500,
               "timing": {
                 "cycle_ms": 3000,
@@ -1616,6 +1632,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 4000,
                 "hits": 2,
@@ -1632,6 +1650,8 @@
               }
             },
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 4000,
                 "hits": 1,
@@ -1742,6 +1762,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 200,
                 "hits": 1,
@@ -1925,6 +1947,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 75,
               "timing": {
                 "cycle_ms": 1300,
                 "hits": 1,
@@ -2012,6 +2036,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 250,
               "timing": {
                 "cycle_ms": 1350,
                 "hits": 1,
@@ -2101,6 +2127,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 3000,
                 "hits": 0,
@@ -2401,6 +2429,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 750,
               "timing": {
                 "cycle_ms": 1800,
                 "hits": 1,
@@ -2486,6 +2516,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 1000,
               "timing": {
                 "cycle_ms": 3440,
                 "hits": 1,
@@ -2567,6 +2599,8 @@
           "member_offset_ms": 100,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 1000,
               "timing": {
                 "cycle_ms": 2700,
                 "hits": 1,
@@ -2661,6 +2695,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 400,
                 "hits": 1,
@@ -2752,6 +2788,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 3000,
                 "hits": 1,
@@ -2817,6 +2855,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 3000,
                 "hits": 1,
@@ -2886,6 +2926,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 250,
               "timing": {
                 "cycle_ms": 750,
                 "hits": 1,
@@ -2975,6 +3017,8 @@
           "member_offset_ms": 344,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 1720,
                 "hits": 1,
@@ -3065,6 +3109,8 @@
           "member_offset_ms": 300,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 1700,
                 "hits": 1,
@@ -3153,6 +3199,8 @@
           "member_offset_ms": 1250,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 250,
               "timing": {
                 "cycle_ms": 5000,
                 "hits": 1,
@@ -3245,6 +3293,8 @@
           "member_offset_ms": 800,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 100,
               "timing": {
                 "cycle_ms": 3200,
                 "hits": 1,
@@ -3341,6 +3391,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": false,
               "charge_ms": 0,
               "timing": {
                 "cycle_ms": 4000,
@@ -3438,6 +3489,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": false,
               "charge_ms": 0,
               "timing": {
                 "cycle_ms": 3000,
@@ -3539,6 +3591,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 700,
                 "hits": 1,
@@ -3631,6 +3685,8 @@
           "member_offset_ms": 666,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 500,
               "timing": {
                 "cycle_ms": 2000,
                 "hits": 1,
@@ -3724,6 +3780,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": false,
               "charge_ms": 0,
               "timing": {
                 "cycle_ms": 180,
@@ -3811,6 +3868,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 500,
                 "hits": 1,
@@ -3827,6 +3886,8 @@
               }
             },
             {
+              "chargeInCycle": true,
+              "charge_ms": 100,
               "timing": {
                 "cycle_ms": 2000,
                 "hits": 1,
@@ -3935,6 +3996,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 300,
               "timing": {
                 "cycle_ms": 5000,
                 "hits": 1,
@@ -4023,6 +4086,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 500,
                 "hits": 1,
@@ -4095,6 +4160,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 50,
                 "hits": 1,
@@ -4184,6 +4251,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": false,
               "charge_ms": 0,
               "timing": {
                 "cycle_ms": 190,
@@ -4275,6 +4343,8 @@
           "member_offset_ms": 1500,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 3000,
                 "hits": 1,
@@ -4370,6 +4440,8 @@
           "member_offset_ms": 1500,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 3000,
                 "hits": 1,
@@ -4467,6 +4539,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 250,
               "timing": {
                 "cycle_ms": 3900,
                 "hits": 1,
@@ -4559,6 +4633,8 @@
           "member_offset_ms": 250,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 4250,
                 "hits": 1,
@@ -4661,6 +4737,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": false,
               "charge_ms": 300,
               "timing": {
                 "cycle_ms": 250,
@@ -4671,6 +4748,7 @@
               "weapon": "laser0"
             },
             {
+              "chargeInCycle": false,
               "charge_ms": 0,
               "timing": {
                 "cycle_ms": 500,
@@ -4793,6 +4871,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 1300,
                 "hits": 1,
@@ -5171,6 +5251,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 250,
               "timing": {
                 "cycle_ms": 660,
                 "hits": 1,
@@ -5266,6 +5348,8 @@
               "weapon": "gasWeapon0"
             },
             {
+              "chargeInCycle": true,
+              "charge_ms": 80,
               "timing": {
                 "cycle_ms": 1600,
                 "hits": 1,
@@ -5378,6 +5462,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 500,
               "timing": {
                 "cycle_ms": 1720,
                 "hits": 1,
@@ -5461,6 +5547,7 @@
           "member_offset_ms": 300,
           "tracks": [
             {
+              "chargeInCycle": false,
               "charge_ms": 0,
               "timing": {
                 "cycle_ms": 500,
@@ -5556,6 +5643,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": false,
               "charge_ms": 0,
               "timing": {
                 "cycle_ms": 500,
@@ -5644,6 +5732,7 @@
           "member_offset_ms": 1000,
           "tracks": [
             {
+              "chargeInCycle": false,
               "charge_ms": 0,
               "timing": {
                 "cycle_ms": 400,
@@ -5781,6 +5870,8 @@
           "member_offset_ms": 375,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 300,
               "timing": {
                 "cycle_ms": 1500,
                 "hits": 2,
@@ -5867,6 +5958,8 @@
           "member_offset_ms": 1000,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 2000,
                 "hits": 1,
@@ -6052,6 +6145,8 @@
           "member_offset_ms": 750,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 850,
                 "hits": 1,
@@ -6236,6 +6331,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": false,
               "charge_ms": 0,
               "timing": {
                 "cycle_ms": 500,
@@ -6330,6 +6426,7 @@
           "member_offset_ms": 666,
           "tracks": [
             {
+              "chargeInCycle": false,
               "charge_ms": 0,
               "timing": {
                 "cycle_ms": 2000,
@@ -6507,6 +6604,8 @@
           "member_offset_ms": 400,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 1500,
                 "hits": 1,
@@ -6601,6 +6700,8 @@
           "member_offset_ms": 344,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 1720,
                 "hits": 1,
@@ -6691,6 +6792,8 @@
           "member_offset_ms": 1000,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 3000,
                 "hits": 1,
@@ -6782,6 +6885,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 3000,
               "timing": {
                 "cycle_ms": 4000,
                 "hits": 1,
@@ -6858,6 +6963,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 1750,
               "timing": {
                 "cycle_ms": 3250,
                 "hits": 1,
@@ -7030,6 +7137,7 @@
           "member_offset_ms": 2000,
           "tracks": [
             {
+              "chargeInCycle": false,
               "charge_ms": 100,
               "timing": {
                 "cycle_ms": 5000,
@@ -7128,6 +7236,8 @@
           "member_offset_ms": 1333,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 150,
               "timing": {
                 "cycle_ms": 4000,
                 "hits": 1,
@@ -7224,6 +7334,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 1000,
               "timing": {
                 "cycle_ms": 2400,
                 "hits": 1,
@@ -7398,6 +7510,8 @@
           "member_offset_ms": 1250,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 250,
               "timing": {
                 "cycle_ms": 5000,
                 "hits": 1,
@@ -7490,6 +7604,8 @@
           "member_offset_ms": 800,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 100,
               "timing": {
                 "cycle_ms": 3200,
                 "hits": 1,
@@ -7586,6 +7702,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 1000,
               "timing": {
                 "cycle_ms": 3000,
                 "hits": 1,
@@ -7594,6 +7712,8 @@
               "weapon": "cannon0"
             },
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 2800,
                 "hits": 1,
@@ -7699,6 +7819,8 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": true,
+              "charge_ms": 0,
               "timing": {
                 "cycle_ms": 400,
                 "hits": 1,
@@ -7866,6 +7988,7 @@
           "member_offset_ms": 0,
           "tracks": [
             {
+              "chargeInCycle": false,
               "charge_ms": 0,
               "timing": {
                 "cycle_ms": 500,
@@ -7876,6 +7999,8 @@
               "weapon": "flamethrower0"
             },
             {
+              "chargeInCycle": true,
+              "charge_ms": 930,
               "timing": {
                 "cycle_ms": 1500,
                 "hits": 6,
