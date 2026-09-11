@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 采集车：敞口矿斗（里面露出矿石）+ 驾驶室 + 三个轮子。
+       斗里露矿石是为了和普通「载具」区分开 -->
+  <path fill="currentColor" d="M6 18h26v22H6z"/>
+  <path fill="currentColor" d="M33 24h11l9 9v7H33z"/>
+  <g fill="none" stroke="currentColor" stroke-width="8">
+    <circle cx="14" cy="44" r="2"/>
+    <circle cx="27" cy="44" r="2"/>
+    <circle cx="45" cy="44" r="2"/>
+  </g>
+</svg>
