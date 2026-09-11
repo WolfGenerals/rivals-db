@@ -531,17 +531,27 @@ export class UnitAttack {
   readonly weapons: WeaponAttack[];
   readonly waveSize: number;
   readonly separationMs: number;
+  /**
+   * **主武器的下标** —— 面板显示的就是它。
+   *
+   * 引擎有 `GetPrimaryWeapon()` 这个概念，**14 个开火行为的 Timeline 都作用于它**
+   * （不是「声明该行为的那把武器」—— 行为是写在某把武器的表里，但作用域是单位的）。
+   * 见 findings I103。
+   */
+  readonly primaryIndex: number;
 
   private constructor(
     unit: EntityRecord,
     weapons: WeaponAttack[],
     waveSize: number,
     separationMs: number,
+    primaryIndex: number,
   ) {
     this.unit = unit;
     this.weapons = weapons;
     this.waveSize = waveSize;
     this.separationMs = separationMs;
+    this.primaryIndex = primaryIndex;
   }
 
   static of(unit: EntityRecord, waveSize?: number): UnitAttack {
@@ -563,10 +573,22 @@ export class UnitAttack {
     const attacks = ws.map((w) => weaponAttackOf(w, wave, patternFor(w)));
 
     /*
-     * D 族特例：`catalystBurst` 写在**铺场那把手**上，伤害却在**另一把手**上。
-     * 所以把所有武器里能找到的 `catalystBurst.cooldown` 取出来，交给伤害最高的那把引爆武器。
-     * 依据：催化剂直升机 —— `gasWeapon` 有 `catalystBurst{cooldown:1600}`，
-     * `catalystWeapon` 伤害 270，实测 270/1.6 = 168.75（见 findings I82）。
+     * **主武器** = 第一把「真武器」：有伤害，或带开火行为。
+     *
+     * 这样能跳过占位桩 —— 虎鲸轰炸机的武器[0] 是叫 `targetSelector` 的空壳
+     * （无伤害、`modifier_sequence` 只有个空 `ability_empty_weapon_sequence`），
+     * 真武器是武器[1] 的 `bomb`。
+     */
+    const hasBehaviour = (w: WeaponTuning) =>
+      Boolean((w.modifier_sequence as { behaviourName?: string } | undefined)?.behaviourName);
+    let primaryIndex = ws.findIndex((w, i) => attacks[i]!.damage() > 0 || hasBehaviour(w));
+    if (primaryIndex < 0) primaryIndex = 0;
+
+    /*
+     * D 族特例：催化炮艇的 `catalystBurst` 写在**铺场那把**（`gasWeapon`）上，
+     * 伤害却在**另一把**（`catalystWeapon`，270）上。它的 Timeline 是 15 个实现里
+     * **唯一「单位级」的**（同时驱动两把武器），所以面板显示的是**被引爆那把**的数值：
+     * `270 / 1.6 = 168.75`（findings I82/I103）。
      */
     const catalystCd = ws.reduce<number | undefined>((found, w) => {
       const cd = (w.modifier_sequence as { tuning?: { catalystBurst?: { cooldown?: number } } })
@@ -574,7 +596,6 @@ export class UnitAttack {
       return cd && (found === undefined || cd < found) ? cd : found;
     }, undefined);
     if (catalystCd) {
-      // 伤害最高、且自身不是"铺场"那把的武器，改判为引爆型
       let victim: WeaponAttack | undefined;
       for (const a of attacks) {
         if (a instanceof DetonateAttack) continue;
@@ -584,23 +605,31 @@ export class UnitAttack {
       if (victim) {
         const idx = attacks.indexOf(victim);
         attacks[idx] = new DetonateAttack(victim.weapon, wave).withCycle(catalystCd);
+        primaryIndex = idx; // 单位级行为 → 面板数值由被引爆那把决定
       }
     }
 
-    return new UnitAttack(unit, attacks, wave, sep);
+    return new UnitAttack(unit, attacks, wave, sep, primaryIndex);
   }
 
-  /** 招牌：**取最大，不求和**（findings I75） */
+  /** 主武器（面板显示的那把） */
+  primary(): WeaponAttack | undefined {
+    return this.weapons[this.primaryIndex];
+  }
+
+  /**
+   * 单位级 DPS = **主武器的 DPS**。
+   *
+   * ⚠️ **不是「取最大」**（早先是 max，错在寡妇制造者上：面板 280 是喷火器，
+   * 而火箭是 320，取最大会得 320）。见 findings I103。
+   */
   dps(): number {
-    return this.weapons.reduce((m, w) => Math.max(m, w.dps()), 0);
+    return this.primary()?.dps() ?? 0;
   }
 
-  /** DPS 来自哪把武器（便于核对） */
-  best(): WeaponAttack | undefined {
-    return this.weapons.reduce<WeaponAttack | undefined>(
-      (best, w) => (best === undefined || w.dps() > best.dps() ? w : best),
-      undefined,
-    );
+  /** 各武器各自的值，供页面逐把显示 */
+  perWeapon(): Array<{ label: string; dps: number; primary: boolean }> {
+    return this.weapons.map((w, i) => ({ label: w.label, dps: w.dps(), primary: i === this.primaryIndex }));
   }
 
   labels(): string[] {

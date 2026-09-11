@@ -47,11 +47,11 @@ let pass = 0;
 const fails: string[] = [];
 
 /*
- * 判定标准：面板值应当等于**某一把武器**的 DPS，而不是"取最大"。
+ * 判定标准：**严格相等** —— `UnitAttack.dps()` 必须等于面板值 ÷ F(major,minor)。
  *
- * 依据：寡妇制造者面板 280 = 喷火器（火箭是 320），圣灵面板 640 = laser（fire 是 280），
- * 两个方向都有 —— 说明游戏面板**只显示某一把武器**，我们没必要求出是哪一把，
- * 只要**每把武器各自显示自己的 DPS** 即可（见 findings I82）。
+ * 早先这里是宽松的「面板值命中任意一把武器的 DPS 即可」，结果掩盖了一个真 bug：
+ * 寡妇制造者面板是 280（喷火器），而当时的 `dps()` 取 max 得 320。
+ * 改成严格相等后立刻暴露（见 findings I103）。
  */
 console.log(
   "单位".padEnd(22) + "等级".padEnd(7) + "面板".padStart(9) + "反推基准".padStart(11) + "  各武器 DPS（基准）",
@@ -61,14 +61,14 @@ for (const o of OBS) {
   const atk = UnitAttack.of(rec);
   const expected = o.panel / levelFactor(o.major, o.minor);
   const all = atk.weapons.map((w) => ({ label: w.label, dps: w.dps() }));
-  const hit = all.find((w) => w.dps > 0 && Math.abs(w.dps - expected) / expected < 0.005);
+  // 严格：单位级 DPS 必须**等于**面板值（不再容忍「命中任意一把武器」）
+  const got = atk.dps();
+  const hit = Math.abs(got - expected) / expected < 0.005 ? { dps: got } : undefined;
   const ok = hit !== undefined;
   if (ok) pass++;
   else fails.push(o.id);
   const name = (rec.name_zh ?? o.id).slice(0, 10);
-  const detail = all
-    .map((w) => `${w.label} ${w.dps.toFixed(0)}${w === hit ? "←" : ""}`)
-    .join(" / ");
+  const detail = `单位 ${got.toFixed(1)} ← ` + all.map((w) => `${w.label} ${w.dps.toFixed(0)}`).join(" / ");
   console.log(
     name.padEnd(22) +
       `${o.major}-${o.minor}`.padEnd(7) +
@@ -79,5 +79,5 @@ for (const o of OBS) {
   );
 }
 
-console.log(`\n通过 ${pass}/${OBS.length}（面板值命中某一把武器的 DPS 即算通过）`);
+console.log(`\n通过 ${pass}/${OBS.length}（断言 UnitAttack.dps() ≈ 面板值 ÷ F(major,minor)，严格相等）`);
 if (fails.length) console.log("未通过：" + fails.join(", "));

@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 /**
  * 单位数据面板 —— 可复用的「一组数据一张卡」。
  *
@@ -21,7 +21,8 @@
 import { computed, ref } from "vue";
 
 import { level as makeLevel, startingMajorOfRarity, type Level } from "@rivals/core/levels";
-import { modifierIntroMs, modifierOutroMs, squadHealth, unitBaseDps, type EntityRecord } from "@rivals/core/types";
+import { UnitAttack } from "@rivals/core/attack";
+import { modifierIntroMs, modifierOutroMs, squadHealth, type EntityRecord } from "@rivals/core/types";
 
 import StatIcon from "./StatIcon.vue";
 import TypeIcon from "./TypeIcon.vue";
@@ -95,8 +96,15 @@ const totalHealth = computed(() => {
   const total = squadHealth(props.unit);
   return total === undefined ? undefined : lv.value.hp(total);
 });
+const unitAttack = computed(() => UnitAttack.of(props.unit));
+/**
+ * 单位 DPS = **主武器的 DPS**（不是各武器取最大），与游戏内面板一致。
+ *
+ * 见 `findings.md` I103：面板显示的是主武器。寡妇制造者面板是 280（喷火器）
+ * 而火箭是 320 —— 取最大会算错。
+ */
 const dps = computed(() => {
-  const base = unitBaseDps(props.unit);
+  const base = unitAttack.value.dps();
   return base > 0 ? lv.value.dps(base) : undefined;
 });
 
