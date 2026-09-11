@@ -130,6 +130,20 @@ function pick(side: "left" | "right", id: string) {
   .cols {
     grid-template-columns: 1fr;
   }
+  /*
+   * ⚠️ **堆成一列时必须释放固定高度** ——
+   * 两栏上下叠起来必然超过一屏，再锁 `calc(100dvh - 121px)` 会把两栏各压成半屏、
+   * 底部那栏被裁掉（用户报的「不适配窄页面」）。
+   * 改为让页面正常滚动，每栏的墙各自限高。
+   */
+  .compare {
+    height: auto;
+    min-height: 0;
+  }
+  .wall {
+    flex: none;
+    max-height: 55vh;
+  }
 }
 /*
  * 卡片墙**限高 + 内部滚动**。不限高的话两栏各 86 张卡 → 页面极高，
