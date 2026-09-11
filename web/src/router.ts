@@ -37,8 +37,19 @@ const routes: RouteRecordRaw[] = [
 export const router = createRouter({
   history: createWebHashHistory(),
   routes,
-  // 切换页面回到顶部；否则从长列表点进详情会停在半空
-  scrollBehavior: () => ({ top: 0 }),
+  /**
+   * 滚动行为。
+   *
+   * ⚠️ **不能无条件 `{ top: 0 }`** —— 那样"从列表进详情再返回"会丢掉列表位置，
+   * 长列表里翻到一半点进去、返回就得重新找（用户报的 bug）。
+   *
+   * `savedPosition` 由 vue-router 在**前进/后退**时给出，有就恢复。
+   * 只有**新导航**（点链接去另一个页面）才回顶。
+   */
+  scrollBehavior(_to, _from, savedPosition) {
+    if (savedPosition) return savedPosition;
+    return { top: 0 };
+  },
 });
 
 /** 按 id 生成详情页链接（**只有单位** —— 指挥官已无路由）。 */

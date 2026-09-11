@@ -10,7 +10,7 @@
  * 为什么不自己做一套选择界面：卡片墙已经有搜索、阵营/稀有度筛选、类型分组、排序 ——
  * 再造一套只会更差。
  */
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import Arsenal from "./Arsenal.vue";
@@ -21,22 +21,40 @@ const route = useRoute();
 const router = useRouter();
 const data = useData();
 
-const left = computed(() => String(route.params.left ?? ""));
-const right = computed(() => String(route.params.right ?? ""));
+/**
+ * 第一阶段的选择**先攒在本地，两个都选了才导航**。
+ *
+ * ⚠️ 每选一个就 `router.push` 的话，每次都会触发导航 → 页面滚回顶部，
+ * 在长卡片墙里点完第一个就得重新往下翻（用户报的 bug）。
+ */
+const localLeft = ref("");
+const localRight = ref("");
+
+const routeLeft = computed(() => String(route.params.left ?? ""));
+const routeRight = computed(() => String(route.params.right ?? ""))
+const left = computed(() => routeLeft.value || localLeft.value);
+const right = computed(() => routeRight.value || localRight.value);
 const picking = computed(() => !left.value || !right.value);
 
 /** 已选的（用于在卡片墙上画高亮） */
 const picked = computed(() => [left.value, right.value].filter(Boolean));
 
 function onPick(id: string) {
-  // 左边还没选 → 填左边；否则填右边。选满两个即进入对比。
-  if (!left.value) router.push(`/compare/${encodeURIComponent(id)}`);
-  else if (!right.value && id !== left.value) {
+  if (!left.value) {
+    localLeft.value = id;
+    return;
+  }
+  if (!right.value && id !== left.value) {
+    localRight.value = id;
     router.push(`/compare/${encodeURIComponent(left.value)}/${encodeURIComponent(id)}`);
   }
 }
 
-const reset = () => router.push("/compare");
+const reset = () => {
+  localLeft.value = "";
+  localRight.value = "";
+  router.push("/compare");
+};
 const swap = () =>
   router.push(`/compare/${encodeURIComponent(right.value)}/${encodeURIComponent(left.value)}`);
 const byId = computed(() => new Map((data.value?.dataset.units ?? []).map((e) => [e.id, e])));
