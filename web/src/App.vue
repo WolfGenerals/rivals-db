@@ -27,8 +27,12 @@ onMounted(async () => {
 provide(DATA_KEY, data);
 
 const unitCount = computed(() => data.value?.dataset.unit_count ?? 0);
-const commanderCount = computed(() => data.value?.dataset?.commander_count ?? 0);
-const activeNav = computed(() => (String(route.name ?? "").startsWith("commander") ? "commanders" : "units"));
+const activeNav = computed(() => {
+  const n = String(route.name ?? "");
+  if (n === "compare") return "compare";
+  if (n === "table") return "table";
+  return "units";
+});
 </script>
 
 <template>
@@ -39,9 +43,8 @@ const activeNav = computed(() => (String(route.name ?? "").startsWith("commander
       <RouterLink to="/" :class="{ active: activeNav === 'units' }">
         单位<span v-if="unitCount" class="count">{{ unitCount }}</span>
       </RouterLink>
-      <RouterLink v-if="commanderCount" to="/commander" :class="{ active: activeNav === 'commanders' }">
-        指挥官<span class="count">{{ commanderCount }}</span>
-      </RouterLink>
+      <RouterLink to="/table" :class="{ active: activeNav === 'table' }">表格</RouterLink>
+      <RouterLink to="/compare" :class="{ active: activeNav === 'compare' }">对比</RouterLink>
     </nav>
 
     <LevelControls />
