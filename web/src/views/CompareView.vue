@@ -84,6 +84,17 @@ function pick(side: "left" | "right", id: string) {
 <style scoped>
 .compare {
   padding-top: 12px;
+  /*
+   * **占满视口剩余高度**，让两栏的卡片墙一直撑到底、由墙内部滚动。
+   *
+   * 数值来源：顶栏 `padding: 12px` ×2 + 内容 ≈ 49px，`main` 底部内边距 60px，
+   * 再加本组件 `padding-top: 12px`。`dvh` 而非 `vh` —— 移动端地址栏收起时 `vh` 会偏大。
+   * `min-height` 兜底：窗口太矮时不要让墙塌成一条。
+   */
+  height: calc(100dvh - 121px);
+  min-height: 460px;
+  display: flex;
+  flex-direction: column;
 }
 .bar {
   display: flex;
@@ -109,7 +120,10 @@ function pick(side: "left" | "right", id: string) {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
-  align-items: start;
+  /* 吃掉 .compare 里标题行剩下的高度；`min-height:0` 让子项的 overflow 生效 */
+  flex: 1;
+  min-height: 0;
+  align-items: stretch;
 }
 /* 窄屏（<1200px）堆成一列 */
 @media (max-width: 1200px) {
@@ -122,7 +136,9 @@ function pick(side: "left" | "right", id: string) {
  * 选完之后一栏塌成小详情，滚动位置就错位了（用户报的 bug）。
  */
 .wall {
-  max-height: 62vh;
+  /* 撑满该栏剩余高度（不再用 max-height:62vh —— 那会留出一截空白） */
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -130,6 +146,10 @@ function pick(side: "left" | "right", id: string) {
 /* ⚠️ min-width:0 不能省 —— grid 子项默认不肯收缩，长内容会撑破分栏 */
 .col {
   min-width: 0;
+  /* 纵向 flex：头部固定、墙撑满 */
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   border: 1px solid var(--line, #2b3038);
   border-radius: 8px;
   padding: 8px;
