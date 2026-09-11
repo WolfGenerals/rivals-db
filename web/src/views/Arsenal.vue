@@ -53,7 +53,7 @@ const TYPE_LABEL: Record<string, string> = {
   Vehicle: "载具",
   Aircraft: "空军",
   Structure: "建筑",
-  Harvester: "运矿车",
+  Harvester: "采集车",
 };
 
 const RARITY_ORDER: Record<string, number> = { Common: 1, Rare: 2, Epic: 3 };
@@ -118,7 +118,7 @@ const total = computed(() =>
 /**
  * 分组后的分节。`group === "none"` 时返回 `null`（走平铺那条路）。
  *
- * 组的顺序按 `TYPE_ORDER` 固定（步兵→载具→空军→建筑→运矿车），不按数量排 ——
+ * 组的顺序按 `TYPE_ORDER` 固定（步兵→载具→空军→建筑→采集车），不按数量排 ——
  * 顺序固定，翻页/筛选时才不会跳来跳去。**组内用当前排序**（默认按造价）。
  * 未知类型（如总部那种 `unit_type` 缺失的）排最后。
  */

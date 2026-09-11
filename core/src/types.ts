@@ -561,7 +561,7 @@ export const DESCRIPTOR_ALL = 1024;
  * `override` 的含义是「优先匹配」，不是排他过滤器 —— 目标身上可以挂多个
  * `override_*` 标签，按这条链从具体到宽泛依次找，都没有才吃 `default`。
  *
- * 运矿车的 `tags` 是 `[Vehicle, override_harvester, override_vehicle]`，
+ * 采集车的 `tags` 是 `[Vehicle, override_harvester, override_vehicle]`，
  * 同时写两个 override 正是在声明 `Harvester → Vehicle → default` 这条链。
  * 于是「反步兵打不动矿车」得到解释：步枪兵只有 `Vehicle: 15`，
  * 打矿车回退到 15（相对对步兵的 38 确实打不动），不是零。
@@ -578,7 +578,7 @@ export const DAMAGE_CASCADE: Record<DamageOverrideTag, DamageOverrideTag[]> = {
  * 这把武器**能不能打到**这类目标。
  *
  *   建筑 Structure         → 任何武器都能打（独立轴）
- *   步兵 / 载具 / 运矿车    → 需 `Ground` 位；矿车是载具的一种
+ *   步兵 / 载具 / 采集车    → 需 `Ground` 位；矿车是载具的一种
  *   空中 Aircraft          → 需 `TransportTypeMask_Flying` 位
  *
  * 判据是武器自己的 `descriptors`，**不是** `goodAgainstTags`（那是 AI 索敌
@@ -609,7 +609,7 @@ export function targetingUnknown(weapon: WeaponTuning): boolean {
  * 这把武器**能不能打到**这类目标。
  *
  *   建筑 Structure         → 任何武器都能打（独立轴）
- *   步兵 / 载具 / 运矿车    → 需 `Ground` 位；矿车是载具的一种
+ *   步兵 / 载具 / 采集车    → 需 `Ground` 位；矿车是载具的一种
  *   空中 Aircraft          → 需 `TransportTypeMask_Flying` 位
  *   地空通吃               → `NotHiddenTypeMask` / `AllMask`（**防空单位都靠这个**）
  *

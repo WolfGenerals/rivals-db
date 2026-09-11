@@ -43,7 +43,7 @@ const hasAny = computed(() => intent.value.size > 0 || cells.value.some((c) => c
           data-float
           :data-tip="
             c.reachable
-              ? `${TARGET_LABELS[c.type]}：${c.damage}（该武器正常的 ${(c.ratio * 100).toFixed(0)}%）${c.from ? ` ← ${c.from}` : ''}`
+              ? `${TARGET_LABELS[c.type]}：${c.damage}（${(c.ratio * 100).toFixed(0)}%）${c.from ? ` ← ${c.from}` : ''}`
               : `${TARGET_LABELS[c.type]}：打不到`
           "
         >

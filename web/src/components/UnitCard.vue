@@ -74,8 +74,8 @@ const has = (f: CardField) => props.fields.includes(f);
 
 /**
  * 兵种：优先 `override_harvester`。
- * 运矿车的 `tags` 是 `[Vehicle, override_harvester, override_vehicle]`，
- * 直接用 `baseUnitType()` 会得到 Vehicle，但游戏里运矿车有单独的图标。
+ * 采集车的 `tags` 是 `[Vehicle, override_harvester, override_vehicle]`，
+ * 直接用 `baseUnitType()` 会得到 Vehicle，但游戏里采集车有单独的图标。
  */
 const unitType = computed(() => {
   const tags = props.unit.derived.stats.tags ?? [];

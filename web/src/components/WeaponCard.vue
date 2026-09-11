@@ -180,8 +180,8 @@ const minor = computed(() => {
    * 游戏面板的攻击距离用的是 `squadTuning.maxAttackRangeInTiles`（单位总览行已显示）。
    * 见 findings I126/I127/I129。
    */
-  if (props.weapon.homing !== undefined) out.push(["弹道", props.weapon.homing ? "追踪（难躲）" : "不追踪（可走位躲）"]);
-  if (props.weapon.targeting_unknown) out.push(["索敌", "未知（数据缺失，不猜）"]);
+  if (props.weapon.homing !== undefined) out.push(["弹道", props.weapon.homing ? "追踪" : "不追踪"]);
+  if (props.weapon.targeting_unknown) out.push(["索敌", "未知"]);
   return out;
 });
 </script>

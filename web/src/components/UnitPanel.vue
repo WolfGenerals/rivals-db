@@ -84,11 +84,11 @@ const unitType = computed(() => {
 const STAT_TOKENS: Record<string, (r: DatasetEntry) => string | undefined> = {
   VisionRange: (r) => {
     const v = r.derived.stats.vision_tiles;
-    return v === undefined ? undefined : `${v} 格`;
+    return v === undefined ? undefined : `${v}`;
   },
   ExtendedAttackRange: (r) => {
     const v = r.derived.stats.attack_range_tiles;
-    return v === undefined ? undefined : `${v} 格`;
+    return v === undefined ? undefined : `${v}`;
   },
   /** 壁虱坦克的壕沟：`modifier_intro.tuning.damageReductionPercent`×100 = 70 */
   BuffEffect: (r) => {

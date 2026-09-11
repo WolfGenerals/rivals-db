@@ -46,7 +46,7 @@ const SHORT: Record<T, string> = {
   Vehicle: "载具",
   Aircraft: "空军",
   Structure: "建筑",
-  Harvester: "运矿车",
+  Harvester: "采集车",
 };
 
 const TYPE_ORDER = ["Infantry", "Vehicle", "Aircraft", "Structure", "Harvester"];

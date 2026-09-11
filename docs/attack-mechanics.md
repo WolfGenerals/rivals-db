@@ -226,7 +226,7 @@ initialChargeUpMs = 1750, shotCooldownMs = 500
 
 ```
 步兵 → Infantry        载具 → Vehicle       建筑 → Structure
-空中 → Aircraft        运矿车 → Harvester → Vehicle → default
+空中 → Aircraft        采集车 → Harvester → Vehicle → default
 ```
 
 ---

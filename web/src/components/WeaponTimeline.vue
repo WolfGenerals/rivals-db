@@ -110,11 +110,10 @@ const baseSegs = computed<Seg[]>(() => {
       title:
         tm.hits > 1
           ? `连打 ${tm.hits} 发（每 ${fmt(iv)} 一发，共 ${fmt(tm.hits * iv)}）`
-          : `持续攻击（每 ${fmt(tm.cycle_ms)} 一发）`,
+          : `攻击（每 ${fmt(tm.cycle_ms)} 一发）`,
     });
     if (t.chargeInCycle && charge > 0) {
-      // 周期**末尾**的前摇：画在末尾，段总长仍等于周期
-      out.push({ kind: "charge", at: start, ms: charge, title: `周期末尾的前摇 ${fmt(charge)}` });
+      out.push({ kind: "charge", at: start, ms: charge, title: `前摇 ${fmt(charge)}` });
     } else if (!t.chargeInCycle && charge > 0) {
       out.push({ kind: "charge", at: start, ms: charge, title: `前摇 ${fmt(charge)}（在连打之前）` });
     }

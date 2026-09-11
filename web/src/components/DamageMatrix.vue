@@ -60,7 +60,7 @@ const rows = computed<Row[]>(() => {
       title: d.unknown
         ? `${TARGET_LABELS[type]}：索敌方式未知（该武器 descriptors 为空，不走常规索敌）`
         : d.reachable
-          ? `${TARGET_LABELS[type]}：${damage}（该武器正常的 ${percent}%）`
+          ? `${TARGET_LABELS[type]}：${damage}（${percent}%）`
           : `${TARGET_LABELS[type]}：打不到`,
     };
   });

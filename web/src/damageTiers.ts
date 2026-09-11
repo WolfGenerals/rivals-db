@@ -120,7 +120,7 @@ export const TARGET_LABELS: Record<DamageOverrideTag, string> = {
   Vehicle: "载具",
   Aircraft: "空军",
   Structure: "建筑",
-  Harvester: "运矿车",
+  Harvester: "采集车",
 };
 
 export const TARGET_TYPES: DamageOverrideTag[] = [
