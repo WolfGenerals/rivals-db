@@ -67,6 +67,29 @@ function withCapped(lv: Level, capped: boolean): LevelDisplay {
 export const tableSortKey: Ref<string> = ref("cost");
 export const tableSortDir: Ref<"asc" | "desc"> = ref("asc");
 
+/** 表格「对目标 DPS / 伤害补正」的切换 */
+export const tableCellMode: Ref<"dps" | "ratio"> = ref("dps");
+
+/*
+ * 列表页的筛选与排序 —— 同样放模块级。
+ *
+ * 这些是**界面状态**，不是某个组件实例的私有数据：换路由回来应当保持原样。
+ * 放组件内的话，点进单位详情再返回，筛选就被清空了。
+ */
+export const listQuery: Ref<string> = ref("");
+export const listFaction: Ref<string> = ref("");
+export const listRarity: Ref<string> = ref("");
+export const listType: Ref<string> = ref("");
+export const listHidden: Ref<"hide" | "only" | "all"> = ref("hide");
+export const listGroup: Ref<"none" | "type" | "faction"> = ref("type");
+export const listSort: Ref<"cost" | "name" | "hp" | "dps"> = ref("cost");
+
+/** 对比页已选的两个单位与"正在选"状态 —— 同样不该因路由切换而清空 */
+export const compareLeft: Ref<string> = ref("");
+export const compareRight: Ref<string> = ref("");
+export const comparePickingLeft: Ref<boolean> = ref(true);
+export const comparePickingRight: Ref<boolean> = ref(true);
+
 /**
  * 某条目在当前设置下应显示的等级。
  *

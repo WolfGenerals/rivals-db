@@ -25,11 +25,18 @@ import { useData } from "../useData.ts";
 const props = defineProps<{ commandersOnly?: boolean }>();
 const data = useData();
 
-const q = ref("");
-const faction = ref("");
-const rarity = ref("");
-const type = ref("");
-const hiddenMode = ref<"hide" | "only" | "all">("hide");
+/*
+ * 筛选状态放 `state.ts` 的**模块级单例**（这里只取别名，模板不用改）——
+ * 组件内的 ref 会在换路由时被重置，点进单位再返回筛选就没了。
+ */
+import {
+  listFaction as faction,
+  listHidden as hiddenMode,
+  listQuery as q,
+  listRarity as rarity,
+  listType as type,
+  tableCellMode as cellMode,
+} from "../state.ts";
 
 const TYPES = ["Infantry", "Vehicle", "Aircraft", "Structure", "Harvester"] as const;
 type T = (typeof TYPES)[number];
@@ -45,8 +52,7 @@ const TYPE_ORDER = ["Infantry", "Vehicle", "Aircraft", "Structure", "Harvester"]
 const TYPE_LABEL: Record<string, string> = SHORT;
 const RARITIES = ["Common", "Rare", "Epic"];
 
-/** 目标列显示什么：`dps` 实战输出 / `ratio` 补正倍率 */
-const cellMode = ref<"dps" | "ratio">("dps");
+/** 目标列显示什么：`dps` 实战输出 / `ratio` 补正倍率 → 见 `state.ts` 的 `tableCellMode` */
 
 /**
  * 排序。点列名切换：**首次点按该列的合理方向**（数值列默认降序、名称默认升序），

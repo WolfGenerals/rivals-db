@@ -32,17 +32,19 @@ const data = useData();
 const records = computed<DatasetEntry[]>(() => data.value?.all ?? []);
 const loading = computed(() => !data.value);
 
-const q = ref("");
-const faction = ref("");
-const rarity = ref("");
-const sort = ref<"cost" | "name" | "hp" | "dps">("cost");
-/** 分组维度。默认**按类型** —— 一屏里同类单位挨在一起才好比。 */
-const group = ref<"none" | "type" | "faction">("type");
-
-/** 类型过滤。取值来自 `derived.stats.unit_type` */
-const type = ref("");
-/** 隐藏单位：`hidden` = 后缀为 ST / CR / mayhem 的变体。**默认不显示** */
-const hiddenMode = ref<"hide" | "only" | "all">("hide");
+/*
+ * 筛选/排序/分组放 `state.ts` 的**模块级单例**（这里取别名，模板不用改）——
+ * 组件内的 ref 会在换路由时被重置，点进单位再返回筛选就没了。
+ */
+import {
+  listFaction as faction,
+  listGroup as group,
+  listHidden as hiddenMode,
+  listQuery as q,
+  listRarity as rarity,
+  listSort as sort,
+  listType as type,
+} from "../state.ts";
 
 /** 类型分组的显示顺序与中文名。`derived.stats.unit_type` 的取值就是这些 */
 const TYPE_ORDER = ["Infantry", "Vehicle", "Aircraft", "Structure", "Harvester"];

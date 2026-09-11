@@ -14,12 +14,19 @@ import { computed, ref } from "vue";
 import Arsenal from "./Arsenal.vue";
 import UnitDetail from "./UnitDetail.vue";
 
-const left = ref("");
-const right = ref("");
-
-/** 每栏独立的「正在选」状态 —— 选完切详情，点「换」切回墙 */
-const pickingLeft = ref(true);
-const pickingRight = ref(true);
+/*
+ * ⚠️ 选择状态放 `state.ts` 的**模块级单例** —— 组件内的 ref 换路由就没了
+ * （对比页 → 详情页 → 返回，已选的两个单位会被清空）。
+ *
+ * 选择只存本地、**不写进路由**：每次点卡片都 `router.push` 会触发导航回顶，
+ * 在长卡片墙里点完一张就得重新往下翻（用户报过这个 bug）。
+ */
+import {
+  compareLeft as left,
+  comparePickingLeft as pickingLeft,
+  comparePickingRight as pickingRight,
+  compareRight as right,
+} from "../state.ts";
 
 const picked = computed(() => [left.value, right.value].filter(Boolean));
 
