@@ -19,6 +19,7 @@ import { startingMajorOfRarity, type Level } from "@rivals/core/levels";
 
 import { detailPath } from "../router.ts";
 import { displayLevel } from "../state.ts";
+// 排序状态放 `state.ts` 的模块级单例 —— 组件内的 ref 会在路由切换时被重置
 import { useData } from "../useData.ts";
 
 const props = defineProps<{ commandersOnly?: boolean }>();
@@ -51,8 +52,7 @@ const cellMode = ref<"dps" | "ratio">("dps");
  * 排序。点列名切换：**首次点按该列的合理方向**（数值列默认降序、名称默认升序），
  * 再点同一列则反向。这是表格的通行约定 —— 点"DPS"想看的是最高的那几个。
  */
-const sortKey = ref("cost");
-const sortDir = ref<"asc" | "desc">("asc");
+import { tableSortDir as sortDir, tableSortKey as sortKey } from "../state.ts";
 
 /** 数值列首次点击用降序（最大值更有参考价值）；文本列用升序 */
 const DESC_FIRST = new Set(["cost", "totalHP", "dps", "range", ...TYPES]);

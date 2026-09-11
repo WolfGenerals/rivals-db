@@ -58,6 +58,16 @@ function withCapped(lv: Level, capped: boolean): LevelDisplay {
 }
 
 /**
+ * 表格的排序状态。
+ *
+ * ⚠️ **必须是模块级单例，不能放在 `UnitList` 组件内** —— 点单位进详情页再返回会
+ * 重新挂载列表组件，组件内的 `ref` 会被重置，排序就丢了（用户报的 bug）。
+ * 放这里之后会话内切换路由/页面都不会丢。
+ */
+export const tableSortKey: Ref<string> = ref("cost");
+export const tableSortDir: Ref<"asc" | "desc"> = ref("asc");
+
+/**
  * 某条目在当前设置下应显示的等级。
  *
  * - **绝对**（默认）：滑块就是游戏内的 `major-minor`，所有条目同等级对比。
