@@ -237,4 +237,41 @@ const onToggle = (e: Event) => emit("update:independent", (e.target as HTMLInput
   border-color: #4a9eff;
   color: #8fc4ff;
 }
+
+/*
+ * 窄屏：与顶栏的 `LevelControls` 同一套处理，理由见那边（以及 `docs/findings.md`）。
+ * 这一处实测最小按钮只有 20×34px，而 15×4 的等级网格宽约 448px，
+ * 在 390px 屏幕上以 `right: 0` 锚定会向左溢出、左边几列点不到。
+ */
+@media (max-width: 820px) {
+  .nav {
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
+  }
+  .value {
+    height: 34px;
+    min-width: 56px;
+  }
+  .grid {
+    position: fixed;
+    top: auto;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    max-height: 62dvh;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  .cell {
+    width: 34px;
+    height: 30px;
+    /* 全局窄屏规则里有 button { min-height: 34px }，网格格子要显式放开 */
+    min-height: 0;
+    font-size: 11px;
+  }
+  .col {
+    width: 34px;
+  }
+}
 </style>

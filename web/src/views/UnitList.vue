@@ -182,7 +182,7 @@ function sortVal(r: Row, key: string): number | string {
 
 const rows = computed<Row[]>(() => {
   const out = entries.value.map((u) => {
-    const lv = displayLevel(u);
+    const lv = displayLevel();
     const h = u.derived.health;
     const w = primaryWeapon(u);
     // 按顶栏选的 DPS 口径（原先写死 `derived.dps`，切口径时表格不动）
@@ -272,59 +272,66 @@ void startingMajorOfRarity;
     {{ rows.length }} 个条目　·　等级由顶栏控制（{{ cellMode === "dps" ? "已按当前等级换算" : "补正与等级无关" }}）
   </p>
 
-  <table class="grid-table">
-    <thead class="sticky">
-      <tr>
-        <th class="sortable" @click="toggleSort('name')">
-          单位<i class="arrow">{{ sortKey === "name" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
-        </th>
-        <th class="sortable" @click="toggleSort('faction')">
-          阵营<i class="arrow">{{ sortKey === "faction" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
-        </th>
-        <th class="sortable" @click="toggleSort('rarity')">
-          稀有度<i class="arrow">{{ sortKey === "rarity" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
-        </th>
-        <th class="num sortable" @click="toggleSort('cost')">
-          造价<i class="arrow">{{ sortKey === "cost" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
-        </th>
-        <th class="num sortable" @click="toggleSort('totalHP')">
-          总血<i class="arrow">{{ sortKey === "totalHP" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
-        </th>
-        <th class="num sortable" @click="toggleSort('dps')">
-          DPS<i class="arrow">{{ sortKey === "dps" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
-        </th>
-        <th class="num sortable" @click="toggleSort('range')">
-          射程<i class="arrow">{{ sortKey === "range" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
-        </th>
-        <th title="一轮打几下 · 两下之间的间隔。用来区分持续与爆发">连击</th>
-        <th v-for="t in TYPES" :key="t" class="num target sortable" @click="toggleSort(t)">
-          {{ SHORT[t] }}<i class="arrow">{{ sortKey === t ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="r in rows" :key="r.u.id">
-        <td>
-          <!--
-            本地化名：中文 → 英文 → 去掉前缀的 id。
-            只有 3 个测试桩两者都没有（`unit_dlc_test`/`unit_example`/`cmdr_dlc_test`），
-            而它们默认被隐藏，正常浏览看不到。
-          -->
-          <RouterLink :to="detailPath(r.u.id)">
-            {{ r.u.name_zh || r.u.name_en || r.u.id.replace(/^(unit|cmdr|bldg)_/, "") }}
-          </RouterLink>
-        </td>
-        <td class="dim">{{ r.u.faction }}</td>
-        <td class="dim">{{ r.u.pb?.rarity ?? "—" }}</td>
-        <td class="num">{{ r.u.derived.stats.cost ?? "—" }}</td>
-        <td class="num">{{ r.totalHP?.toFixed(0) ?? "—" }}</td>
-        <td class="num strong">{{ r.dps?.toFixed(0) ?? "—" }}</td>
-        <td class="num">{{ r.range === undefined ? "—" : `${r.range} 格` }}</td>
-        <td class="burst">{{ r.burst }}</td>
-        <td v-for="(c, i) in r.cells" :key="i" class="num target" :class="cellClass(c)">{{ c.text }}</td>
-      </tr>
-    </tbody>
-  </table>
+  <!--
+    13 列全 `nowrap` 的宽表，最小宽度实测 781px —— 手机上必然放不下。
+    横拖交给这个容器（窄屏下才有 `overflow`，见 `style.css`），
+    **不能让整页跟着横拖**：整页横拖时顶栏和筛选栏会一起跑掉。
+  -->
+  <div class="table-wrap">
+    <table class="grid-table">
+      <thead class="sticky">
+        <tr>
+          <th class="sortable" @click="toggleSort('name')">
+            单位<i class="arrow">{{ sortKey === "name" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
+          </th>
+          <th class="sortable" @click="toggleSort('faction')">
+            阵营<i class="arrow">{{ sortKey === "faction" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
+          </th>
+          <th class="sortable" @click="toggleSort('rarity')">
+            稀有度<i class="arrow">{{ sortKey === "rarity" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
+          </th>
+          <th class="num sortable" @click="toggleSort('cost')">
+            造价<i class="arrow">{{ sortKey === "cost" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
+          </th>
+          <th class="num sortable" @click="toggleSort('totalHP')">
+            总血<i class="arrow">{{ sortKey === "totalHP" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
+          </th>
+          <th class="num sortable" @click="toggleSort('dps')">
+            DPS<i class="arrow">{{ sortKey === "dps" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
+          </th>
+          <th class="num sortable" @click="toggleSort('range')">
+            射程<i class="arrow">{{ sortKey === "range" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
+          </th>
+          <th title="一轮打几下 · 两下之间的间隔。用来区分持续与爆发">连击</th>
+          <th v-for="t in TYPES" :key="t" class="num target sortable" @click="toggleSort(t)">
+            {{ SHORT[t] }}<i class="arrow">{{ sortKey === t ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="r in rows" :key="r.u.id">
+          <td>
+            <!--
+              本地化名：中文 → 英文 → 去掉前缀的 id。
+              只有 3 个测试桩两者都没有（`unit_dlc_test`/`unit_example`/`cmdr_dlc_test`），
+              而它们默认被隐藏，正常浏览看不到。
+            -->
+            <RouterLink :to="detailPath(r.u.id)">
+              {{ r.u.name_zh || r.u.name_en || r.u.id.replace(/^(unit|cmdr|bldg)_/, "") }}
+            </RouterLink>
+          </td>
+          <td class="dim">{{ r.u.faction }}</td>
+          <td class="dim">{{ r.u.pb?.rarity ?? "—" }}</td>
+          <td class="num">{{ r.u.derived.stats.cost ?? "—" }}</td>
+          <td class="num">{{ r.totalHP?.toFixed(0) ?? "—" }}</td>
+          <td class="num strong">{{ r.dps?.toFixed(0) ?? "—" }}</td>
+          <td class="num">{{ r.range === undefined ? "—" : `${r.range} 格` }}</td>
+          <td class="burst">{{ r.burst }}</td>
+          <td v-for="(c, i) in r.cells" :key="i" class="num target" :class="cellClass(c)">{{ c.text }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </template>
 
 <style scoped>
@@ -413,5 +420,23 @@ td.high {
 }
 td.dead {
   color: #4a5163;
+}
+
+/*
+ * 窄屏：筛选栏是 1 个搜索框 + 5 个下拉 + 1 组分段按钮，手机上必然折成好几行。
+ * 原先 `.modes` 靠 `margin-left: auto` 右推，折行时会被挤出右边缘（实测截图里
+ * 「对目标 DPS」被切掉）；窄屏下取消右推，让它规规矩矩参与折行。
+ */
+@media (max-width: 820px) {
+  .filters {
+    gap: 6px;
+  }
+  .filters input[type="search"] {
+    /* 手机上一行放不下「搜索框 + 一个下拉」，让搜索框独占一行 */
+    flex: 1 1 100%;
+  }
+  .modes {
+    margin-left: 0;
+  }
 }
 </style>

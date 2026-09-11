@@ -284,19 +284,47 @@ watch(
   margin-top: 3.2cqw;
   min-width: 0;
 }
+/*
+ * 文字尺寸**带下限**。
+ *
+ * 卡内一切都是 `cqw`（卡宽百分比），这在 170~210px 的桌面列宽下没问题；
+ * 但手机卡片墙要排到 3~4 列（卡宽降到 ~85~110px），纯 `cqw` 会让中文名掉到
+ * 5~7px —— 小到读不出来。`max()` 给它一个像素下限：**宽卡上完全不生效**
+ * （164px 时 6.2cqw = 10.2px > 9px），只有窄卡才顶住。
+ * 名字超宽会被 `text-overflow: ellipsis` 截断，不会撑破卡片。
+ */
 .zh {
   font-weight: 650;
-  font-size: 6.2cqw;
+  font-size: max(6.2cqw, 9px);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .en {
-  font-size: 4.8cqw;
+  font-size: max(4.8cqw, 7px);
   color: #7f8aa6;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/*
+ * 卡片很窄时**丢掉英文名，把整行让给中文名**。
+ *
+ * 手机卡片墙排到 3~4 列时卡宽只有 83~107px，而 `.zh`/`.en` 都是 `nowrap` ——
+ * 两个一起放不下，flex 会同时压缩它们，结果**中文名被截成「步...」「激进...」**
+ * （实测截图 `out/g-units.png` 一眼可见）。中文名是主标签，英文名是次要信息，
+ * 所以优先保中文。
+ *
+ * 用**容器查询**而不是 `@media`：要看的是「卡片有多宽」而不是「屏幕有多宽」——
+ * 同一个 390px 屏幕上，对比页的两栏里卡片更窄，桌面宽屏也可能因为筛选后列数变化
+ * 而让卡片变窄。`.card` 本来就是 `container-type: inline-size`（cqw 的前提）。
+ * 阈值 124px：桌面 170~210px 的列宽不受影响，2 列手机（164px）也不受影响。
+ */
+@container (max-width: 124px) {
+  .en {
+    display: none;
+  }
 }
 /* 点选模式：鼠标变手型 + 悬浮描边，让"能点"这件事看得出来 */
 .card.pickable {

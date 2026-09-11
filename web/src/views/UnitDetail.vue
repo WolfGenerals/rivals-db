@@ -30,7 +30,7 @@ const rec = computed<DatasetEntry | null>(() =>
   data.value ? (findEntryById(data.value, props.id) ?? null) : null,
 );
 const loading = computed(() => !data.value);
-const level = computed(() => displayLevel(rec.value ?? undefined));
+const level = computed(() => displayLevel());
 const backTo = computed(() => "/");
 const title = computed(() => rec.value?.name_zh || rec.value?.name_en || props.id);
 </script>

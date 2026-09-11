@@ -58,9 +58,9 @@ const TYPE_LABEL: Record<string, string> = {
 
 const RARITY_ORDER: Record<string, number> = { Common: 1, Rare: 2, Epic: 3 };
 
-/** 该条目在当前等级设置下应显示的等级（「相对起始」模式下每个单位不同）。 */
-function levelOf(rec: DatasetEntry) {
-  return displayLevel(rec);
+/** 卡片显示的等级 = 顶栏的全局等级（条目不再参与计算，见 `state.ts` 的 `displayLevel`）。 */
+function levelOf() {
+  return displayLevel();
 }
 
 function sortKey(rec: DatasetEntry): number {
@@ -205,7 +205,7 @@ const costSpread = computed(() => {
             v-for="rec in s.items"
             :key="rec.id"
             :unit="rec"
-            :level="levelOf(rec)"
+            :level="levelOf()"
             :fields="['type', 'level', 'faction', 'cost', 'name']"
             :pickable="pickable"
             :picked="picked?.includes(rec.id)"
@@ -220,7 +220,7 @@ const costSpread = computed(() => {
         v-for="rec in shown"
         :key="rec.id"
         :unit="rec"
-        :level="levelOf(rec)"
+        :level="levelOf()"
         :fields="['type', 'level', 'faction', 'cost', 'name']"
         :pickable="pickable"
         :picked="picked?.includes(rec.id)"
@@ -269,5 +269,38 @@ const costSpread = computed(() => {
   justify-content: start;
   /* 第一列/第一行卡片的角标会探出容器，给点内边距免得贴边 */
   padding: 8px 14px 4px;
+}
+
+/*
+ * 窄屏卡片墙。
+ *
+ * 原先只有一档 `minmax(170px, 210px)` + 28px 间隙 —— 两列需要 170×2 + 28 = 368px，
+ * 而 390 宽的手机上 `main` 内容区只有 354px（`padding: 0 18px`），于是**永远只排 1 列**，
+ * 每张卡撑到 210px 宽，86 张卡竖着排成一条极长的滚轴。
+ *
+ * 目标密度（用户要求）：**手机一屏 3~4 列**。
+ * 列数由 `auto-fill` 算，所以关键是把列宽上限压到 82px、间隙压到 12px：
+ *   可用宽 W = 视口 − main 左右各 12 − grid 左右各 10
+ *   360 → W=316：3 列（4 列要 4×82+3×12=364 > 316）
+ *   390 → W=346：3 列（卡宽 ≈107px）
+ *   414 → W=370：4 列（卡宽 ≈85px）
+ *   430 → W=386：4 列
+ *
+ * 卡片内部所有尺寸都用 `cqw`（卡宽的 1%）表达，缩小列宽后角标/边框/字号
+ * **整体等比缩小**，不会出现「卡小了但角标没大」的错位；中文名另有 9px 下限
+ * （见 `UnitCard.vue` 的 `.zh`），否则 85px 卡上会掉到 5px。
+ *
+ * ⚠️ 间隙不能压到 12px 以下：角标按 `--over: 24%` 探出卡外，两列相邻的角标
+ * 相加约需 `24%×24cqw + 24%×16cqw ≈ 10% 卡宽`（107px 卡 ≈ 10.3px），12px 刚好让开。
+ */
+@media (max-width: 820px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
+    gap: 14px 12px;
+    padding: 6px 10px 2px;
+  }
+  .filters {
+    gap: 6px;
+  }
 }
 </style>

@@ -1,11 +1,16 @@
 /**
- * 全局显示状态：等级滑块与「相对起始等级」开关。
+ * 全局显示状态：等级 + DPS 口径 + 各页面的筛选/排序。
  *
  * 用模块级 `ref` 而不是 provide/inject：列表页与详情页都要用同一个等级，
  * 而且切换页面不该把等级重置，所以做成单例并持久化到 localStorage。
+ *
+ * ⚠️ 这里**曾经**有一个「从各自起始等级算」开关（`relativeToStart`），
+ * 用户判定没人用、要求彻底去掉（PC 与手机都不留），已删除 —— 现在等级一律是
+ * 游戏内的绝对 `大级-小级`。注意 localStorage 里可能还残留 `rivals.relativeToStart`，
+ * 现在没有任何代码读它，无害。
  */
 
-import { computed, ref, watch, type ComputedRef, type Ref } from "vue";
+import { ref, watch, type Ref } from "vue";
 
 import { fromOrdinal, level, MAX_ORDINAL, startingMajorOfRarity, type Level } from "@rivals/core/levels";
 
@@ -13,7 +18,6 @@ import { fromOrdinal, level, MAX_ORDINAL, startingMajorOfRarity, type Level } fr
 export { MAX_ORDINAL };
 
 const KEY_LEVEL = "rivals.level";
-const KEY_RELATIVE = "rivals.relativeToStart";
 
 function read(key: string): string | null {
   try {
@@ -37,14 +41,10 @@ function clamp(n: number): number {
 
 const storedLevel = Number(read(KEY_LEVEL) ?? "0");
 
-/** 滑块位置（0 = 见 `displayLevel` 的说明）。 */
+/** 当前等级（序数，0 = `1-0`，见 `displayLevel` 的说明）。 */
 export const ordinal: Ref<number> = ref(clamp(storedLevel));
 
-/** 是否从「各自起始等级」起算。 */
-export const relativeToStart: Ref<boolean> = ref(read(KEY_RELATIVE) === "1");
-
 watch(ordinal, (v) => write(KEY_LEVEL, String(v)));
-watch(relativeToStart, (v) => write(KEY_RELATIVE, v ? "1" : "0"));
 
 /** 展示用的等级 = 等级对象 + 一个「是否被 15-3 上限截断」的标记。 */
 export interface LevelDisplay extends Level {
@@ -109,29 +109,18 @@ export const comparePickingLeft: Ref<boolean> = ref(true);
 export const comparePickingRight: Ref<boolean> = ref(true);
 
 /**
- * 某条目在当前设置下应显示的等级。
+ * 当前应显示的等级。
  *
- * - **绝对**（默认）：滑块就是游戏内的 `major-minor`，所有条目同等级对比。
- * - **相对起始**：滑块 0 = 该条目**自己的起始等级**（普通 1-0 / 稀有 3-0 /
- *   史诗 5-0），用于比较「升同样级数的收益」。
+ * 就是游戏内的绝对 `大级-小级`（顶栏那个「从各自起始等级算」的开关已按用户要求删除，
+ * 所以这里不再依赖具体条目）。返回带 `capped` 标记的对象 —— 15-3 是上限。
  */
-export function displayLevel(u: { pb?: { rarity?: string } } | undefined): LevelDisplay {
-  const base = fromOrdinal(ordinal.value);
-  const start = relativeToStart.value ? startingMajorOfRarity(u?.pb?.rarity) : null;
-  if (start === null) return withCapped(base, false);
-
-  const shifted = level(start, 0).ordinal() + ordinal.value;
-  return withCapped(fromOrdinal(Math.min(shifted, MAX_ORDINAL)), shifted > MAX_ORDINAL);
+export function displayLevel(): LevelDisplay {
+  return withCapped(fromOrdinal(ordinal.value), false);
 }
 
 /** 该条目从起始等级到当前等级升了几级。 */
 export function upgradeSteps(u: { pb?: { rarity?: string } } | undefined): number {
   const start = startingMajorOfRarity(u?.pb?.rarity);
   if (start === null) return 0;
-  return Math.max(0, displayLevel(u).stepsFrom(level(start, 0)));
+  return Math.max(0, displayLevel().stepsFrom(level(start, 0)));
 }
-
-/** 滑块旁边的文字。 */
-export const levelLabel: ComputedRef<string> = computed(() =>
-  relativeToStart.value ? `起始 ${fromOrdinal(ordinal.value).format()} 级起` : fromOrdinal(ordinal.value).format(),
-);

@@ -94,11 +94,14 @@ function pick(side: "left" | "right", id: string) {
   /*
    * **占满视口剩余高度**，让两栏的卡片墙一直撑到底、由墙内部滚动。
    *
-   * 数值来源：顶栏 `padding: 12px` ×2 + 内容 ≈ 49px，`main` 底部内边距 60px，
-   * 再加本组件 `padding-top: 12px`。`dvh` 而非 `vh` —— 移动端地址栏收起时 `vh` 会偏大。
+   * 顶栏高度用 `--topbar-h`（`App.vue` 用 ResizeObserver 实测写入）而不是写死数字 ——
+   * 原先这里硬编码 121px，等于假设顶栏恒为 49px 高；顶栏一旦折行（窄屏、或
+   * 1200px 出头那种「两栏还在、顶栏先挤了」的宽度）这个减法就错了。
+   * 余下的 72px = `main` 底部内边距 60px + 本组件 `padding-top: 12px`。
+   * `dvh` 而非 `vh` —— 移动端地址栏收起时 `vh` 会偏大。
    * `min-height` 兜底：窗口太矮时不要让墙塌成一条。
    */
-  height: calc(100dvh - 121px);
+  height: calc(100dvh - var(--topbar-h, 49px) - 72px);
   min-height: 460px;
   display: flex;
   flex-direction: column;

@@ -15,6 +15,27 @@ const data = ref<LoadedData | null>(null);
 const error = ref<string | null>(null);
 const route = useRoute();
 
+/**
+ * 顶栏的实际高度写进 `--topbar-h`，供 `thead` 的 sticky 偏移使用。
+ *
+ * 这个数字**不能写死**：桌面顶栏是一行（实测 51px），手机窄屏会折成两行（实测 105px）。
+ * 原先 `style.css` 里写死 `top: 51px`，手机上表头就会钻到顶栏底下。
+ * 用 ResizeObserver 而不是只在挂载时量一次 —— 窗口缩放、字体加载完、导航栏换行动都会变。
+ */
+const topbar = ref<HTMLElement | null>(null);
+
+onMounted(() => {
+  const el = topbar.value;
+  if (!el) return;
+  const apply = () =>
+    document.documentElement.style.setProperty(
+      "--topbar-h",
+      `${Math.round(el.getBoundingClientRect().height)}px`,
+    );
+  apply();
+  new ResizeObserver(apply).observe(el);
+});
+
 onMounted(async () => {
   try {
     data.value = await loadDataset();
@@ -36,7 +57,7 @@ const activeNav = computed(() => {
 </script>
 
 <template>
-  <header class="topbar">
+  <header ref="topbar" class="topbar">
     <RouterLink class="brand" to="/">Rivals 图鉴</RouterLink>
 
     <nav>

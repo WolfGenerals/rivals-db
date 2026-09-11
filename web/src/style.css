@@ -1,5 +1,10 @@
 :root {
   /*
+   * 让原生控件（select 下拉、复选框、滚动条）走暗色。
+   * 不加这条的话，手机上 `<select>` 会弹出一个亮色系统菜单，和整页割裂。
+   */
+  color-scheme: dark;
+  /*
    * 配色。**层次要拉得开** ——
    * `--bg` / `--panel` / `--line` 三档贴太近的话，面板看起来跟背景是一块，
    * 按钮和卡片也都"沉"下去（用户反馈"颜色也要更显眼"）。
@@ -187,7 +192,7 @@ button:focus-visible {
   left: 50%;
   z-index: 40;
   padding: 5px 9px;
-  max-width: 280px;
+  max-width: min(280px, calc(100vw - 24px)); /* 手机上别宽出屏幕 */
   width: max-content;
   font-size: 11px;
   line-height: 1.5;
@@ -250,11 +255,27 @@ th {
   font-weight: 500;
   font-size: 12px;
 }
-thead.sticky th {
+/*
+ * ⚠️ **sticky 必须加在 `thead`（行组）上，不能加在 `th` 上。**
+ *
+ * 加在 `th` 上时 Chromium 实测完全不生效：滚动 420px 后表头 `top = -287`（跟着滚走了），
+ * 计算样式里 `position` 明明是 `sticky`。同一页面把 sticky 挪到 `thead` 上，同样的滚动量
+ * 下 `top = 51`，正好贴在顶栏下沿。原因是 table-cell 的 sticky 约束矩形没有位移空间，
+ * `border-collapse: collapse` 也不是元凶（换成 separate 实测照样不粘）。
+ * 对照数据见 `docs/findings.md`。
+ */
+thead.sticky {
   position: sticky;
-  top: 51px;
-  background: var(--bg);
+  /*
+   * 顶栏高度**由 JS 实测写进 `--topbar-h`**（`App.vue` 的 ResizeObserver）。
+   * 原先这里写死 `51px` —— 那正好是桌面顶栏的高度，手机顶栏实测 105px，
+   * 于是表头会钻到顶栏底下。兜底值保留 51px。
+   */
+  top: var(--topbar-h, 51px);
   z-index: 5;
+}
+thead.sticky th {
+  background: var(--bg);
 }
 td.num,
 th.num {
@@ -393,4 +414,93 @@ code {
   padding: 1px 5px;
   border-radius: 4px;
   font-size: 12px;
+}
+
+/* ── 表格滚动容器 ─────────────────────────────────── */
+
+/*
+ * 宽屏下**故意不建立滚动容器**（`overflow: visible`）。
+ *
+ * 一旦这里 `overflow-x: auto`，按 CSS 规则 `overflow-y` 也会变成 `auto`，
+ * 容器就成了滚动口 —— 而容器与表格等高、自身不纵向滚动，于是 `thead` 的
+ * `position: sticky` 永远不触发（它只相对「最近的滚动口」粘，而那个口不动）。
+ * 换个说法：整页滚动的场景下，表头要贴在**视口**的顶栏下沿，必须保持 visible。
+ */
+.table-wrap {
+  overflow: visible;
+}
+
+/* ── 窄屏（手机 / 小平板）─────────────────────────────
+ *
+ * 全站原先只有 `CompareView` 里一条 `@media (max-width: 1200px)`，手机上没有断点。
+ * 实测（无头 Edge，390×844）出来的问题：
+ *   · 表格页整页横向溢出 —— 视口 390，而 `doc.scrollWidth = 799`（要横拖 2 屏）
+ *   · 顶栏换行成两行、高 105px，却仍然放不下：等级步进器被右边缘切掉
+ *   · 卡片墙 `minmax(170px, 210px)` + 28px 间隙需要 368px，而可用宽只有 354px
+ *     → 只能排 1 列，卡片过大
+ *
+ * 断点取 820px 的依据：表格的最小宽度实测 781px（13 列全 `nowrap`），
+ * 加上 `main` 左右各 18px，817px 是「表格还能整幅显示」的下限。
+ */
+
+@media (max-width: 820px) {
+  /* 表格：横向滚动交给容器，**不让整页跟着横拖** */
+  .table-wrap {
+    overflow: auto;
+    /*
+     * 限高 + 容器内滚动：这样 `thead` 的 sticky 贴的是容器顶（见下面的 top: 0），
+     * 表头在手机上也真的留得住 —— 13 列的宽表尤其需要。
+     */
+    max-height: 64dvh;
+    overscroll-behavior: contain;
+  }
+  thead.sticky {
+    top: 0;
+  }
+
+  /* 单元格收紧，少横拖一点 */
+  th,
+  td {
+    padding: 5px 6px;
+  }
+
+  main {
+    padding: 0 12px 48px;
+  }
+
+  /* 顶栏：内边距和间距收紧，给内容让出宽度 */
+  header.topbar {
+    padding: 8px 12px;
+    gap: 8px 12px;
+  }
+  .brand {
+    font-size: 14px;
+  }
+  nav {
+    gap: 10px;
+  }
+  nav a {
+    /* 手机上链接要有能点中的高度 */
+    padding: 5px 0;
+  }
+
+  /*
+   * 触摸目标 —— 实测全站最小的按钮是等级步进的 18×22px（`−`/`+`）。
+   * Apple HIG 建议 44×44，这里给到 34px 高已经是「能稳妥点中」的下限。
+   */
+  button {
+    min-height: 34px;
+    padding: 5px 11px;
+  }
+
+  /*
+   * ⚠️ **输入框字号必须 ≥16px** —— iOS Safari 对字号 <16px 的输入控件，
+   * 聚焦时会强制把整页放大（用户点一下搜索框，页面就缩放、布局错位）。
+   * 桌面保持 14px 不变，所以只在窄屏放大。
+   */
+  input[type="search"],
+  select {
+    font-size: 16px;
+    min-height: 34px;
+  }
 }
