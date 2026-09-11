@@ -11,32 +11,20 @@
  *
  * 配色：圆底 `--icon-bg`、剪影 `--icon-glyph`、描边 `--icon-ring`。
  */
-import { computed } from "vue";
+import { computed, useId } from "vue";
 
 import { TYPE_ICONS } from "../icons.ts";
 
 const props = defineProps<{ type: string; color?: string }>();
+
+/** `clipPath` 的 id **必须每个实例都不同** —— 同页多个图标共用 id 会互相串 */
+const clipId = `type-icon-clip-${useId()}`;
 
 const icon = computed(() => TYPE_ICONS[props.type.toLowerCase()]);
 
 const size = computed(() => {
   const parts = icon.value?.viewBox.split(/\s+/).map(Number) ?? [];
   return Number.isFinite(parts[2]) ? parts[2]! : 64;
-});
-
-/**
- * 图形相对圆底的缩放。
- *
- * ⚠️ **必须是这个**：圆是 `r = size/2`，**正好顶满 viewBox 四边**，所以按 64×64 画满的
- * 图形一定会从圆里戳出去（正方形内接于圆的极限只有 `1/√2 ≈ 0.707`）。
- * 取 `0.62` 再留一点内边距，视觉上与圆环贴合。
- */
-const GLYPH_SCALE = 0.62;
-
-/** 绕**圆心**缩放（直接 `scale` 是绕左上角，会跑偏） */
-const glyphTransform = computed(() => {
-  const c = size.value / 2;
-  return `translate(${c} ${c}) scale(${GLYPH_SCALE}) translate(${-c} ${-c})`;
 });
 </script>
 
@@ -49,6 +37,16 @@ const glyphTransform = computed(() => {
     :aria-label="type"
     :style="color ? { '--icon-bg': color } : undefined"
   >
+    <!--
+      圆底。`r = size/2` 正好顶满 viewBox，**同时用作图形的裁切边界** ——
+      图形按原尺寸画，超出圆的部分被裁掉。比缩小图形好看得多（保持饱满），
+      也是常规做法。`clipPath` 的 id 每个实例都不同，避免同页互相串。
+    -->
+    <defs>
+      <clipPath :id="clipId">
+        <circle :cx="size / 2" :cy="size / 2" :r="size / 2" />
+      </clipPath>
+    </defs>
     <circle
       :cx="size / 2"
       :cy="size / 2"
@@ -57,8 +55,8 @@ const glyphTransform = computed(() => {
       stroke="var(--icon-ring, #0b1020)"
       :stroke-width="size * 0.03"
     />
-    <!-- 图形用 currentColor 画，所以这里把 color 设成剪影色；按圆心缩小以放进圆内 -->
-    <g class="glyph" :transform="glyphTransform" v-html="icon.body" />
+    <!-- 图形用 currentColor 画，所以这里把 color 设成剪影色 -->
+    <g class="glyph" :clip-path="`url(#${clipId})`" v-html="icon.body" />
   </svg>
 </template>
 
