@@ -85,17 +85,28 @@ const baseSegs = computed<Seg[]>(() => {
 
     // 单发
     const iv = tm.interval_ms ?? tm.cycle_ms;
-    const fireMs = tm.hits > 1 ? tm.hits * iv : 0;
-    if (fireMs > 0) {
-      const ticks = Array.from({ length: tm.hits }, (_, i) => start + charge + i * iv);
-      out.push({
-        kind: "fire",
-        at: start + charge,
-        ms: fireMs,
-        ticks,
-        title: `连打 ${tm.hits} 发（每 ${fmt(iv)} 一发，共 ${fmt(fireMs)}）`,
-      });
-    }
+    /*
+     * ⚠️ **`hits === 1` 也要画出来。**
+     *
+     * 单发武器的"打一下"是瞬时的（宽度理应 0），但宽度 0 就等于**什么都没画** ——
+     * 弹弓、狼獾这类绝大多数常规武器整条会变成空的（用户报"好多单位的条搞坏了"）。
+     * 给一个可见的最小宽度，真正的"打在哪一刻"靠金色刻度线表达。
+     */
+    const fireMs = tm.hits > 1 ? tm.hits * iv : Math.max(1, tm.cycle_ms * 0.04);
+    const ticks = Array.from(
+      { length: Math.max(1, tm.hits) },
+      (_, i) => start + charge + (tm.hits > 1 ? i * iv : 0),
+    );
+    out.push({
+      kind: "fire",
+      at: start + charge,
+      ms: fireMs,
+      ticks,
+      title:
+        tm.hits > 1
+          ? `连打 ${tm.hits} 发（每 ${fmt(iv)} 一发，共 ${fmt(tm.hits * iv)}）`
+          : `开火（周期 ${fmt(tm.cycle_ms)}）`,
+    });
     if (t.chargeInCycle && charge > 0) {
       // 周期**末尾**的前摇：画在末尾，段总长仍等于周期
       out.push({ kind: "charge", at: start, ms: charge, title: `周期末尾的前摇 ${fmt(charge)}` });
@@ -106,13 +117,23 @@ const baseSegs = computed<Seg[]>(() => {
   return out;
 });
 
-/** 一名队员的时间轴总长（毫秒） */
+/**
+ * 一名队员的时间轴总长（毫秒）。
+ *
+ * ⚠️ **必须把每条的 `cycle_ms` 也算进来** —— 只取「段终点」是错的：单发武器的
+ * 段只有几毫秒（`hits === 1` 给的最小宽度），整条跨度就塌成几毫秒，于是那一点点
+ * 伤害段**铺满全宽**，看起来像"一直在打"（弹弓就是这样被画坏的）。
+ * 周期才是这条轴的真正长度。
+ */
 const cycleMs = computed(() => {
-  const ends = baseSegs.value.map((s) => s.at + s.ms);
-  const last = props.tracks[props.tracks.length - 1];
-  // `sequence` 末段是「持续」时，用一个周期长度收尾，否则条子会无限长
-  const tail = last?.lasts_ms === null ? (last.timing.kind === "单发" ? last.timing.cycle_ms : 0) : 0;
-  return Math.max(1, ...ends, tail);
+  const spans = baseSegs.value.map((s) => s.at + s.ms);
+  for (const t of props.tracks) {
+    const tm = t.timing;
+    if (tm.kind === "单发") spans.push(tm.cycle_ms);
+    else if (tm.kind === "装填") spans.push(tm.clip * (tm.interval_ms ?? 0) + tm.reload_ms);
+    else spans.push(tm.charge_ms);
+  }
+  return Math.max(1, ...spans);
 });
 
 /** 横轴跨度：最后一名队员的起点 + 一个周期 */
