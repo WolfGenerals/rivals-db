@@ -46,9 +46,30 @@ const props = withDefaults(
     level?: Level;
     /** 默认只露「名称 + 造价」，就是游戏商店里那张卡的样子 */
     fields?: CardField[];
+    /**
+     * **点选模式**：卡还是那张卡（仍是 `RouterLink`，结构不动），但点击**不跳转**而是
+     * 抛 `pick` 事件。对比页挑单位时用。
+     */
+    pickable?: boolean;
+    /** 点选模式下的选中态（画一圈高亮） */
+    picked?: boolean;
   }>(),
   { fields: () => ["name", "cost"] as CardField[] },
 );
+
+const emit = defineEmits<{ (e: "pick", id: string): void }>();
+
+/**
+ * 点选模式下拦掉跳转。
+ *
+ * ⚠️ 用 `@click` + `preventDefault` 而不是把根元素换成 `<button>` ——
+ * 后者要把 140 行模板复制一份，得不偿失。
+ */
+function onClick(e: MouseEvent) {
+  if (!props.pickable) return;
+  e.preventDefault();
+  emit("pick", props.unit.id);
+}
 
 const has = (f: CardField) => props.fields.includes(f);
 
@@ -91,9 +112,14 @@ watch(
 <template>
   <RouterLink
     class="card"
-    :class="[`f-${unit.faction.toLowerCase()}`, rarity ? `r-${rarity.toLowerCase()}` : 'r-none']"
+    :class="[
+      `f-${unit.faction.toLowerCase()}`,
+      rarity ? `r-${rarity.toLowerCase()}` : 'r-none',
+      { pickable, picked },
+    ]"
     :to="detailPath(unit.id)"
     :title="nameEn && nameEn !== name ? `${name} · ${nameEn}` : name"
+    @click="onClick"
   >
     <!--
       .frame 只负责当角标的定位参照，不裁剪；.art 只负责把卡面裁进圆角。
@@ -270,5 +296,17 @@ watch(
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+/* 点选模式：鼠标变手型 + 悬浮描边，让"能点"这件事看得出来 */
+.card.pickable {
+  cursor: pointer;
+}
+.card.pickable:hover {
+  outline: 2px solid #4a9eff;
+  outline-offset: 2px;
+}
+.card.picked {
+  outline: 3px solid #4a9eff;
+  outline-offset: 2px;
 }
 </style>

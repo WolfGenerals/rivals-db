@@ -1,90 +1,84 @@
 <script setup lang="ts">
 /**
- * 左右分栏对比 —— 两个单位并排，共用一个等级（顶栏控制）。
+ * 左右分栏对比。
  *
- * **为什么自带走查**：对比的选择状态属于本页，不该散到列表页去。两个 `<select>`
- * 直接放在面板顶上，从任何入口进来（含分享链接 `/compare/a/b`）都能立刻换。
+ * **两个阶段，同一个路由**：
+ *   `/compare`      —— **卡片墙选单位**（复用 `Arsenal` 的卡片墙 + 筛选/分组），
+ *                      点第一张选左边、点第二张选右边
+ *   `/compare/a/b`  —— **左右并排两个 `UnitDetail`**，与单独看某个单位的页面完全一致
  *
- * ⚠️ 两侧都是完整的 `UnitPanel`（含武器卡、时序、逐目标伤害），所以每栏**必须有
- * `min-width: 0`** —— 不然 flex 子项不肯收缩，内容会撑破分栏。
+ * 为什么不自己做一套选择界面：卡片墙已经有搜索、阵营/稀有度筛选、类型分组、排序 ——
+ * 再造一套只会更差。
  */
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import type { DatasetEntry } from "@rivals/core/derive";
-
-import UnitPanel from "../components/UnitPanel.vue";
-import { displayLevel } from "../state.ts";
+import Arsenal from "./Arsenal.vue";
+import UnitDetail from "./UnitDetail.vue";
 import { useData } from "../useData.ts";
 
 const route = useRoute();
 const router = useRouter();
 const data = useData();
 
-/** 可选单位：**排除指挥官**（无武器、不是战场单位，对比没有意义） */
-const choices = computed<DatasetEntry[]>(() => data.value?.dataset.units ?? []);
-const byId = computed(() => new Map(choices.value.map((e) => [e.id, e])));
+const left = computed(() => String(route.params.left ?? ""));
+const right = computed(() => String(route.params.right ?? ""));
+const picking = computed(() => !left.value || !right.value);
 
-const leftId = computed(() => String(route.params.left ?? ""));
-const rightId = computed(() => String(route.params.right ?? ""));
+/** 已选的（用于在卡片墙上画高亮） */
+const picked = computed(() => [left.value, right.value].filter(Boolean));
 
-const left = computed(() => byId.value.get(leftId.value));
-const right = computed(() => byId.value.get(rightId.value));
-
-/**
- * 两侧共用**顶栏的全局等级**（`displayLevel(undefined)` 就是不按稀有度偏移的那个）。
- * `UnitPanel` 仍可各自勾「独立」在栏内单独调。
- */
-const sideLevel = computed(() => displayLevel(undefined));
-
-function go(side: "left" | "right", id: string) {
-  const l = side === "left" ? id : leftId.value;
-  const r = side === "right" ? id : rightId.value;
-  if (l && r) router.push(`/compare/${encodeURIComponent(l)}/${encodeURIComponent(r)}`);
-  else if (l) router.push(`/compare/${encodeURIComponent(l)}`);
-  else router.push("/compare");
+function onPick(id: string) {
+  // 左边还没选 → 填左边；否则填右边。选满两个即进入对比。
+  if (!left.value) router.push(`/compare/${encodeURIComponent(id)}`);
+  else if (!right.value && id !== left.value) {
+    router.push(`/compare/${encodeURIComponent(left.value)}/${encodeURIComponent(id)}`);
+  }
 }
 
-function label(e: DatasetEntry): string {
-  return e.name_zh ? `${e.name_zh}（${e.id.replace(/^unit_/, "")}）` : e.id;
-}
+const reset = () => router.push("/compare");
+const swap = () =>
+  router.push(`/compare/${encodeURIComponent(right.value)}/${encodeURIComponent(left.value)}`);
+const byId = computed(() => new Map((data.value?.dataset.units ?? []).map((e) => [e.id, e])));
+const nameOf = (id: string) => byId.value.get(id)?.name_zh ?? id.replace(/^unit_/, "");
 </script>
 
 <template>
   <div class="compare">
-    <div class="bar">
-      <h2>对比</h2>
-      <span class="muted">等级由顶栏统一控制，左右同步</span>
-    </div>
+    <!-- 阶段二：两个完整详情页并排 -->
+    <template v-if="!picking">
+      <div class="bar">
+        <h2>对比</h2>
+        <span class="muted">{{ nameOf(left) }} ↔ {{ nameOf(right) }}</span>
+        <button type="button" @click="swap">交换</button>
+        <button type="button" @click="reset">重选</button>
+      </div>
+      <div class="cols">
+        <!--
+          ⚠️ `min-width: 0` 不能省 —— grid 子项默认不肯收缩到内容以下，
+          少了这行长内容（武器时序那句长文本）会撑破分栏。
+        -->
+        <section class="col"><UnitDetail :id="left" embedded /></section>
+        <section class="col"><UnitDetail :id="right" embedded /></section>
+      </div>
+    </template>
 
-    <div class="cols">
-      <!-- 左 -->
-      <section class="col">
-        <select :value="leftId" @change="go('left', ($event.target as HTMLSelectElement).value)">
-          <option value="">— 选左边 —</option>
-          <option v-for="e in choices" :key="e.id" :value="e.id">{{ label(e) }}</option>
-        </select>
-        <UnitPanel v-if="left" :unit="left" :level="sideLevel" />
-        <p v-else class="empty">从上面选一个单位</p>
-      </section>
-
-      <!-- 右 -->
-      <section class="col">
-        <select :value="rightId" @change="go('right', ($event.target as HTMLSelectElement).value)">
-          <option value="">— 选右边 —</option>
-          <option v-for="e in choices" :key="e.id" :value="e.id">{{ label(e) }}</option>
-        </select>
-        <UnitPanel v-if="right" :unit="right" :level="sideLevel" />
-        <p v-else class="empty">从上面选一个单位</p>
-      </section>
-    </div>
+    <!-- 阶段一：卡片墙选单位 -->
+    <template v-else>
+      <div class="bar">
+        <h2>选两个单位对比</h2>
+        <span class="muted">
+          已选 {{ picked.length }}/2
+          <template v-if="left">　左边：{{ nameOf(left) }}</template>
+        </span>
+        <button v-if="picked.length" type="button" @click="reset">清空</button>
+      </div>
+      <Arsenal pickable :picked="picked" @pick="onPick" />
+    </template>
   </div>
 </template>
 
 <style scoped>
-.compare {
-  padding-top: 12px;
-}
 .bar {
   display: flex;
   align-items: baseline;
@@ -95,40 +89,34 @@ function label(e: DatasetEntry): string {
   margin: 0;
   font-size: 16px;
 }
+.bar button {
+  padding: 2px 10px;
+  font-size: 12px;
+  color: #b9c4dc;
+  background: #1d2430;
+  border: 1px solid var(--line, #2b3038);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.bar button:hover {
+  background: #26303f;
+  color: #fff;
+}
 
 .cols {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  gap: 16px;
   align-items: start;
 }
-/* 窄屏（<1100px）堆成一列 —— 两栏挤在一起比单栏还难读 */
-@media (max-width: 1100px) {
+/* 窄屏（<1200px）堆成一列 —— 两个详情页挤在一起比单栏还难读 */
+@media (max-width: 1200px) {
   .cols {
     grid-template-columns: 1fr;
   }
 }
-
-/* ⚠️ min-width:0 是关键：不加的话 grid 子项不肯收缩，长内容会撑破分栏 */
 .col {
   min-width: 0;
-}
-.col select {
-  width: 100%;
-  margin-bottom: 8px;
-  padding: 5px 8px;
-  font-size: 13px;
-  color: #e6ecf5;
-  background: #1d2430;
-  border: 1px solid var(--line, #2b3038);
-  border-radius: 6px;
-}
-.empty {
-  padding: 24px;
-  text-align: center;
-  color: #6b7a99;
-  border: 1px dashed var(--line, #2b3038);
-  border-radius: 8px;
 }
 .muted {
   color: #7f8aa6;

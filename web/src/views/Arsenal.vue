@@ -17,7 +17,15 @@ import { loadDataset } from "../data.ts";
 import { displayLevel } from "../state.ts";
 import { useData } from "../useData.ts";
 
-const props = defineProps<{ commandersOnly?: boolean }>();
+const props = defineProps<{
+  commandersOnly?: boolean;
+  /** 点选模式：卡片点击抛 `pick` 而不跳转（对比页挑单位用） */
+  pickable?: boolean;
+  /** 已选中的 id（画高亮） */
+  picked?: string[];
+}>();
+
+const emit = defineEmits<{ (e: "pick", id: string): void }>();
 const data = useData();
 
 // 数据集是单文件，加载完就全在内存里 —— 同步取即可
@@ -188,6 +196,9 @@ const costSpread = computed(() => {
             :unit="rec"
             :level="levelOf(rec)"
             :fields="['type', 'level', 'faction', 'cost', 'name']"
+            :pickable="pickable"
+            :picked="picked?.includes(rec.id)"
+            @pick="emit('pick', $event)"
           />
         </div>
       </section>
@@ -200,6 +211,9 @@ const costSpread = computed(() => {
         :unit="rec"
         :level="levelOf(rec)"
         :fields="['type', 'level', 'faction', 'cost', 'name']"
+        :pickable="pickable"
+        :picked="picked?.includes(rec.id)"
+        @pick="emit('pick', $event)"
       />
     </div>
   </template>
