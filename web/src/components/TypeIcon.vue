@@ -23,6 +23,21 @@ const size = computed(() => {
   const parts = icon.value?.viewBox.split(/\s+/).map(Number) ?? [];
   return Number.isFinite(parts[2]) ? parts[2]! : 64;
 });
+
+/**
+ * 图形相对圆底的缩放。
+ *
+ * ⚠️ **必须是这个**：圆是 `r = size/2`，**正好顶满 viewBox 四边**，所以按 64×64 画满的
+ * 图形一定会从圆里戳出去（正方形内接于圆的极限只有 `1/√2 ≈ 0.707`）。
+ * 取 `0.62` 再留一点内边距，视觉上与圆环贴合。
+ */
+const GLYPH_SCALE = 0.62;
+
+/** 绕**圆心**缩放（直接 `scale` 是绕左上角，会跑偏） */
+const glyphTransform = computed(() => {
+  const c = size.value / 2;
+  return `translate(${c} ${c}) scale(${GLYPH_SCALE}) translate(${-c} ${-c})`;
+});
 </script>
 
 <template>
@@ -42,8 +57,8 @@ const size = computed(() => {
       stroke="var(--icon-ring, #0b1020)"
       :stroke-width="size * 0.03"
     />
-    <!-- 图形用 currentColor 画，所以这里把 color 设成剪影色 -->
-    <g class="glyph" v-html="icon.body" />
+    <!-- 图形用 currentColor 画，所以这里把 color 设成剪影色；按圆心缩小以放进圆内 -->
+    <g class="glyph" :transform="glyphTransform" v-html="icon.body" />
   </svg>
 </template>
 
