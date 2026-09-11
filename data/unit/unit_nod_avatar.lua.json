@@ -62,6 +62,7 @@
           "maxRangeInTiles": 1.25,
           "modifier_sequence": {
             "behaviour": {},
+            "behaviourName": "ability_avatar_laser_weapon_sequence_behaviour",
             "name": "ability_avatar_laser_weapon_sequence",
             "tuning": {
               "damage": {
@@ -113,6 +114,7 @@
           "maxRangeInTiles": 1.25,
           "modifier_sequence": {
             "behaviour": {},
+            "behaviourName": "ability_avatar_fire_weapon_sequence_behaviour",
             "name": "ability_avatar_fire_weapon_sequence",
             "tuning": {
               "damage": {

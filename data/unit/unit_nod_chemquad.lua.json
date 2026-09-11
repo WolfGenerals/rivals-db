@@ -48,6 +48,7 @@
           "maxRangeInTiles": 1.25,
           "modifier_sequence": {
             "behaviour": {},
+            "behaviourName": "ability_chemical_weapon_sequence",
             "name": "ability_chem_quad_weapon_sequence",
             "tuning": {
               "burstCooldown": 500,

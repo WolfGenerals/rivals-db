@@ -391,12 +391,37 @@ export async function extractAll(opts: ExtractOptions): Promise<ExtractResult> {
       return undefined;
     };
 
+    /**
+     * 把 `modifier_sequence.behaviour = <Lua 函数名>` 补进对应武器。
+     *
+     * 它在 JSON 里是 `{}`（函数无法序列化），但**这是精确的行为派发键**：
+     * 15 份共享实现，名字直接对应 `gameplay/abilities/<名>.lua`。
+     * 没有它就只能靠字段嗅探（`if ("stage1" in tuning)`），而嗅探已经错过多次。
+     *
+     * 提取方式：源码里每张表都是 `name = "..."` 紧跟 `behaviour = <标识符>`。
+     */
+    const attachBehaviour = (rec: EntityRecord, text: string): void => {
+      const before = /name\s*=\s*"([^"]+)"\s*,\s*\n\s*behaviour\s*=\s*(\w+)/g;
+      const map = new Map<string, string>();
+      for (const m of text.matchAll(before)) map.set(m[1]!, m[2]!);
+      if (!map.size) return;
+      const ct = rec.config["combatantTuning"] as { weaponTunings?: unknown[] } | undefined;
+      if (!Array.isArray(ct?.weaponTunings)) return;
+      for (const w of ct.weaponTunings) {
+        const ms = (w as { modifier_sequence?: { name?: string; behaviourName?: string } }).modifier_sequence;
+        const b = ms?.name ? map.get(ms.name) : undefined;
+        // 只认开火序列，别把 `modifier_*` 之类的表也写进来
+        if (b && b.includes("weapon_sequence")) ms!.behaviourName = b;
+      }
+    };
+
     const collect = (sources: SourceFile[]): EntityRecord[] => {
       const out: EntityRecord[] = [];
       for (const src of sources) {
         if (failures.has(src.stem)) continue;
         try {
           const rec = buildRecord(src, lua.get(src.stem), pbByLuaName, []);
+          attachBehaviour(rec, src.text);
           const visual = visualOf(src.stem);
           if (visual) rec.visual = visual;
           out.push(rec);

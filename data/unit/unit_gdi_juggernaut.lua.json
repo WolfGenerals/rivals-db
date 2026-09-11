@@ -59,6 +59,7 @@
           },
           "modifier_sequence": {
             "behaviour": {},
+            "behaviourName": "ability_juggernaut_weapon_sequence_behaviour",
             "name": "ability_juggernaut_weapon_sequence",
             "tuning": {
               "delayAfterShot": 250,

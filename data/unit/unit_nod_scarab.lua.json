@@ -55,6 +55,7 @@
           },
           "modifier_sequence": {
             "behaviour": {},
+            "behaviourName": "ability_scarab_weapon_sequence_behaviour",
             "name": "ability_scarab_weapon_sequence",
             "tuning": {
               "durationMs": 4500,

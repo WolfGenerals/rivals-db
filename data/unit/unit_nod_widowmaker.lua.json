@@ -40,6 +40,7 @@
           "maxRangeInTiles": 2.5,
           "modifier_sequence": {
             "behaviour": {},
+            "behaviourName": "ability_widowmaker_fire_weapon_sequence_behaviour",
             "name": "ability_widowmaker_fire_weapon_sequence",
             "tuning": {
               "damage": {

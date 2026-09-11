@@ -267,28 +267,19 @@ export class DetonateAttack extends WeaponAttack {
   }
 }
 
-/** E 族 · 齐射：`每轮总伤害 ÷ durationBetweenVolley_s` */
+/** E 族 · 齐射：`每轮总伤害 ÷ durationBetweenVolley_s`。**不含**枪口模式乘法 */
 export class VolleyAttack extends WeaponAttack {
   get label() {
     return "齐射";
   }
-  private cycleMs(): number {
+  protected cycleMs(): number {
     const t = this.tuning() as { durationBetweenVolley?: number };
     return t.durationBetweenVolley ?? 0;
   }
-  /**
-   * **只有伤害写在弹体上时才乘发射数。**
-   *
-   * 两个单位 `#MUZZLE_INFO` 都是 3，但一个乘一个不乘：
-   *   · 科迪亚克 `damageTuning = 1500` 是**整轮总和** → `1500/3.0 = 500`（不乘）✅
-   *   · 神像机甲 `projectile.modifier.damage = 400` 是**每发** → `400×3/2.5 = 480`（乘）✅
-   * 拿不准时以实测为准，见 docs/attack-mechanics.md 9.1。
-   */
   dps(): number {
     const cyc = this.cycleMs();
     if (!cyc) return 0;
-    const volley = this.projectileDamage() === undefined ? this.damage() : this.damage() * this.patternLength;
-    return (volley * this.waveSize * 1000) / cyc;
+    return (this.damage() * this.waveSize * 1000) / cyc;
   }
   phases(): Phase[] {
     const t = this.tuning() as { delayAfterShot?: number; initialChargeUpMs?: number };
@@ -380,22 +371,152 @@ export class BasicAttack extends WeaponAttack {
   }
 }
 
-/** 武器 → 攻击类型。判别谓词显式写出，便于审查与测试 */
+// ── 15 个开火行为实现 ─────────────────────────────────────────────
+//
+// **按 `behaviourName` 精确派发**，不再嗅探字段。
+//
+// 为什么：22 把特殊武器的真正实现在 `gameplay/abilities/*.lua` 的 `Timeline()` 里，
+// 与参数表（`tuning`）是两回事。靠 `if ("stage1" in tuning)` 这类嗅探去猜形状，
+// 本项目已经错过多次（漏 TickAttack、muzzleFactor 搞错、damage 少两支）。
+// 用 behaviour 名派发是**精确**的，且类名直接对应 Lua 文件，便于审计。
+//
+// 每个类只写**已验证过的公式**（`core/test/attack-verify.ts` 的观测点会抓漂移），
+// 不是对着 Lua 逐行转写。行为的细节说明见 `docs/attack-mechanics.md` 第 9 节。
+
+/**
+ * `ability_simple_weapon_sequence` —— 弹弓 / 狼獾 / 忏悔者 / 烈焰之手
+ *
+ * Lua：`while true` + `SetCooldown(burstCooldown)`，前摇在周期开头；
+ * `muzzleStrategy` 只决定多发**怎么分配**，**不乘 DPS**。
+ */
+export class SimpleWeaponSequence extends ContinuousAttack {}
+
+/** `ability_chemical_weapon_sequence` —— 生化战士 / 生化越野车。额外生成毒雾，**毒雾不计入 DPS** */
+export class ChemicalWeaponSequence extends ContinuousAttack {}
+
+/** `ability_rockwyrm_weapon_sequence_behaviour` —— 深岩巨虫。范围伤害 */
+export class RockWyrmWeaponSequence extends ContinuousAttack {}
+
+/** `ability_flametank_weapon_sequence_behaviour` —— 火焰坦克。主伤打目标格、副伤只打邻格，故 DPS 只用 `damageMain` */
+export class FlameTankWeaponSequence extends ContinuousAttack {}
+
+/** `ability_avatar_laser_weapon_sequence_behaviour` —— 圣灵（laser） */
+export class AvatarLaserWeaponSequence extends TickAttack {}
+
+/** `ability_avatar_fire_weapon_sequence_behaviour` —— 圣灵（fire） */
+export class AvatarFireWeaponSequence extends TickAttack {}
+
+/** `ability_widowmaker_fire_weapon_sequence_behaviour` —— 黑寡妇 */
+export class WidowMakerWeaponSequence extends TickAttack {}
+
+/** `ability_beamcannon_weapon_sequence_behaviour` —— 万钧巨炮。三段递增，取末段 */
+export class BeamCannonWeaponSequence extends StagedAttack {}
+
+/** `ability_basilisk_weapon_sequence_behaviour` —— 蛇怪。两段递增，取末段 */
+export class BasiliskWeaponSequence extends StagedAttack {}
+
+/**
+ * `ability_kodiak_weapon_sequence_behaviour` —— 科迪亚克
+ *
+ * `damageTuning.default = 1500` 是**整轮总和**（3 个枪口分摊），所以**不乘**枪口数。
+ * `1500 / 3.0 = 500` ✅
+ */
+export class KodiakWeaponSequence extends VolleyAttack {}
+
+/**
+ * `ability_juggernaut_weapon_sequence_behaviour` —— 神像机甲 / 神像机甲_ST
+ *
+ * 一轮 **3 发**（Timeline 里硬编码三个 `Fire()`），伤害 `400` 写在
+ * `projectile.modifier` 上是**每发值**，所以要乘枪口模式长度：
+ * `400 × 3 / 2.5 = 480` ✅
+ *
+ * ⚠️ 这是**实测拟合的窄规则**，不是引擎语义：沙暴也是「伤害在弹体上」，
+ * 但它的枪口模式只有 2 条而一轮打 12 发（见 `SandstormWeaponSequence`）。
+ */
+export class JuggernautWeaponSequence extends VolleyAttack {
+  dps(): number {
+    const cyc = this.cycleMs();
+    if (!cyc) return 0;
+    return (this.damage() * this.patternLength * this.waveSize * 1000) / cyc;
+  }
+}
+
+/**
+ * `ability_sandstorm_weapon_sequence_behaviour` —— 沙暴 / 沙暴_ST
+ *
+ * 按目标小队数分档倾泻 `missileCount` 发；`MUZZLE_INFO` 只是**枪口轮转**用的
+ * （2 个枪口轮流打 12 发），**不是发数**。`12 × 150 / 4.0 = 450` ✅
+ */
+export class SandstormWeaponSequence extends PourAttack {}
+
+/** `ability_catalyst_chemical_weapon_sequence` —— 催化炮艇。周期在**另一把武器**上，由 `UnitAttack` 补 */
+export class CatalystWeaponSequence extends DetonateAttack {}
+
+/** `ability_scarab_weapon_sequence_behaviour` —— 圣甲虫。前摇后一枪，然后自爆；DPS 走 `burstTiming` */
+export class ScarabWeaponSequence extends BasicAttack {}
+
+/**
+ * `ability_disruptor_weapon_sequence_behaviour` —— 破坏者
+ *
+ * 有 `FireEndlessBeam` / `FireLimitedBeam` 两种模式，但 `tuning` 里**只有 `initialChargeUpMs`**，
+ * 没有周期参数，**公式未解**（也没有游戏内观测点）。如实标未知，不猜。
+ */
+export class DisruptorWeaponSequence extends UnknownAttack {
+  constructor(weapon: WeaponTuning, waveSize: number, patternLength: number) {
+    super(weapon, waveSize, patternLength, "破坏者的 Timeline 分无限/有限光束两模式，tuning 里没有周期参数");
+  }
+}
+
+type BehaviourCtor = new (w: WeaponTuning, waveSize: number, patternLength: number) => WeaponAttack;
+
+/** `behaviour` 名 → 实现类。键必须与 `gameplay/abilities/<名去掉 _behaviour>.lua` 对应 */
+export const BEHAVIOURS: Record<string, BehaviourCtor> = {
+  ability_simple_weapon_sequence: SimpleWeaponSequence,
+  ability_chemical_weapon_sequence: ChemicalWeaponSequence,
+  ability_rockwyrm_weapon_sequence_behaviour: RockWyrmWeaponSequence,
+  ability_flametank_weapon_sequence_behaviour: FlameTankWeaponSequence,
+  ability_avatar_laser_weapon_sequence_behaviour: AvatarLaserWeaponSequence,
+  ability_avatar_fire_weapon_sequence_behaviour: AvatarFireWeaponSequence,
+  ability_widowmaker_fire_weapon_sequence_behaviour: WidowMakerWeaponSequence,
+  ability_beamcannon_weapon_sequence_behaviour: BeamCannonWeaponSequence,
+  ability_basilisk_weapon_sequence_behaviour: BasiliskWeaponSequence,
+  ability_kodiak_weapon_sequence_behaviour: KodiakWeaponSequence,
+  ability_juggernaut_weapon_sequence_behaviour: JuggernautWeaponSequence,
+  ability_sandstorm_weapon_sequence_behaviour: SandstormWeaponSequence,
+  ability_catalyst_chemical_weapon_sequence: CatalystWeaponSequence,
+  ability_scarab_weapon_sequence_behaviour: ScarabWeaponSequence,
+  ability_disruptor_weapon_sequence_behaviour: DisruptorWeaponSequence,
+};
+
+/**
+ * 武器 → 攻击类型。
+ *
+ * **先按 `behaviourName` 精确派发**（22 把特殊武器），
+ * 没有 behaviour 的（61 把常规武器）才退到字段驱动。
+ */
 export function weaponAttackOf(weapon: WeaponTuning, waveSize: number, patternLength = 1): WeaponAttack {
-  const ms = (weapon as { modifier_sequence?: { tuning?: Record<string, unknown> } }).modifier_sequence;
-  const t = ms?.tuning ?? {};
+  const beh = (weapon.modifier_sequence as { behaviourName?: string } | undefined)?.behaviourName;
+  const Ctor = beh ? BEHAVIOURS[beh] : undefined;
+  if (Ctor) return new Ctor(weapon, waveSize, patternLength);
 
-  if ("stage1" in t || "stage2" in t || "stage3" in t) return new StagedAttack(weapon, waveSize, patternLength);
-  if ("perTargetCount" in t) return new PourAttack(weapon, waveSize, patternLength);
-  if ("catalystBurst" in t || "gasBurst" in t) return new DetonateAttack(weapon, waveSize, patternLength);
-  if ("durationBetweenVolley" in t) return new VolleyAttack(weapon, waveSize, patternLength);
-  if ("tickPeriodMs" in t) return new TickAttack(weapon, waveSize, patternLength);
-  if ("burstCooldown" in t) return new ContinuousAttack(weapon, waveSize, patternLength);
-  if ((weapon as { modifier_spawn?: { tuning?: { burstTuning?: { shotCooldownMs?: number } } } }).modifier_spawn?.tuning?.burstTuning?.shotCooldownMs) return new ContinuousAttack(weapon, waveSize, patternLength);
+  /*
+   * 常规武器：`burstTiming.cooldown` 驱动。
+   *
+   * ⚠️ 但少数武器把间隔写在 `modifier_spawn.burstTuning.shotCooldownMs`（虎鲸轰炸机），
+   * 而它们的 `burstTiming.cooldown` 也在（值不同）—— **必须先查前者**，
+   * 否则会用错间隔（虎鲸会算成 800 而正确值是 1600）。
+   */
+  const spawn = (weapon as { modifier_spawn?: { tuning?: { burstTuning?: { shotCooldownMs?: number } } } })
+    .modifier_spawn;
+  if (spawn?.tuning?.burstTuning?.shotCooldownMs) {
+    return new ContinuousAttack(weapon, waveSize, patternLength);
+  }
+  if ((weapon.burstTiming as { cooldown?: number })?.cooldown) {
+    return new BasicAttack(weapon, waveSize, patternLength);
+  }
 
-  if ((weapon.burstTiming as { cooldown?: number })?.cooldown) return new BasicAttack(weapon, waveSize, patternLength);
-
-  return new UnknownAttack(weapon, waveSize, patternLength, "既无 burstTiming.cooldown，也认不出 modifier_sequence 结构");
+  const why = beh ? `认不出 behaviour「${beh}」` : "既无 behaviour，也无 burstTiming.cooldown";
+  return new UnknownAttack(weapon, waveSize, patternLength, why);
 }
 
 /** 单位级聚合：双武器**取最大**（不求和），并带上小队信息 */

@@ -74,6 +74,7 @@
           },
           "modifier_sequence": {
             "behaviour": {},
+            "behaviourName": "ability_rockwyrm_weapon_sequence_behaviour",
             "name": "ability_rockwyrm_weapon_sequence",
             "tuning": {
               "ARMY_FILTER_FLAG": "kQueryArmyFilter_None",

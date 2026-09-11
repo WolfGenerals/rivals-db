@@ -40,6 +40,7 @@
           "maxRangeInTiles": 1.25,
           "modifier_sequence": {
             "behaviour": {},
+            "behaviourName": "ability_disruptor_weapon_sequence_behaviour",
             "name": "ability_disruptor_weapon_sequence",
             "tuning": {
               "ARMY_FILTER_FLAG": "kQueryArmyFilter_Enemy",
