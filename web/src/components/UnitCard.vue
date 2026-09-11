@@ -60,15 +60,14 @@ const props = withDefaults(
 const emit = defineEmits<{ (e: "pick", id: string): void }>();
 
 /**
- * 点选模式下拦掉跳转。
+ * 点选模式下**根本不渲染成 `RouterLink`**，换成普通 `<button>`（见模板的 `:is`）。
  *
- * ⚠️ 用 `@click` + `preventDefault` 而不是把根元素换成 `<button>` ——
- * 后者要把 140 行模板复制一份，得不偿失。
+ * ⚠️ 一开始用 `@click` + `preventDefault()` 拦 `RouterLink` 的跳转，**不可靠** ——
+ * `RouterLink` 内部有自己的点击处理，是否被拦住取决于两个监听器的注册顺序，
+ * 实测仍然跳到 `#/unit/<id>`（用户报的 bug）。换成非链接元素就没有导航这回事。
  */
-function onClick(e: MouseEvent) {
-  if (!props.pickable) return;
-  e.preventDefault();
-  emit("pick", props.unit.id);
+function onClick() {
+  if (props.pickable) emit("pick", props.unit.id);
 }
 
 const has = (f: CardField) => props.fields.includes(f);
@@ -110,14 +109,16 @@ watch(
 </script>
 
 <template>
-  <RouterLink
+  <component
+    :is="pickable ? 'button' : RouterLink"
     class="card"
     :class="[
       `f-${unit.faction.toLowerCase()}`,
       rarity ? `r-${rarity.toLowerCase()}` : 'r-none',
       { pickable, picked },
     ]"
-    :to="detailPath(unit.id)"
+    :to="pickable ? undefined : detailPath(unit.id)"
+    :type="pickable ? 'button' : undefined"
     :title="nameEn && nameEn !== name ? `${name} · ${nameEn}` : name"
     @click="onClick"
   >
@@ -163,7 +164,7 @@ watch(
       <span class="zh">{{ name }}</span>
       <span v-if="showNameEn" class="en">{{ nameEn }}</span>
     </div>
-  </RouterLink>
+  </component>
 </template>
 
 <style scoped>
