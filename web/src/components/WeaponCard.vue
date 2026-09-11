@@ -60,30 +60,51 @@ const baseDps = computed(() => {
 });
 const levelDps = computed(() => (baseDps.value > 0 ? props.level.dps(baseDps.value) : undefined));
 
-/** 时序的一行文字 */
-function timingText(t: Track): string {
-  const tm = t.timing;
+const fmtMs = (ms: number) => (ms >= 1000 ? `${(ms / 1000).toFixed(2)}s` : `${Math.round(ms)}ms`);
+const fmtSec = (ms: number) => `${(ms / 1000).toFixed(ms % 1000 === 0 ? 1 : 2)}s`;
+
+/**
+ * 把一条时序**按顺序读成一句话**。
+ *
+ * 原先是一张「时序 / 时机 / 节奏」三列表格，三个格子之间要读者自己拼 —— 但时序本来就是
+ * **一条时间线**，读成句子才自然：
+ *
+ * ```
+ * 每 250ms 一发，一轮 12 发（3.00s）
+ * 每 500ms 投一发，弹夹 6 发，打空后装填 12.00s
+ * ```
+ */
+function describeTiming(tm: Track["timing"]): string {
+  if (tm.kind === "一次") return `蓄力 ${fmtMs(tm.charge_ms)} 后一次性`;
   if (tm.kind === "装填") {
-    const parts = [`弹夹 ${tm.clip} 发`, `装填 ${(tm.reload_ms / 1000).toFixed(1)}s`];
-    if (tm.interval_ms) parts.push(`间隔 ${tm.interval_ms}ms`);
-    return parts.join(" · ");
+    const fire = tm.interval_ms ? `每 ${fmtMs(tm.interval_ms)} 一发，` : "";
+    return `${fire}弹夹 ${tm.clip} 发，打空后装填 ${fmtSec(tm.reload_ms)}`;
   }
-  if (tm.kind === "一次") return `蓄力 ${tm.charge_ms}ms 后一次性`;
-  const parts = [`一轮 ${tm.hits} 发`, `周期 ${(tm.cycle_ms / 1000).toFixed(2)}s`];
-  if (tm.interval_ms) parts.push(`间隔 ${tm.interval_ms}ms`);
-  if (tm.gap_ms) parts.push(`空档 ${(tm.gap_ms / 1000).toFixed(2)}s`);
-  return parts.join(" · ");
+  // 单发
+  if (tm.hits <= 1) {
+    return `每 ${fmtSec(tm.cycle_ms)} 一发`;
+  }
+  const span = tm.hits * (tm.interval_ms ?? tm.cycle_ms);
+  const head = `每 ${fmtMs(tm.interval_ms ?? tm.cycle_ms)} 一发，一轮 ${tm.hits} 发（${fmtSec(span)}）`;
+  return tm.gap_ms ? `${head}，然后停 ${fmtSec(tm.gap_ms)}（周期 ${fmtSec(tm.cycle_ms)}）` : head;
 }
 
-/** 轨道的时间定位（`sequence` 用） */
-function whenText(t: Track): string {
+/** 这条轨在整轮里的位置（`sequence` 才是按时间接替） */
+function describeWhen(t: Track): string {
   const parts: string[] = [];
-  if (t.charge_ms) parts.push(`前摇 ${t.charge_ms}ms`);
-  if (t.after_ms !== undefined) parts.push(`${(t.after_ms / 1000).toFixed(2)}s 起`);
-  if (t.lasts_ms === null) parts.push("持续");
-  else if (t.lasts_ms !== undefined) parts.push(`持续 ${(t.lasts_ms / 1000).toFixed(1)}s`);
-  if (t.when?.target?.length) parts.push(`目标：${t.when.target.join("/")}`);
-  return parts.join(" · ");
+  if (t.charge_ms) parts.push(`前摇 ${fmtMs(t.charge_ms)}`);
+  if (t.after_ms !== undefined && t.after_ms > 0) parts.push(`${fmtSec(t.after_ms)} 起`);
+  if (t.lasts_ms === null) parts.push("之后持续");
+  else if (t.lasts_ms !== undefined) parts.push(`持续 ${fmtSec(t.lasts_ms)}`);
+  if (t.when?.target?.length) parts.push(`目标 ${t.when.target.join("/")}`);
+  return parts.join("、");
+}
+
+/** 一条轨的完整句子 */
+function describeTrack(t: Track): string {
+  const when = describeWhen(t);
+  const what = describeTiming(t.timing);
+  return when ? `${when}：${what}` : what;
 }
 
 /** 范围伤害机制 */
@@ -152,23 +173,13 @@ const minor = computed(() => {
       Lua 侧无读取说明是 C++ 在读，所以**数据保留，只是不摆在结论行**。
     -->
 
-    <!-- ② 时序 -->
-    <table v-if="tracks.length" class="timing">
-      <thead>
-        <tr>
-          <th>时序</th>
-          <th>时机</th>
-          <th>节奏</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(t, i) in tracks" :key="i">
-          <td>{{ t.timing.kind }}</td>
-          <td class="dim">{{ whenText(t) || "—" }}</td>
-          <td>{{ timingText(t) }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <!-- ② 时序 —— 按顺序读成句子，不用表格 -->
+    <ul v-if="tracks.length" class="timing">
+      <li v-for="(t, i) in tracks" :key="i">
+        <span class="step">{{ tracks.length > 1 ? i + 1 : "" }}</span>
+        <span>{{ describeTrack(t) }}</span>
+      </li>
+    </ul>
 
     <!-- ③ 范围 -->
     <p v-if="areaText" class="area"><span class="dim">范围</span>{{ areaText }}</p>
@@ -247,23 +258,26 @@ const minor = computed(() => {
 }
 
 .timing {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-  margin-bottom: 8px;
-}
-.timing th {
-  text-align: left;
-  font-weight: 500;
-  color: #7f8aa6;
-  font-size: 11px;
-  padding: 2px 8px 4px 0;
-  border-bottom: 1px solid var(--line, #2a3550);
-}
-.timing td {
-  padding: 3px 8px 3px 0;
-  border-bottom: 1px solid #232b3d;
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  font-size: 12.5px;
   color: #b9c4dc;
+}
+.timing li {
+  padding: 3px 0;
+  border-bottom: 1px solid #232b3d;
+}
+.timing li:last-child {
+  border-bottom: none;
+}
+/* 多段时用序号标出顺序 */
+.timing .step {
+  display: inline-block;
+  min-width: 18px;
+  margin-right: 6px;
+  color: #6b7a99;
+  font-variant-numeric: tabular-nums;
 }
 
 .area {
