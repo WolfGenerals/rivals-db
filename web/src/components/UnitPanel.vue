@@ -110,7 +110,17 @@ const basics = computed(() => {
   if (st.turn_speed !== undefined) rows.push(["转向速度", String(st.turn_speed)]);
   if (st.vision_tiles !== undefined) rows.push(["视野", `${st.vision_tiles} 格`]);
   // ⚠️ 攻击距离（格，整数）与武器射程（实际距离）**不是一回事** —— 万钧巨炮 2 vs 2.5
-  if (st.attack_range_tiles !== undefined) rows.push(["攻击距离", `${st.attack_range_tiles} 格`]);
+  /*
+   * 攻击距离：**1 格是基线**（78 个单位里 65 个是 1，只 13 个是 2/3）。
+   * 游戏面板 `<= 1` 时整行不显示（`CombatTuningInfo.lua:440`），所以那 13 个才是
+   * 游戏里看得见射程的单位。这里仍然列出来，但把基线标出来 —— 否则一页全是「攻击距离 1 格」。
+   */
+  if (st.attack_range_tiles !== undefined) {
+    rows.push([
+      "攻击距离",
+      st.attack_range_tiles > 1 ? `${st.attack_range_tiles} 格` : `${st.attack_range_tiles} 格（基线）`,
+    ]);
+  }
   if (st.aggro_radius_tiles !== undefined) rows.push(["索敌半径", `${st.aggro_radius_tiles} 格`]);
   if (st.avoidance_radius !== undefined) rows.push(["避让半径", `${st.avoidance_radius} 格`]);
   if (st.can_be_crushed !== undefined) rows.push(["能否被碾压", st.can_be_crushed ? "是" : "否"]);
