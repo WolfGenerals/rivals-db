@@ -32,6 +32,16 @@ function pick(side: "left" | "right", id: string) {
     right.value = id;
     pickingRight.value = false;
   }
+  /*
+   * 选完把**该栏滚回顶部**。
+   *
+   * 卡片墙很高（限高 62vh + 内部滚动），点卡片时墙内部可能滚了很远；
+   * 换成详情后那点滚动量就没了，视觉上像"跳回卡片墙的某个位置"。
+   */
+  requestAnimationFrame(() => {
+    const el = document.querySelector(side === "left" ? ".col-left" : ".col-right");
+    el?.scrollIntoView({ block: "start" });
+  });
 }
 </script>
 
@@ -47,25 +57,25 @@ function pick(side: "left" | "right", id: string) {
 
     <div class="cols">
       <!-- 左 -->
-      <section class="col">
+      <section class="col col-left">
         <div class="col-head">
           <span>左</span>
           <b v-if="left">{{ left.replace(/^unit_/, "") }}</b>
           <button v-if="left && !pickingLeft" type="button" @click="pickingLeft = true">换</button>
         </div>
-        <Arsenal v-if="pickingLeft" pickable :picked="picked" @pick="pick('left', $event)" />
-        <UnitDetail v-else-if="left" :id="left" embedded />
+        <div v-if="pickingLeft" key="l-wall" class="wall"><Arsenal pickable :picked="picked" @pick="pick('left', $event)" /></div>
+        <UnitDetail v-else-if="left" key="l-detail" :id="left" embedded />
       </section>
 
       <!-- 右 -->
-      <section class="col">
+      <section class="col col-right">
         <div class="col-head">
           <span>右</span>
           <b v-if="right">{{ right.replace(/^unit_/, "") }}</b>
           <button v-if="right && !pickingRight" type="button" @click="pickingRight = true">换</button>
         </div>
-        <Arsenal v-if="pickingRight" pickable :picked="picked" @pick="pick('right', $event)" />
-        <UnitDetail v-else-if="right" :id="right" embedded />
+        <div v-if="pickingRight" key="r-wall" class="wall"><Arsenal pickable :picked="picked" @pick="pick('right', $event)" /></div>
+        <UnitDetail v-else-if="right" key="r-detail" :id="right" embedded />
       </section>
     </div>
   </div>
@@ -107,6 +117,16 @@ function pick(side: "left" | "right", id: string) {
     grid-template-columns: 1fr;
   }
 }
+/*
+ * 卡片墙**限高 + 内部滚动**。不限高的话两栏各 86 张卡 → 页面极高，
+ * 选完之后一栏塌成小详情，滚动位置就错位了（用户报的 bug）。
+ */
+.wall {
+  max-height: 62vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 /* ⚠️ min-width:0 不能省 —— grid 子项默认不肯收缩，长内容会撑破分栏 */
 .col {
   min-width: 0;
