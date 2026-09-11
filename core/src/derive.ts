@@ -491,6 +491,10 @@ export interface DerivedStats {
   avoidance_radius?: number;
   /** 伤害减免百分比（已 ×100）。仅壁虱坦克的壕沟有 —— 来自 modifier_intro.tuning.damageReductionPercent */
   damage_reduction_pct?: number;
+  /** **最小攻击距离**（格）—— 有的单位有"死区"，太近打不到。神像 2 · 自行火炮 1 */
+  min_attack_range_tiles?: number;
+  /** EMP 半径（格，已由 1/8 格换算）。幽灵原始 18 → 2.25 */
+  emp_radius_tiles?: number;
 }
 
 export interface DerivedHealth {

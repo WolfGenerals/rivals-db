@@ -1207,6 +1207,7 @@
           "avoidance_radius": 2.7,
           "cost": 120,
           "deploy_ms": 5000,
+          "min_attack_range_tiles": 2,
           "preferred_targets": [
             "Infantry",
             "Vehicle",
@@ -1304,6 +1305,7 @@
           "avoidance_radius": 2.7,
           "cost": 120,
           "deploy_ms": 3000,
+          "min_attack_range_tiles": 2,
           "preferred_targets": [
             "Infantry",
             "Vehicle",
@@ -4425,6 +4427,7 @@
           "avoidance_radius": 2.7,
           "cost": 110,
           "deploy_ms": 4000,
+          "min_attack_range_tiles": 1,
           "preferred_targets": [
             "Infantry",
             "Vehicle",
@@ -7896,6 +7899,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 1.7,
           "cost": 70,
+          "emp_radius_tiles": 2.25,
           "preferred_targets": [
             "Vehicle"
           ],

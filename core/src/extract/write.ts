@@ -199,6 +199,29 @@ function statsOf(rec: EntityRecord): Record<string, unknown> {
     .filter((v): v is number => typeof v === "number");
   if (pcts.length) s.damage_reduction_pct = Math.round(Math.max(...pcts) * 100);
 
+  /*
+   * **最小攻击距离** —— 有的单位有"死区"（太近打不到）。
+   * 神像机甲 2、自行火炮 1（`squadTuning.minAttackRangeInTiles`）。
+   */
+  put("min_attack_range_tiles", cfg.squadTuning?.minAttackRangeInTiles);
+
+  /*
+   * **EMP 半径**（幽灵）。原始值 18，与虎鲸的 `damageRadius = 18` **同值** ——
+   * 交叉验证了弹体 modifier 子系统用的是 **1/8 格**（findings I132/I133）。
+   */
+  const mods = wts.flatMap((w) => [
+    w.projectile?.modifier?.tuning,
+    (w as { modifier_shot?: { tuning?: Record<string, unknown> } }).modifier_shot?.tuning,
+    // ⚠️ `modifier_spawn` 有两个位置：**武器上**（虎鲸轰炸机的投弹 `burstTuning`）
+    // 和 **`squadTuning` 里**（幽灵的 `modifier_wraith_squad`，`unit_nod_wraith.lua:79-90`）。
+    // 两处都要扫。
+    (w as { modifier_spawn?: { tuning?: Record<string, unknown> } }).modifier_spawn?.tuning,
+    (cfg.squadTuning as { modifier_spawn?: { tuning?: Record<string, unknown> } } | undefined)
+      ?.modifier_spawn?.tuning,
+  ]);
+  const emp = mods.map((m) => m?.["empRadius"]).find((v) => typeof v === "number");
+  if (typeof emp === "number") s.emp_radius_tiles = emp / 8;
+
   return s;
 }
 
