@@ -2281,20 +2281,20 @@
                   "percent": 100
                 },
                 {
-                  "distance": 6,
+                  "distance": 0.75,
                   "percent": 65
                 },
                 {
-                  "distance": 12,
+                  "distance": 1.5,
                   "percent": 45
                 },
                 {
-                  "distance": 18,
+                  "distance": 2.25,
                   "percent": 25
                 }
               ],
               "kind": "radius",
-              "radius_tiles": 18
+              "radius_tiles": 2.25
             },
             "can_attack": [],
             "damage": 800,

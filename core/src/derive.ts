@@ -187,11 +187,22 @@ function areaOf(w: WeaponTuning, stage?: string, multiHex?: { shape: string; siz
     | { damageRadius?: number; damageFalloff?: { distances?: Array<{ distance?: number; percent?: number }> } }
     | undefined;
   if (num(mod?.damageRadius)) {
+    /*
+     * ⚠️ **`damageRadius` / `fireRadius` / 衰减 `distance` 的单位是 1/8 格**，
+     * 不是格 —— 源码里是裸的 `damageRadius = 18`（`unit_gdi_orcabomber.lua:72`）。
+     *
+     * 两组证据：① 18/8 = **2.25 格**，与用户游戏内观察到的"才两格"吻合；
+     * ② 衰减断点 0/6/12/18 → **0 / 0.75 / 1.5 / 2.25 格** 合理，
+     *    若按格读则是 0/6/12/18 格，**超过地图宽度**（约 10 格）。
+     * 见 findings I132。
+     */
+    const PER_TILE = 8;
+    const rawRadius = mod?.damageRadius as number;
     return {
       kind: "radius",
-      radius_tiles: mod!.damageRadius,
+      radius_tiles: rawRadius / PER_TILE,
       falloff: (mod!.damageFalloff?.distances ?? []).map((d) => ({
-        distance: d.distance ?? 0,
+        distance: (d.distance ?? 0) / PER_TILE,
         percent: d.percent ?? 0,
       })),
     };
