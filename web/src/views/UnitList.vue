@@ -47,6 +47,27 @@ const RARITIES = ["Common", "Rare", "Epic"];
 /** 目标列显示什么：`dps` 实战输出 / `ratio` 补正倍率 */
 const cellMode = ref<"dps" | "ratio">("dps");
 
+/**
+ * 排序。点列名切换：**首次点按该列的合理方向**（数值列默认降序、名称默认升序），
+ * 再点同一列则反向。这是表格的通行约定 —— 点"DPS"想看的是最高的那几个。
+ */
+const sortKey = ref("cost");
+const sortDir = ref<"asc" | "desc">("asc");
+
+/** 数值列首次点击用降序（最大值更有参考价值）；文本列用升序 */
+const DESC_FIRST = new Set(["cost", "totalHP", "dps", "range", ...TYPES]);
+
+function toggleSort(key: string) {
+  if (sortKey.value === key) {
+    sortDir.value = sortDir.value === "asc" ? "desc" : "asc";
+  } else {
+    sortKey.value = key;
+    sortDir.value = DESC_FIRST.has(key) ? "desc" : "asc";
+  }
+}
+
+const RARITY_RANK: Record<string, number> = { Common: 1, Rare: 2, Epic: 3 };
+
 const source = computed(() =>
   props.commandersOnly ? (data.value?.dataset.commanders ?? []) : (data.value?.all ?? []),
 );
@@ -97,8 +118,36 @@ interface Row {
   cells: Cell[];
 }
 
-const rows = computed<Row[]>(() =>
-  entries.value.map((u) => {
+/** 排序取值。**打不到的按 -1**（排最后），而不是当 0 —— 否则会混进"最低输出"那一档 */
+function sortVal(r: Row, key: string): number | string {
+  const ti = TYPES.indexOf(key as T);
+  if (ti >= 0) {
+    const c = r.cells[ti]!;
+    if (!c.reach) return -1;
+    return cellMode.value === "ratio" ? c.ratio : Number(c.text);
+  }
+  switch (key) {
+    case "name":
+      return r.u.name_zh ?? r.u.name_en ?? r.u.id;
+    case "faction":
+      return r.u.faction;
+    case "rarity":
+      return RARITY_RANK[r.u.pb?.rarity ?? ""] ?? 0;
+    case "cost":
+      return r.u.derived.stats.cost ?? -1;
+    case "totalHP":
+      return r.totalHP ?? -1;
+    case "dps":
+      return r.dps ?? -1;
+    case "range":
+      return r.range ?? -1;
+    default:
+      return 0;
+  }
+}
+
+const rows = computed<Row[]>(() => {
+  const out = entries.value.map((u) => {
     const lv = displayLevel(u);
     const h = u.derived.health;
     const w = primaryWeapon(u);
@@ -125,8 +174,25 @@ const rows = computed<Row[]>(() =>
       dps: base === null ? null : lv.dps(base),
       cells,
     };
-  }),
-);
+  });
+
+  const key = sortKey.value;
+  const dir = sortDir.value === "asc" ? 1 : -1;
+  // 排序副本而不是原地排序 —— `entries` 是 computed 的派生，不该被改动
+  return [...out].sort((a, b) => {
+    const va = sortVal(a, key);
+    const vb = sortVal(b, key);
+    let c: number;
+    if (typeof va === "string" || typeof vb === "string") {
+      c = String(va).localeCompare(String(vb), "zh");
+    } else {
+      c = va - vb;
+    }
+    // 同值时按名字稳定排序，避免每次渲染顺序抖动
+    if (c === 0) c = (a.u.name_zh ?? a.u.id).localeCompare(b.u.name_zh ?? b.u.id, "zh");
+    return c * dir;
+  });
+});
 
 /** 补正分档配色：<70% 减伤 / 70~130% 正常 / >130% 增伤 */
 function cellClass(c: Cell): string {
@@ -173,14 +239,30 @@ void startingMajorOfRarity;
   <table class="grid-table">
     <thead class="sticky">
       <tr>
-        <th>单位</th>
-        <th>阵营</th>
-        <th>稀有度</th>
-        <th class="num">造价</th>
-        <th class="num">总血</th>
-        <th class="num">DPS</th>
-        <th class="num">射程</th>
-        <th v-for="t in TYPES" :key="t" class="num target">{{ SHORT[t] }}</th>
+        <th class="sortable" @click="toggleSort('name')">
+          单位<i class="arrow">{{ sortKey === "name" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
+        </th>
+        <th class="sortable" @click="toggleSort('faction')">
+          阵营<i class="arrow">{{ sortKey === "faction" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
+        </th>
+        <th class="sortable" @click="toggleSort('rarity')">
+          稀有度<i class="arrow">{{ sortKey === "rarity" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
+        </th>
+        <th class="num sortable" @click="toggleSort('cost')">
+          造价<i class="arrow">{{ sortKey === "cost" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
+        </th>
+        <th class="num sortable" @click="toggleSort('totalHP')">
+          总血<i class="arrow">{{ sortKey === "totalHP" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
+        </th>
+        <th class="num sortable" @click="toggleSort('dps')">
+          DPS<i class="arrow">{{ sortKey === "dps" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
+        </th>
+        <th class="num sortable" @click="toggleSort('range')">
+          射程<i class="arrow">{{ sortKey === "range" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
+        </th>
+        <th v-for="t in TYPES" :key="t" class="num target sortable" @click="toggleSort(t)">
+          {{ SHORT[t] }}<i class="arrow">{{ sortKey === t ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
+        </th>
       </tr>
     </thead>
     <tbody>
@@ -241,6 +323,23 @@ void startingMajorOfRarity;
 
 .grid-table {
   width: 100%;
+}
+/* 可排序表头：手型 + hover 提亮，让人知道能点 */
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+th.sortable:hover {
+  color: var(--accent);
+}
+.arrow {
+  display: inline-block;
+  width: 0.9em;
+  font-style: normal;
+  font-size: 8px;
+  color: var(--accent);
+  vertical-align: middle;
 }
 .grid-table th.target,
 .grid-table td.target {
