@@ -34,22 +34,12 @@ const props = defineProps<{
 }>();
 
 /**
- * 该不该画时序条 —— 只在**单一轨道且前摇在周期内**时画。
+ * 时序条 —— 现在**所有**有时序的武器都画。
  *
- * `WeaponTimeline` 的模型就是「一个周期 + 周期**末尾**的前摇」（它自己的注释里写着：
- * 前摇是周期末尾那一段，不是前置相加）—— 正好对应普通武器，而且**空间上就区分开了
- * "前摇在不在周期内"**，不需要任何措辞。
- *
- * `sequence`（万钧巨炮那种多段接替）与「前摇在周期外」（音波坦克的 3 秒蓄力）
- * 超出它的模型，仍走文字描述。
+ * 旧版只吃 `{cycle, chargeUp}` 两个数，于是 `sequence`（万钧巨炮多段）与装填型
+ * （虎鲸轰炸机）都被挡在外面。新版 `WeaponTimeline` 直接消费 `tracks`，所以这里
+ * 不再有"能不能画"的判断 —— 只要有时序就画。
  */
-const singleCycle = computed(() => {
-  const ts = props.tracks;
-  if (ts.length !== 1) return null;
-  const t = ts[0]!;
-  if (t.timing.kind !== "单发" || !t.chargeInCycle) return null;
-  return { cycle: t.timing.cycle_ms / 1000, chargeUp: (t.charge_ms ?? 0) / 1000 };
-});
 
 /**
  * 一把武器的 DPS —— **统一式子**：
@@ -130,11 +120,16 @@ function describeWhen(t: Track): string {
    * 前摇用 `含` 还是 `→` 由 `chargeInCycle` 决定：
    *   · 含 —— 在周期内，周期不因它变长（普通武器的 `chargeUpDuration`）
    *   · →  —— 在连打之前，与连打时间相加（序列武器的 `initialChargeUpMs`）
+   *
+   * ⚠️ **分段轨的 `charge_ms` 与 `after_ms` 是同一个数**（第一段的 `after_ms` 就是它自己的
+   * 前摇），两个都说会变成「前摇 500ms、前摇 500ms →、0.50s 起」。有 `after_ms` 时
+   * 由它表达位置，不再单独说前摇。
    */
-  if (t.charge_ms) {
+  const hasAfter = t.after_ms !== undefined && t.after_ms > 0;
+  if (t.charge_ms && !hasAfter) {
     parts.push(t.chargeInCycle ? `（含前摇 ${fmtMs(t.charge_ms)}）` : `前摇 ${fmtMs(t.charge_ms)} →`);
   }
-  if (t.after_ms !== undefined && t.after_ms > 0) parts.push(`${fmtSec(t.after_ms)} 起`);
+  if (hasAfter) parts.push(`${fmtSec(t.after_ms!)} 起`);
   if (t.lasts_ms === null) parts.push("之后持续");
   else if (t.lasts_ms !== undefined) parts.push(`持续 ${fmtSec(t.lasts_ms)}`);
   if (t.when?.target?.length) parts.push(`目标 ${t.when.target.join("/")}`);
@@ -219,13 +214,12 @@ const minor = computed(() => {
     -->
 
     <!--
-      ② 时序条 —— **前摇画在周期条内还是条外，看一眼就知道**，不需要任何措辞。
-      这正是当初画它要解决的问题。每个队员一条（小队行为只画一条就看不见了）。
+      ② 时序条 —— **段与段的位置关系自己就说明了"前摇在不在周期内"**，不需要措辞。
+      这是图，下面是字：图给形状、字给数字，互补而不互相替代。
     -->
     <WeaponTimeline
-      v-if="singleCycle"
-      :cycle="singleCycle.cycle"
-      :charge-up="singleCycle.chargeUp"
+      v-if="tracks.length"
+      :tracks="tracks"
       :wave-size="waveSize ?? 1"
       :separation-ms="separationMs ?? 0"
     />
