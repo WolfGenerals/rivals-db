@@ -93,19 +93,10 @@ function summarize(rec: EntityRecord): Record<string, unknown> {
   return out;
 }
 
-/**
- * 单个实体的输出载荷。
- *
- * **两块**：
- *   · `derived` —— 已决策的展示数据（武器 + 时序），**消费方只读这里**
- *   · `config`  —— 原始树，保留供审计与再推导，消费方不应解析
- *
- * 见 `docs/data-schema.md`。
- */
+/** 单个实体的输出载荷（**不含 `config`** —— 单文件数据集用这个）。 */
 export function payloadFor(rec: EntityRecord): Record<string, unknown> {
   const out: Record<string, unknown> = {
-    _schema: 2,
-    _note: FILE_NOTE,
+    _schema: 3,
     id: rec.id,
     faction: rec.faction,
     variant: rec.variant,
@@ -113,29 +104,29 @@ export function payloadFor(rec: EntityRecord): Record<string, unknown> {
   if (rec.suffixes?.length) out.suffixes = rec.suffixes;
   out.source = rec.source;
   if (rec.pb) out.pb = rec.pb;
-  if (rec.visual) out.visual = rec.visual;
   if (rec.warnings?.length) out.warnings = rec.warnings;
 
-  // 迁移：官方结构 → 我们的规范格式（武器 + 时序）
+  // 本地化
+  if (rec.name_zh) out.name_zh = rec.name_zh;
+  if (rec.name_en) out.name_en = rec.name_en;
+  if (rec.desc_zh) out.desc_zh = rec.desc_zh;
+  if (rec.desc_en) out.desc_en = rec.desc_en;
+
+  // ── 迁移结果：官方结构 → 我们的规范格式（武器 + 时序）──
   const { weapons, attack, primary, dps, notes } = deriveAttack(rec);
   const cfg = rec.config;
   const wave = cfg.squadTuning?.waveSize ?? 1;
   const per = cfg.combatantTuning?.health;
-  out.derived = {
-    _note: "已按引擎算法算好的最终值。消费方只读这里，不要解析 config。",
-    health:
-      per === undefined
-        ? undefined
-        : { per_member: per, wave_size: wave, total: per * wave },
+  const derived: Record<string, unknown> = {
+    health: per === undefined ? null : { per_member: per, wave_size: wave, total: per * wave },
     dps: dps > 0 ? Number(dps.toFixed(4)) : null,
-    squad: wave > 1 ? { wave_size: wave, member_offset_ms: attack.member_offset_ms } : undefined,
     weapons,
     attack,
     primary,
-    notes,
   };
-
-  out.config = rec.config;
+  if (wave > 1) derived.squad = { wave_size: wave, member_offset_ms: attack.member_offset_ms };
+  if (notes.length) derived.notes = notes;
+  out.derived = derived;
   return out;
 }
 
@@ -184,12 +175,25 @@ export function indexPayload(records: EntityRecord[]): Record<string, unknown> {
   return out;
 }
 
+/** 单文件数据集的说明 */
+const DATASET_NOTE =
+  "已解析好的单位数据。每条含 derived.weapons（打出去的**是什么**：伤害/补正/范围/可打目标）与 " +
+  "derived.attack（**什么时候**打**哪一把**：composition + tracks）。不含原始 config 树。";
+
 export interface WriteOptions {
   /** 输出根目录，通常是仓库的 data/ */
   outDir: string;
 }
 
-/** 写出全部产物，返回写出的文件路径列表。 */
+/**
+ * 写出全部产物。
+ *
+ * **只有一个文件**：`data/units.json` —— 全部单位与指挥官，每条是
+ * 「解析出来的攻击逻辑（武器 + 时序）+ 其他必要部分（名称/描述/稀有度/血量/造价…）」。
+ *
+ * ⚠️ **不含原始 `config` 树**（那是"冗长的提取结果"）。需要原始结构时重跑提取即可
+ * —— 它本来就是从 `tmp/` 的 Lua 源码现算的。
+ */
 export async function writeAll(
   result: { units: EntityRecord[]; commanders: EntityRecord[]; factions: unknown[] },
   opts: WriteOptions,
@@ -202,26 +206,14 @@ export async function writeAll(
     written.push(path);
   };
 
-  for (const [dir, records] of [
-    ["unit", result.units],
-    ["commander", result.commanders],
-  ] as const) {
-    for (const rec of records) {
-      await write(join(opts.outDir, dir, `${rec.id}.lua.json`), stableJson(payloadFor(rec)));
-    }
-  }
-
-  await write(join(opts.outDir, "index.json"), stableJson(indexPayload(result.units)));
-  if (result.commanders.length) {
-    await write(
-      join(opts.outDir, "commander-index.json"),
-      stableJson({
-        _note: INDEX_NOTE,
-        commander_count: result.commanders.length,
-        factions: result.factions,
-        commanders: result.commanders.map(summarize),
-      }),
-    );
-  }
+  const payload = {
+    _schema: 3,
+    _note: DATASET_NOTE,
+    unit_count: result.units.length,
+    commander_count: result.commanders.length,
+    units: result.units.map(payloadFor),
+    commanders: result.commanders.map(payloadFor),
+  };
+  await write(join(opts.outDir, "units.json"), stableJson(payload));
   return written;
 }
