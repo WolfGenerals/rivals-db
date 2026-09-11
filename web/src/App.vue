@@ -41,7 +41,7 @@ const activeNav = computed(() => {
 
     <nav>
       <RouterLink to="/" :class="{ active: activeNav === 'units' }">
-        单位<span v-if="unitCount" class="count">{{ unitCount }}</span>
+        单位
       </RouterLink>
       <RouterLink to="/table" :class="{ active: activeNav === 'table' }">表格</RouterLink>
       <RouterLink to="/compare" :class="{ active: activeNav === 'compare' }">对比</RouterLink>
