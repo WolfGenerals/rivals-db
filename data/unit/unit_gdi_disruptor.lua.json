@@ -1,0 +1,102 @@
+{
+  "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "config": {
+    "combatStoreTuning": {
+      "addIncreaseCountOnPurchase": true,
+      "subtractIncreaseCountOnDeath": true,
+      "tiberiumCost": 120,
+      "useGlobalCooldown": true
+    },
+    "combatantTuning": {
+      "aggroRadiusInTiles": 2.5,
+      "angularSpeed": 200,
+      "avoidanceRadius": 2.7,
+      "descriptors": [
+        8,
+        32,
+        2,
+        4
+      ],
+      "goodAgainstTags": [
+        "Infantry",
+        "Structure"
+      ],
+      "health": 3300,
+      "speed": 3.958857,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "weaponTunings": [
+        {
+          "burstTiming": {
+            "numToBurst": 1
+          },
+          "canShootWhileMoving": true,
+          "descriptors": [
+            8,
+            16
+          ],
+          "maxRangeInTiles": 1.25,
+          "modifier_sequence": {
+            "behaviour": {},
+            "name": "ability_disruptor_weapon_sequence",
+            "tuning": {
+              "ARMY_FILTER_FLAG": "kQueryArmyFilter_Enemy",
+              "DESCRIPTOR_FILTERS": 8,
+              "attackCount": 20,
+              "beamWidth": 6,
+              "damage": {
+                "default": 26,
+                "override": [
+                  "Structure",
+                  "Vehicle"
+                ]
+              },
+              "initialChargeUpMs": 3000,
+              "tickPeriodMs": 40
+            }
+          },
+          "muzzleCount": 1,
+          "name": "cannon",
+          "projectile": {
+            "homing": true,
+            "initialSpeed": 125,
+            "maxRangeTimeToHit": 10,
+            "minRangeTimeToHit": 5
+          },
+          "targetSelector": "unit_antiInfantry",
+          "turret": {
+            "pitch": {},
+            "yaw": {
+              "enable": true,
+              "speed": 150
+            }
+          },
+          "weaponType": "projectile"
+        }
+      ]
+    },
+    "name": "unit_gdi_disruptor",
+    "squadTuning": {
+      "accelerationDistance": 2,
+      "decelerationDistance": 2,
+      "hexReservationRadius": 4,
+      "maxAttackRangeInTiles": 2,
+      "visionRangeInTiles": 2,
+      "waveSize": 1
+    }
+  },
+  "desc_en": "Can attack up to <stat|ExtendedAttackRange> tiles away. Damages any enemy in the beam.",
+  "desc_zh": "攻击距离可以达到<stat|ExtendedAttackRange>格。对被光束射中的所有敌人造成伤害。",
+  "faction": "GDI",
+  "id": "unit_gdi_disruptor",
+  "name_en": "Disruptor",
+  "name_zh": "音波坦克",
+  "pb": {
+    "rarity": "Rare",
+    "start_major": 3
+  },
+  "source": "gameplay/units/unit_gdi_disruptor.lua",
+  "variant": "disruptor"
+}

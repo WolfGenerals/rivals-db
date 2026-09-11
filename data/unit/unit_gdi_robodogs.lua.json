@@ -1,0 +1,104 @@
+{
+  "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "config": {
+    "combatStoreTuning": {
+      "addIncreaseCountOnPurchase": true,
+      "subtractIncreaseCountOnDeath": true,
+      "tiberiumCost": 10,
+      "useGlobalCooldown": true
+    },
+    "combatantTuning": {
+      "aggroRadiusInTiles": 2.5,
+      "angularSpeed": 400,
+      "avoidanceRadius": 1.7,
+      "descriptors": [
+        8,
+        32,
+        2,
+        4
+      ],
+      "goodAgainstTags": [
+        "Infantry"
+      ],
+      "health": 300,
+      "speed": 8,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "weaponTunings": [
+        {
+          "burstTiming": {
+            "chargeUpDuration": 0,
+            "cooldown": 1.7,
+            "numToBurst": 1
+          },
+          "damageTuning": {
+            "default": 22,
+            "overrides": [
+              [
+                "Vehicle",
+                10
+              ]
+            ]
+          },
+          "descriptors": [
+            8,
+            16
+          ],
+          "maxRangeInTiles": 2.5,
+          "muzzleCount": 1,
+          "name": "cannon",
+          "projectile": {
+            "homing": true,
+            "initialSpeed": 125,
+            "maxRangeTimeToHit": 10,
+            "minRangeTimeToHit": 5
+          },
+          "targetSelector": "unit_antiInfantry",
+          "targetingTuning": {
+            "randomBurstMax": 5,
+            "randomBurstMin": 2,
+            "targetMode": "kRandom"
+          },
+          "turret": {
+            "pitch": {},
+            "yaw": {
+              "enable": true,
+              "hasConstraints": true,
+              "isLocal": true,
+              "lowerConstraint": -35,
+              "shouldTurnWhileConstrained": true,
+              "speed": 800,
+              "turnToCenterConstraints": true,
+              "upperConstraint": 35
+            }
+          },
+          "weaponType": "projectile"
+        }
+      ]
+    },
+    "name": "unit_gdi_robodogs",
+    "squadTuning": {
+      "accelerationDistance": 2,
+      "attackSeparationDurationMS": 300,
+      "decelerationDistance": 2,
+      "hexReservationRadius": 2.5,
+      "maxAttackRangeInTiles": 1,
+      "visionRangeInTiles": 3,
+      "waveSize": 4
+    }
+  },
+  "desc_en": "Has four vehicles per squad instead of the usual one.",
+  "desc_zh": "每个小队中拥有四台载具，而非常规的一台。",
+  "faction": "GDI",
+  "id": "unit_gdi_robodogs",
+  "name_en": "War Dogs",
+  "name_zh": "军犬",
+  "pb": {
+    "rarity": "Common",
+    "start_major": 1
+  },
+  "source": "gameplay/units/unit_gdi_robodogs.lua",
+  "variant": "robodogs"
+}

@@ -1,0 +1,154 @@
+{
+  "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "config": {
+    "combatStoreTuning": {
+      "addIncreaseCountOnPurchase": true,
+      "subtractIncreaseCountOnDeath": true,
+      "tiberiumCost": 80,
+      "useGlobalCooldown": true
+    },
+    "combatantTuning": {
+      "aggroRadiusInTiles": 2.5,
+      "angularSpeed": 400,
+      "avoidanceRadius": 2.7,
+      "descriptors": [
+        8,
+        32,
+        2,
+        4
+      ],
+      "goodAgainstTags": [
+        "Vehicle",
+        "Structure"
+      ],
+      "health": 1455,
+      "speed": 5.5424,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "weaponTunings": [
+        {
+          "burstTiming": {
+            "numToBurst": 1
+          },
+          "damageTuning": {
+            "default": 150,
+            "overrides": [
+              [
+                "Infantry",
+                20
+              ],
+              [
+                "Vehicle",
+                150
+              ]
+            ]
+          },
+          "descriptors": [
+            8,
+            16
+          ],
+          "maxRangeInTiles": 2.5,
+          "modifier_sequence": {
+            "behaviour": {},
+            "name": "ability_beamcannon_weapon_sequence",
+            "tuning": {
+              "ARMY_FILTER_FLAG": "kQueryArmyFilter_Enemy",
+              "DESCRIPTOR_FILTERS": 8,
+              "initialChargeUpMs": 500,
+              "stage1": {
+                "attackCount": 12,
+                "damageMain": {
+                  "default": 45,
+                  "override": [
+                    "Infantry"
+                  ]
+                },
+                "tickPeriodMs": 250
+              },
+              "stage2": {
+                "attackCount": 24,
+                "damageMain": {
+                  "default": 90,
+                  "override": [
+                    "Infantry"
+                  ]
+                },
+                "damageSide": {
+                  "default": 40,
+                  "override": [
+                    "Infantry"
+                  ]
+                },
+                "sideTargetCount": 2,
+                "tickPeriodMs": 250
+              },
+              "stage3": {
+                "damageMain": {
+                  "default": 150,
+                  "override": [
+                    "Infantry"
+                  ]
+                },
+                "damageSide": {
+                  "default": 50,
+                  "override": [
+                    "Infantry"
+                  ]
+                },
+                "sideTargetCount": 3,
+                "tickPeriodMs": 250
+              },
+              "storeChargeTimeMs": 700
+            }
+          },
+          "muzzleCount": 1,
+          "name": "cannon",
+          "projectile": {
+            "acceleration": 0,
+            "homing": true,
+            "initialSpeed": 64,
+            "maxRangeTimeToHit": 10,
+            "maxSpeed": 64,
+            "minRangeTimeToHit": 5
+          },
+          "targetSelector": "unit_antiInfantry",
+          "targetingTuning": {
+            "centerSpread": 30,
+            "targetMode": "kCenter"
+          },
+          "turret": {
+            "pitch": {},
+            "yaw": {}
+          },
+          "weaponType": "projectile"
+        }
+      ]
+    },
+    "name": "unit_nod_beamcannon",
+    "squadTuning": {
+      "accelerationDistance": 0,
+      "decelerationDistance": 1,
+      "hexReservationRadius": 3.5,
+      "maxAttackRangeInTiles": 2,
+      "visionRangeInTiles": 2,
+      "waveSize": 1
+    }
+  },
+  "desc_en": "Beam splits to hit multiple targets after <stat|RampTime> seconds. Can attack up to <stat|ExtendedAttackRange> tiles away.",
+  "desc_zh": "光束可在<stat|RampTime>秒后分裂，攻击多个目标。可以攻击最多<stat|ExtendedAttackRange>格距离。",
+  "faction": "NOD",
+  "id": "unit_nod_beamcannon",
+  "name_en": "Giga-Cannon",
+  "name_zh": "万钧巨炮",
+  "pb": {
+    "rarity": "Epic",
+    "start_major": 5
+  },
+  "source": "gameplay/units/unit_nod_beamcannon.lua",
+  "variant": "beamcannon",
+  "warnings": [
+    "已丢弃占位/未解析字段：GetStatInfo=<function>, SetStatOverrides=<function>, oldTuning.GetStatInfo=<function>, oldTuning.SetStatOverrides=<function>"
+  ]
+}

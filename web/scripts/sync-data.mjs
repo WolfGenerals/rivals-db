@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 把仓库根的 data/ 同步到 apps/web/public/data/。
  *
  * 为什么需要这一步：Vite 的 publicDir 必须在项目根目录**之内**，

@@ -1,16 +1,12 @@
 {
-  "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。",
-  "unit_count": 84,
+  "_note": "health 是每员血量，小队总血 = health × wave_size。start_major 为起始 major 等级（= 2×稀有度编号−1，经验式）。damage 取第一件武器的基础伤害；多武器单位 weapon_count > 1，具体伤害需读单位文件。⚠ good_against 是 AI 索敌偏好，不是克制关系；真实克制看 damage_overrides。",
   "gdi_count": 43,
-  "nod_count": 39,
   "misc_count": 2,
+  "nod_count": 39,
+  "unit_count": 84,
   "units": [
     {
-      "unit_id": "unit_gdi_riflemen",
-      "faction": "GDI",
-      "variant": "riflemen",
-      "health": 130,
-      "speed": 6.928,
+      "cooldown": 1.72,
       "cost": 10,
       "damage": 38,
       "damage_overrides": [
@@ -19,25 +15,27 @@
           15
         ]
       ],
+      "faction": "GDI",
+      "good_against": [
+        "Infantry"
+      ],
+      "health": 130,
+      "id": "unit_gdi_riflemen",
       "range": 2.5,
-      "cooldown": 1.72,
-      "weapon_count": 1,
+      "rarity": "Common",
+      "speed": 6.928,
+      "start_major": 1,
       "tags": [
         "Infantry",
         "override_infantry"
       ],
-      "good_against": [
-        "Infantry"
-      ],
+      "variant": "riflemen",
+      "vision_range": 3,
       "wave_size": 5,
-      "vision_range": 3
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_robodogs",
-      "faction": "GDI",
-      "variant": "robodogs",
-      "health": 300,
-      "speed": 8,
+      "cooldown": 1.7,
       "cost": 10,
       "damage": 22,
       "damage_overrides": [
@@ -46,25 +44,27 @@
           10
         ]
       ],
+      "faction": "GDI",
+      "good_against": [
+        "Infantry"
+      ],
+      "health": 300,
+      "id": "unit_gdi_robodogs",
       "range": 2.5,
-      "cooldown": 1.7,
-      "weapon_count": 1,
+      "rarity": "Common",
+      "speed": 8,
+      "start_major": 1,
       "tags": [
         "Vehicle",
         "override_vehicle"
       ],
-      "good_against": [
-        "Infantry"
-      ],
+      "variant": "robodogs",
+      "vision_range": 3,
       "wave_size": 4,
-      "vision_range": 3
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_cyberwheel",
-      "faction": "NOD",
-      "variant": "cyberwheel",
-      "health": 200,
-      "speed": 8,
+      "cooldown": 1.5,
       "cost": 10,
       "damage": 21,
       "damage_overrides": [
@@ -73,25 +73,27 @@
           5
         ]
       ],
+      "faction": "NOD",
+      "good_against": [
+        "Infantry"
+      ],
+      "health": 200,
+      "id": "unit_nod_cyberwheel",
       "range": 2.5,
-      "cooldown": 1.5,
-      "weapon_count": 1,
+      "rarity": "Common",
+      "speed": 8,
+      "start_major": 1,
       "tags": [
         "Vehicle",
         "override_vehicle"
       ],
-      "good_against": [
-        "Infantry"
-      ],
+      "variant": "cyberwheel",
+      "vision_range": 3,
       "wave_size": 4,
-      "vision_range": 3
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_militant",
-      "faction": "NOD",
-      "variant": "militant",
-      "health": 130,
-      "speed": 6.928,
+      "cooldown": 1.72,
       "cost": 10,
       "damage": 38,
       "damage_overrides": [
@@ -100,25 +102,27 @@
           15
         ]
       ],
+      "faction": "NOD",
+      "good_against": [
+        "Infantry"
+      ],
+      "health": 130,
+      "id": "unit_nod_militant",
       "range": 2.5,
-      "cooldown": 1.72,
-      "weapon_count": 1,
+      "rarity": "Common",
+      "speed": 6.928,
+      "start_major": 1,
       "tags": [
         "Infantry",
         "override_infantry"
       ],
-      "good_against": [
-        "Infantry"
-      ],
+      "variant": "militant",
+      "vision_range": 3,
       "wave_size": 5,
-      "vision_range": 3
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_droneswarm",
-      "faction": "GDI",
-      "variant": "droneswarm",
-      "health": 127,
-      "speed": 8,
+      "cooldown": 1.5,
       "cost": 20,
       "damage": 42,
       "damage_overrides": [
@@ -127,25 +131,27 @@
           7
         ]
       ],
+      "faction": "GDI",
+      "good_against": [
+        "Infantry"
+      ],
+      "health": 127,
+      "id": "unit_gdi_droneswarm",
       "range": 2.5,
-      "cooldown": 1.5,
-      "weapon_count": 1,
+      "rarity": "Common",
+      "speed": 8,
+      "start_major": 1,
       "tags": [
         "Aircraft",
         "override_aircraft"
       ],
-      "good_against": [
-        "Infantry"
-      ],
+      "variant": "droneswarm",
+      "vision_range": 3,
       "wave_size": 5,
-      "vision_range": 3
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_rockettroopers",
-      "faction": "GDI",
-      "variant": "rockettroopers",
-      "health": 220,
-      "speed": 5.5424,
+      "cooldown": 5,
       "cost": 20,
       "damage": 250,
       "damage_overrides": [
@@ -154,29 +160,28 @@
           35
         ]
       ],
-      "range": 2.5,
-      "cooldown": 5,
-      "weapon_count": 1,
-      "tags": [
-        "Infantry",
-        "override_infantry"
-      ],
+      "faction": "GDI",
       "good_against": [
         "Vehicle",
         "Aircraft"
       ],
+      "health": 220,
+      "id": "unit_gdi_rockettroopers",
+      "range": 2.5,
+      "rarity": "Rare",
+      "speed": 5.5424,
+      "start_major": 3,
+      "tags": [
+        "Infantry",
+        "override_infantry"
+      ],
+      "variant": "rockettroopers",
+      "vision_range": 2,
       "wave_size": 4,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_rockettroopers_mayhem",
-      "faction": "GDI",
-      "variant": "rockettroopers",
-      "suffixes": [
-        "mayhem"
-      ],
-      "health": 220,
-      "speed": 5.5424,
+      "cooldown": 3.2,
       "cost": 20,
       "damage": 750,
       "damage_overrides": [
@@ -185,26 +190,31 @@
           35
         ]
       ],
-      "range": 2.5,
-      "cooldown": 3.2,
-      "weapon_count": 1,
-      "tags": [
-        "Infantry",
-        "override_infantry"
-      ],
+      "faction": "GDI",
       "good_against": [
         "Vehicle",
         "Aircraft"
       ],
+      "health": 220,
+      "id": "unit_gdi_rockettroopers_mayhem",
+      "range": 2.5,
+      "rarity": "Rare",
+      "speed": 5.5424,
+      "start_major": 3,
+      "suffixes": [
+        "mayhem"
+      ],
+      "tags": [
+        "Infantry",
+        "override_infantry"
+      ],
+      "variant": "rockettroopers",
+      "vision_range": 2,
       "wave_size": 4,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_laserdrone",
-      "faction": "NOD",
-      "variant": "laserdrone",
-      "health": 180,
-      "speed": 8,
+      "cooldown": 1.5,
       "cost": 20,
       "damage": 92,
       "damage_overrides": [
@@ -221,25 +231,27 @@
           60
         ]
       ],
+      "faction": "NOD",
+      "good_against": [
+        "Vehicle"
+      ],
+      "health": 180,
+      "id": "unit_nod_laserdrone",
       "range": 2.5,
-      "cooldown": 1.5,
-      "weapon_count": 1,
+      "rarity": "Common",
+      "speed": 8,
+      "start_major": 1,
       "tags": [
         "Aircraft",
         "override_aircraft"
       ],
-      "good_against": [
-        "Vehicle"
-      ],
+      "variant": "laserdrone",
+      "vision_range": 3,
       "wave_size": 4,
-      "vision_range": 3
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_stormtroopers",
-      "faction": "NOD",
-      "variant": "stormtroopers",
-      "health": 220,
-      "speed": 5.5424,
+      "cooldown": 5,
       "cost": 20,
       "damage": 250,
       "damage_overrides": [
@@ -248,26 +260,28 @@
           35
         ]
       ],
-      "range": 2.5,
-      "cooldown": 5,
-      "weapon_count": 1,
-      "tags": [
-        "Infantry",
-        "override_infantry"
-      ],
+      "faction": "NOD",
       "good_against": [
         "Vehicle",
         "Aircraft"
       ],
+      "health": 220,
+      "id": "unit_nod_stormtroopers",
+      "range": 2.5,
+      "rarity": "Rare",
+      "speed": 5.5424,
+      "start_major": 3,
+      "tags": [
+        "Infantry",
+        "override_infantry"
+      ],
+      "variant": "stormtroopers",
+      "vision_range": 2,
       "wave_size": 4,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_mgsquad",
-      "faction": "GDI",
-      "variant": "mgsquad",
-      "health": 400,
-      "speed": 5.5424,
+      "cooldown": 0.2,
       "cost": 30,
       "damage": 28,
       "damage_overrides": [
@@ -276,26 +290,28 @@
           28
         ]
       ],
-      "range": 2.5,
-      "cooldown": 0.2,
-      "weapon_count": 1,
-      "tags": [
-        "Infantry",
-        "override_infantry"
-      ],
+      "faction": "GDI",
       "good_against": [
         "Vehicle",
         "Infantry"
       ],
+      "health": 400,
+      "id": "unit_gdi_mgsquad",
+      "range": 2.5,
+      "rarity": "Rare",
+      "speed": 5.5424,
+      "start_major": 3,
+      "tags": [
+        "Infantry",
+        "override_infantry"
+      ],
+      "variant": "mgsquad",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_rhino",
-      "faction": "GDI",
-      "variant": "rhino",
-      "health": 1611,
-      "speed": 8,
+      "cooldown": 0.75,
       "cost": 30,
       "damage": 80,
       "damage_overrides": [
@@ -308,26 +324,28 @@
           60
         ]
       ],
-      "range": 2.5,
-      "cooldown": 0.75,
-      "weapon_count": 1,
-      "tags": [
-        "Vehicle",
-        "override_vehicle"
-      ],
+      "faction": "GDI",
       "good_against": [
         "Infantry",
         "Aircraft"
       ],
+      "health": 1611,
+      "id": "unit_gdi_rhino",
+      "range": 2.5,
+      "rarity": "Common",
+      "speed": 8,
+      "start_major": 1,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "variant": "rhino",
+      "vision_range": 3,
       "wave_size": 1,
-      "vision_range": 3
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_talon",
-      "faction": "GDI",
-      "variant": "talon",
-      "health": 909,
-      "speed": 8,
+      "cooldown": 0.5,
       "cost": 30,
       "damage": 57,
       "damage_overrides": [
@@ -336,26 +354,28 @@
           20
         ]
       ],
-      "range": 2.5,
-      "cooldown": 0.5,
-      "weapon_count": 2,
-      "tags": [
-        "Aircraft",
-        "override_aircraft"
-      ],
+      "faction": "GDI",
       "good_against": [
         "Infantry",
         "Aircraft"
       ],
+      "health": 909,
+      "id": "unit_gdi_talon",
+      "range": 2.5,
+      "rarity": "Common",
+      "speed": 8,
+      "start_major": 1,
+      "tags": [
+        "Aircraft",
+        "override_aircraft"
+      ],
+      "variant": "talon",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 2
     },
     {
-      "unit_id": "unit_nod_attackbike",
-      "faction": "NOD",
-      "variant": "attackbike",
-      "health": 435,
-      "speed": 9.237333,
+      "cooldown": 4.25,
       "cost": 30,
       "damage": 244,
       "damage_overrides": [
@@ -376,26 +396,28 @@
           223
         ]
       ],
-      "range": 2.5,
-      "cooldown": 4.25,
-      "weapon_count": 1,
-      "tags": [
-        "Vehicle",
-        "override_vehicle"
-      ],
+      "faction": "NOD",
       "good_against": [
         "Vehicle",
         "Aircraft"
       ],
+      "health": 435,
+      "id": "unit_nod_attackbike",
+      "range": 2.5,
+      "rarity": "Rare",
+      "speed": 9.237333,
+      "start_major": 3,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "variant": "attackbike",
+      "vision_range": 2,
       "wave_size": 3,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_banshee",
-      "faction": "NOD",
-      "variant": "banshee",
-      "health": 909,
-      "speed": 8,
+      "cooldown": 1.3,
       "cost": 30,
       "damage": 211,
       "damage_overrides": [
@@ -408,26 +430,28 @@
           270
         ]
       ],
-      "range": 2.5,
-      "cooldown": 1.3,
-      "weapon_count": 1,
-      "tags": [
-        "Aircraft",
-        "override_aircraft"
-      ],
+      "faction": "NOD",
       "good_against": [
         "Vehicle",
         "Aircraft"
       ],
+      "health": 909,
+      "id": "unit_nod_banshee",
+      "range": 2.5,
+      "rarity": "Common",
+      "speed": 8,
+      "start_major": 1,
+      "tags": [
+        "Aircraft",
+        "override_aircraft"
+      ],
+      "variant": "banshee",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_buggy",
-      "faction": "NOD",
-      "variant": "buggy",
-      "health": 1320,
-      "speed": 9.237333,
+      "cooldown": 0.66,
       "cost": 30,
       "damage": 76,
       "damage_overrides": [
@@ -440,26 +464,28 @@
           76
         ]
       ],
-      "range": 2.5,
-      "cooldown": 0.66,
-      "weapon_count": 1,
-      "tags": [
-        "Vehicle",
-        "override_vehicle"
-      ],
+      "faction": "NOD",
       "good_against": [
         "Infantry",
         "Aircraft"
       ],
+      "health": 1320,
+      "id": "unit_nod_buggy",
+      "range": 2.5,
+      "rarity": "Common",
+      "speed": 9.237333,
+      "start_major": 1,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "variant": "buggy",
+      "vision_range": 3,
       "wave_size": 1,
-      "vision_range": 3
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_fanatic",
-      "faction": "NOD",
-      "variant": "fanatic",
-      "health": 220,
-      "speed": 6.928,
+      "cooldown": 0.85,
       "cost": 30,
       "damage": 57,
       "damage_overrides": [
@@ -468,25 +494,27 @@
           18
         ]
       ],
+      "faction": "NOD",
+      "good_against": [
+        "Infantry"
+      ],
+      "health": 220,
+      "id": "unit_nod_fanatic",
       "range": 2.5,
-      "cooldown": 0.85,
-      "weapon_count": 1,
+      "rarity": "Rare",
+      "speed": 6.928,
+      "start_major": 3,
       "tags": [
         "Infantry",
         "override_infantry"
       ],
-      "good_against": [
-        "Infantry"
-      ],
+      "variant": "fanatic",
+      "vision_range": 2,
       "wave_size": 3,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_scavenger",
-      "faction": "NOD",
-      "variant": "scavenger",
-      "health": 280,
-      "speed": 5.4,
+      "cooldown": 4,
       "cost": 30,
       "damage": 230,
       "damage_overrides": [
@@ -499,26 +527,28 @@
           240
         ]
       ],
-      "range": 2.5,
-      "cooldown": 4,
-      "weapon_count": 1,
-      "tags": [
-        "Infantry",
-        "override_infantry"
-      ],
+      "faction": "NOD",
       "good_against": [
         "Vehicle",
         "Aircraft"
       ],
+      "health": 280,
+      "id": "unit_nod_scavenger",
+      "range": 2.5,
+      "rarity": "Rare",
+      "speed": 5.4,
+      "start_major": 3,
+      "tags": [
+        "Infantry",
+        "override_infantry"
+      ],
+      "variant": "scavenger",
+      "vision_range": 2,
       "wave_size": 3,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_venom",
-      "faction": "NOD",
-      "variant": "venom",
-      "health": 1210,
-      "speed": 8,
+      "cooldown": 0.4,
       "cost": 30,
       "damage": 60,
       "damage_overrides": [
@@ -531,25 +561,27 @@
           28
         ]
       ],
+      "faction": "NOD",
+      "good_against": [
+        "Infantry"
+      ],
+      "health": 1210,
+      "id": "unit_nod_venom",
       "range": 2.5,
-      "cooldown": 0.4,
-      "weapon_count": 1,
+      "rarity": "Common",
+      "speed": 8,
+      "start_major": 1,
       "tags": [
         "Aircraft",
         "override_aircraft"
       ],
-      "good_against": [
-        "Infantry"
-      ],
+      "variant": "venom",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_jumptroopers",
-      "faction": "GDI",
-      "variant": "jumptroopers",
-      "health": 220,
-      "speed": 9.237333,
+      "cooldown": 5,
       "cost": 40,
       "damage": 382,
       "damage_overrides": [
@@ -562,43 +594,47 @@
           350
         ]
       ],
+      "faction": "GDI",
+      "good_against": [
+        "Vehicle"
+      ],
+      "health": 220,
+      "id": "unit_gdi_jumptroopers",
       "range": 2.5,
-      "cooldown": 5,
-      "weapon_count": 1,
+      "rarity": "Epic",
+      "speed": 9.237333,
+      "start_major": 5,
       "tags": [
         "Infantry",
         "override_infantry"
       ],
-      "good_against": [
-        "Vehicle"
-      ],
+      "variant": "jumptroopers",
+      "vision_range": 2,
       "wave_size": 4,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_msv",
-      "faction": "GDI",
-      "variant": "msv",
-      "health": 1750,
-      "speed": 5.5424,
+      "cooldown": 3,
       "cost": 40,
       "damage": 0,
+      "faction": "GDI",
+      "health": 1750,
+      "id": "unit_gdi_msv",
       "range": 2.5,
-      "cooldown": 3,
-      "weapon_count": 1,
+      "rarity": "Epic",
+      "speed": 5.5424,
+      "start_major": 5,
       "tags": [
         "Vehicle",
         "override_vehicle"
       ],
+      "variant": "msv",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_pitbull",
-      "faction": "GDI",
-      "variant": "pitbull",
-      "health": 1611,
-      "speed": 6.928,
+      "cooldown": 1.8,
       "cost": 40,
       "damage": 250,
       "damage_overrides": [
@@ -607,26 +643,28 @@
           35
         ]
       ],
-      "range": 1.25,
-      "cooldown": 1.8,
-      "weapon_count": 1,
-      "tags": [
-        "Vehicle",
-        "override_vehicle"
-      ],
+      "faction": "GDI",
       "good_against": [
         "Vehicle",
         "Aircraft"
       ],
+      "health": 1611,
+      "id": "unit_gdi_pitbull",
+      "range": 1.25,
+      "rarity": "Rare",
+      "speed": 6.928,
+      "start_major": 3,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "variant": "pitbull",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_shocktroopers",
-      "faction": "GDI",
-      "variant": "shocktroopers",
-      "health": 400,
-      "speed": 6.925,
+      "cooldown": 2,
       "cost": 40,
       "damage": 150,
       "damage_overrides": [
@@ -639,26 +677,27 @@
           200
         ]
       ],
-      "range": 2.5,
-      "cooldown": 2.0,
-      "weapon_count": 1,
-      "tags": [
-        "Infantry",
-        "override_infantry"
-      ],
+      "faction": "GDI",
       "good_against": [
         "Infantry",
         "Structure"
       ],
+      "health": 400,
+      "id": "unit_gdi_shocktroopers",
+      "range": 2.5,
+      "rarity": "Rare",
+      "speed": 6.925,
+      "start_major": 3,
+      "tags": [
+        "Infantry",
+        "override_infantry"
+      ],
+      "variant": "shocktroopers",
+      "vision_range": 2,
       "wave_size": 3,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_flametroopers",
-      "faction": "NOD",
-      "variant": "flametroopers",
-      "health": 400,
-      "speed": 6.925,
       "cost": 40,
       "damage": 75,
       "damage_overrides": [
@@ -671,50 +710,52 @@
           100
         ]
       ],
-      "range": 2.5,
-      "weapon_count": 1,
-      "tags": [
-        "Infantry",
-        "override_infantry"
-      ],
+      "faction": "NOD",
       "good_against": [
         "Infantry",
         "Structure"
       ],
-      "wave_size": 3,
-      "vision_range": 2
-    },
-    {
-      "unit_id": "unit_nod_scarab",
-      "faction": "NOD",
-      "variant": "scarab",
-      "health": 250,
-      "speed": 5.5424,
-      "cost": 40,
+      "health": 400,
+      "id": "unit_nod_flametroopers",
       "range": 2.5,
-      "cooldown": 5,
-      "weapon_count": 1,
+      "rarity": "Rare",
+      "speed": 6.925,
+      "start_major": 3,
       "tags": [
         "Infantry",
         "override_infantry"
       ],
+      "variant": "flametroopers",
+      "vision_range": 2,
+      "wave_size": 3,
+      "weapon_count": 1
+    },
+    {
+      "cooldown": 5,
+      "cost": 40,
+      "faction": "NOD",
       "good_against": [
         "Infantry",
         "Vehicle",
         "Aircraft"
       ],
+      "health": 250,
+      "id": "unit_nod_scarab",
+      "range": 2.5,
+      "rarity": "Epic",
+      "speed": 5.5424,
+      "start_major": 5,
+      "tags": [
+        "Infantry",
+        "override_infantry"
+      ],
+      "variant": "scarab",
+      "vision_range": 2,
       "wave_size": 2,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_stormtroopers_mayhem",
-      "faction": "NOD",
-      "variant": "stormtroopers",
-      "suffixes": [
-        "mayhem"
-      ],
-      "health": 220,
-      "speed": 5.5424,
+      "cooldown": 3.2,
       "cost": 40,
       "damage": 750,
       "damage_overrides": [
@@ -723,26 +764,31 @@
           35
         ]
       ],
-      "range": 2.5,
-      "cooldown": 3.2,
-      "weapon_count": 1,
-      "tags": [
-        "Infantry",
-        "override_infantry"
-      ],
+      "faction": "NOD",
       "good_against": [
         "Vehicle",
         "Aircraft"
       ],
+      "health": 220,
+      "id": "unit_nod_stormtroopers_mayhem",
+      "range": 2.5,
+      "rarity": "Rare",
+      "speed": 5.5424,
+      "start_major": 3,
+      "suffixes": [
+        "mayhem"
+      ],
+      "tags": [
+        "Infantry",
+        "override_infantry"
+      ],
+      "variant": "stormtroopers",
+      "vision_range": 2,
       "wave_size": 4,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_mohawkgunship",
-      "faction": "GDI",
-      "variant": "mohawkgunship",
-      "health": 1650,
-      "speed": 6.923326,
+      "cooldown": 1.3,
       "cost": 50,
       "damage": 382,
       "damage_overrides": [
@@ -755,28 +801,27 @@
           295
         ]
       ],
+      "faction": "GDI",
+      "good_against": [
+        "Vehicle"
+      ],
+      "health": 1650,
+      "id": "unit_gdi_mohawkgunship",
       "range": 2.5,
-      "cooldown": 1.3,
-      "weapon_count": 1,
+      "rarity": "Common",
+      "speed": 6.923326,
+      "start_major": 1,
       "tags": [
         "Aircraft",
         "override_aircraft"
       ],
-      "good_against": [
-        "Vehicle"
-      ],
+      "variant": "mohawkgunship",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_mohawkgunship_ST",
-      "faction": "GDI",
-      "variant": "mohawkgunship",
-      "suffixes": [
-        "ST"
-      ],
-      "health": 1350,
-      "speed": 6.923326,
+      "cooldown": 1.35,
       "cost": 50,
       "damage": 396,
       "damage_overrides": [
@@ -789,25 +834,30 @@
           295
         ]
       ],
+      "faction": "GDI",
+      "good_against": [
+        "Vehicle"
+      ],
+      "health": 1350,
+      "id": "unit_gdi_mohawkgunship_ST",
       "range": 2.5,
-      "cooldown": 1.35,
-      "weapon_count": 1,
+      "rarity": "Common",
+      "speed": 6.923326,
+      "start_major": 1,
+      "suffixes": [
+        "ST"
+      ],
       "tags": [
         "Aircraft",
         "override_aircraft"
       ],
-      "good_against": [
-        "Vehicle"
-      ],
+      "variant": "mohawkgunship",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_rangers",
-      "faction": "GDI",
-      "variant": "rangers",
-      "health": 250,
-      "speed": 6.928,
+      "cooldown": 2.7,
       "cost": 50,
       "damage": 152,
       "damage_overrides": [
@@ -820,25 +870,27 @@
           20
         ]
       ],
+      "faction": "GDI",
+      "good_against": [
+        "Infantry"
+      ],
+      "health": 250,
+      "id": "unit_gdi_rangers",
       "range": 2.5,
-      "cooldown": 2.7,
-      "weapon_count": 1,
+      "rarity": "Epic",
+      "speed": 6.928,
+      "start_major": 5,
       "tags": [
         "Infantry",
         "override_infantry"
       ],
-      "good_against": [
-        "Infantry"
-      ],
+      "variant": "rangers",
+      "vision_range": 2,
       "wave_size": 3,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_shatterer",
-      "faction": "GDI",
-      "variant": "shatterer",
-      "health": 1790,
-      "speed": 6.928,
+      "cooldown": 0.7,
       "cost": 50,
       "damage": 362,
       "damage_overrides": [
@@ -855,59 +907,61 @@
           210
         ]
       ],
-      "range": 2.5,
-      "cooldown": 0.7,
-      "weapon_count": 1,
-      "tags": [
-        "Vehicle",
-        "override_vehicle"
-      ],
+      "faction": "GDI",
       "good_against": [
         "Infantry",
         "Structure"
       ],
+      "health": 1790,
+      "id": "unit_gdi_shatterer",
+      "range": 2.5,
+      "rarity": "Rare",
+      "speed": 6.928,
+      "start_major": 3,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "variant": "shatterer",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_harvester",
-      "faction": "GDI",
-      "variant": "harvester",
-      "health": 3400,
-      "speed": 3.958857,
       "cost": 60,
+      "faction": "GDI",
+      "health": 3400,
+      "id": "unit_gdi_harvester",
+      "speed": 3.958857,
       "tags": [
         "Vehicle",
         "override_harvester",
         "override_vehicle"
       ],
-      "wave_size": 1,
-      "vision_range": 1
+      "variant": "harvester",
+      "vision_range": 1,
+      "wave_size": 1
     },
     {
-      "unit_id": "unit_gdi_harvester_mayhem",
+      "cost": 60,
       "faction": "GDI",
-      "variant": "harvester",
+      "health": 3400,
+      "id": "unit_gdi_harvester_mayhem",
+      "speed": 6.928,
       "suffixes": [
         "mayhem"
       ],
-      "health": 3400,
-      "speed": 6.928,
-      "cost": 60,
       "tags": [
         "Vehicle",
         "override_harvester",
         "override_vehicle"
       ],
-      "wave_size": 1,
-      "vision_range": 1
+      "variant": "harvester",
+      "vision_range": 1,
+      "wave_size": 1
     },
     {
-      "unit_id": "unit_gdi_razorback",
-      "faction": "GDI",
-      "variant": "razorback",
-      "health": 1530,
-      "speed": 6.9,
+      "cooldown": 0.4,
       "cost": 60,
       "damage": 70,
       "damage_overrides": [
@@ -924,25 +978,26 @@
           17
         ]
       ],
+      "faction": "GDI",
+      "good_against": [
+        "Infantry"
+      ],
+      "health": 1530,
+      "id": "unit_gdi_razorback",
       "range": 1.25,
-      "cooldown": 0.4,
-      "weapon_count": 1,
+      "rarity": "Rare",
+      "speed": 6.9,
+      "start_major": 3,
       "tags": [
         "Aircraft",
         "override_aircraft"
       ],
-      "good_against": [
-        "Infantry"
-      ],
+      "variant": "razorback",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_slingshot",
-      "faction": "GDI",
-      "variant": "slingshot",
-      "health": 1500,
-      "speed": 6.928,
       "cost": 60,
       "damage": 54,
       "damage_overrides": [
@@ -955,24 +1010,26 @@
           25
         ]
       ],
+      "faction": "GDI",
+      "good_against": [
+        "Aircraft"
+      ],
+      "health": 1500,
+      "id": "unit_gdi_slingshot",
       "range": 2.5,
-      "weapon_count": 1,
+      "rarity": "Rare",
+      "speed": 6.928,
+      "start_major": 3,
       "tags": [
         "Vehicle",
         "override_vehicle"
       ],
-      "good_against": [
-        "Aircraft"
-      ],
+      "variant": "slingshot",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_catalystgunship",
-      "faction": "NOD",
-      "variant": "catalystgunship",
-      "health": 1530,
-      "speed": 8,
       "cost": 60,
       "damage": 25,
       "damage_overrides": [
@@ -981,24 +1038,26 @@
           20
         ]
       ],
+      "faction": "NOD",
+      "good_against": [
+        "Infantry"
+      ],
+      "health": 1530,
+      "id": "unit_nod_catalystgunship",
       "range": 2.5,
-      "weapon_count": 2,
+      "rarity": "Rare",
+      "speed": 8,
+      "start_major": 3,
       "tags": [
         "Aircraft",
         "override_aircraft"
       ],
-      "good_against": [
-        "Infantry"
-      ],
+      "variant": "catalystgunship",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 2
     },
     {
-      "unit_id": "unit_nod_chemicalwarrior",
-      "faction": "NOD",
-      "variant": "chemicalwarrior",
-      "health": 620,
-      "speed": 5.5424,
       "cost": 60,
       "damage": 20,
       "damage_overrides": [
@@ -1007,24 +1066,26 @@
           10
         ]
       ],
+      "faction": "NOD",
+      "good_against": [
+        "Infantry"
+      ],
+      "health": 620,
+      "id": "unit_nod_chemicalwarrior",
       "range": 2.5,
-      "weapon_count": 1,
+      "rarity": "Epic",
+      "speed": 5.5424,
+      "start_major": 5,
       "tags": [
         "Infantry",
         "override_infantry"
       ],
-      "good_against": [
-        "Infantry"
-      ],
+      "variant": "chemicalwarrior",
+      "vision_range": 2,
       "wave_size": 3,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_chemquad",
-      "faction": "NOD",
-      "variant": "chemquad",
-      "health": 1550,
-      "speed": 6.928,
       "cost": 60,
       "damage": 72,
       "damage_overrides": [
@@ -1033,57 +1094,60 @@
           30
         ]
       ],
-      "range": 1.25,
-      "weapon_count": 1,
-      "tags": [
-        "Vehicle",
-        "override_vehicle"
-      ],
+      "faction": "NOD",
       "good_against": [
         "Infantry"
       ],
+      "health": 1550,
+      "id": "unit_nod_chemquad",
+      "range": 1.25,
+      "rarity": "Rare",
+      "speed": 6.928,
+      "start_major": 3,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "variant": "chemquad",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_harvester",
-      "faction": "NOD",
-      "variant": "harvester",
-      "health": 3400,
-      "speed": 3.958857,
       "cost": 60,
+      "faction": "NOD",
+      "health": 3400,
+      "id": "unit_nod_harvester",
+      "speed": 3.958857,
       "tags": [
         "Vehicle",
         "override_harvester",
         "override_vehicle"
       ],
-      "wave_size": 1,
-      "vision_range": 1
+      "variant": "harvester",
+      "vision_range": 1,
+      "wave_size": 1
     },
     {
-      "unit_id": "unit_nod_harvester_mayhem",
+      "cost": 60,
       "faction": "NOD",
-      "variant": "harvester",
+      "health": 3400,
+      "id": "unit_nod_harvester_mayhem",
+      "speed": 6.928,
       "suffixes": [
         "mayhem"
       ],
-      "health": 3400,
-      "speed": 6.928,
-      "cost": 60,
       "tags": [
         "Vehicle",
         "override_harvester",
         "override_vehicle"
       ],
-      "wave_size": 1,
-      "vision_range": 1
+      "variant": "harvester",
+      "vision_range": 1,
+      "wave_size": 1
     },
     {
-      "unit_id": "unit_nod_mutantmarauder",
-      "faction": "NOD",
-      "variant": "mutantmarauder",
-      "health": 620,
-      "speed": 5.5424,
+      "cooldown": 3,
       "cost": 60,
       "damage": 382,
       "damage_overrides": [
@@ -1092,25 +1156,27 @@
           30
         ]
       ],
+      "faction": "NOD",
+      "good_against": [
+        "Vehicle"
+      ],
+      "health": 620,
+      "id": "unit_nod_mutantmarauder",
       "range": 2.5,
-      "cooldown": 3,
-      "weapon_count": 1,
+      "rarity": "Common",
+      "speed": 5.5424,
+      "start_major": 1,
       "tags": [
         "Infantry",
         "override_infantry"
       ],
-      "good_against": [
-        "Vehicle"
-      ],
+      "variant": "mutantmarauder",
+      "vision_range": 2,
       "wave_size": 3,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_grenadier",
-      "faction": "GDI",
-      "variant": "grenadier",
-      "health": 620,
-      "speed": 6.9,
+      "cooldown": 2.64,
       "cost": 70,
       "damage": 340,
       "damage_overrides": [
@@ -1119,25 +1185,27 @@
           27
         ]
       ],
+      "faction": "GDI",
+      "good_against": [
+        "Vehicle"
+      ],
+      "health": 620,
+      "id": "unit_gdi_grenadier",
       "range": 2.5,
-      "cooldown": 2.64,
-      "weapon_count": 1,
+      "rarity": "Common",
+      "speed": 6.9,
+      "start_major": 1,
       "tags": [
         "Infantry",
         "override_infantry"
       ],
-      "good_against": [
-        "Vehicle"
-      ],
+      "variant": "grenadier",
+      "vision_range": 2,
       "wave_size": 3,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_mlrs",
-      "faction": "GDI",
-      "variant": "mlrs",
-      "health": 1500,
-      "speed": 5.5424,
+      "cooldown": 0.25,
       "cost": 70,
       "damage": 666,
       "damage_overrides": [
@@ -1150,26 +1218,28 @@
           1000
         ]
       ],
-      "range": 2.5,
-      "cooldown": 0.25,
-      "weapon_count": 1,
-      "tags": [
-        "Vehicle",
-        "override_vehicle"
-      ],
+      "faction": "GDI",
       "good_against": [
         "Vehicle",
         "Structure"
       ],
+      "health": 1500,
+      "id": "unit_gdi_mlrs",
+      "range": 2.5,
+      "rarity": "Epic",
+      "speed": 5.5424,
+      "start_major": 5,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "variant": "mlrs",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_orca",
-      "faction": "GDI",
-      "variant": "orca",
-      "health": 1210,
-      "speed": 8.0,
+      "cooldown": 0.2,
       "cost": 70,
       "damage": 510,
       "damage_overrides": [
@@ -1178,25 +1248,27 @@
           75
         ]
       ],
+      "faction": "GDI",
+      "good_against": [
+        "Vehicle"
+      ],
+      "health": 1210,
+      "id": "unit_gdi_orca",
       "range": 1.1,
-      "cooldown": 0.2,
-      "weapon_count": 1,
+      "rarity": "Epic",
+      "speed": 8,
+      "start_major": 5,
       "tags": [
         "Aircraft",
         "override_aircraft"
       ],
-      "good_against": [
-        "Vehicle"
-      ],
+      "variant": "orca",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_predatortank",
-      "faction": "GDI",
-      "variant": "predatortank",
-      "health": 2823,
-      "speed": 3.958857,
+      "cooldown": 3.44,
       "cost": 70,
       "damage": 830,
       "damage_overrides": [
@@ -1205,60 +1277,62 @@
           96
         ]
       ],
-      "range": 1.25,
-      "cooldown": 3.44,
-      "weapon_count": 1,
-      "tags": [
-        "Vehicle",
-        "override_vehicle"
-      ],
+      "faction": "GDI",
       "good_against": [
         "Vehicle"
       ],
-      "wave_size": 1,
-      "vision_range": 2
-    },
-    {
-      "unit_id": "unit_nod_drillpod",
-      "faction": "NOD",
-      "variant": "drillpod",
-      "health": 1800,
-      "cost": 70,
+      "health": 2823,
+      "id": "unit_gdi_predatortank",
+      "range": 1.25,
+      "rarity": "Common",
+      "speed": 3.958857,
+      "start_major": 1,
       "tags": [
         "Vehicle",
         "override_vehicle"
       ],
+      "variant": "predatortank",
+      "vision_range": 2,
+      "wave_size": 1,
+      "weapon_count": 1
+    },
+    {
+      "cost": 70,
+      "faction": "NOD",
       "good_against": [
         "Infantry"
       ],
-      "wave_size": 1,
-      "vision_range": 2
+      "health": 1800,
+      "id": "unit_nod_drillpod",
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "variant": "drillpod",
+      "vision_range": 2,
+      "wave_size": 1
     },
     {
-      "unit_id": "unit_nod_drillpod_CR",
+      "cost": 70,
       "faction": "NOD",
-      "variant": "drillpod",
+      "good_against": [
+        "Infantry"
+      ],
+      "health": 3200,
+      "id": "unit_nod_drillpod_CR",
       "suffixes": [
         "CR"
       ],
-      "health": 3200,
-      "cost": 70,
       "tags": [
         "Vehicle",
         "override_vehicle"
       ],
-      "good_against": [
-        "Infantry"
-      ],
-      "wave_size": 1,
-      "vision_range": 2
+      "variant": "drillpod",
+      "vision_range": 2,
+      "wave_size": 1
     },
     {
-      "unit_id": "unit_nod_scorpiontank",
-      "faction": "NOD",
-      "variant": "scorpiontank",
-      "health": 2197,
-      "speed": 5.5424,
+      "cooldown": 2.4,
       "cost": 70,
       "damage": 646,
       "damage_overrides": [
@@ -1267,25 +1341,27 @@
           96
         ]
       ],
+      "faction": "NOD",
+      "good_against": [
+        "Vehicle"
+      ],
+      "health": 2197,
+      "id": "unit_nod_scorpiontank",
       "range": 1.25,
-      "cooldown": 2.4,
-      "weapon_count": 1,
+      "rarity": "Common",
+      "speed": 5.5424,
+      "start_major": 1,
       "tags": [
         "Vehicle",
         "override_vehicle"
       ],
-      "good_against": [
-        "Vehicle"
-      ],
+      "variant": "scorpiontank",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_ticktank",
-      "faction": "NOD",
-      "variant": "ticktank",
-      "health": 1800,
-      "speed": 5.5424,
+      "cooldown": 3,
       "cost": 70,
       "damage": 750,
       "damage_overrides": [
@@ -1294,25 +1370,27 @@
           105
         ]
       ],
+      "faction": "NOD",
+      "good_against": [
+        "Vehicle"
+      ],
+      "health": 1800,
+      "id": "unit_nod_ticktank",
       "range": 1.25,
-      "cooldown": 3.0,
-      "weapon_count": 2,
+      "rarity": "Epic",
+      "speed": 5.5424,
+      "start_major": 5,
       "tags": [
         "Vehicle",
         "override_vehicle"
       ],
-      "good_against": [
-        "Vehicle"
-      ],
+      "variant": "ticktank",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 2
     },
     {
-      "unit_id": "unit_nod_wraith",
-      "faction": "NOD",
-      "variant": "wraith",
-      "health": 1233,
-      "speed": 8,
+      "cooldown": 0.035,
       "cost": 70,
       "damage": 192,
       "damage_overrides": [
@@ -1329,25 +1407,26 @@
           125
         ]
       ],
+      "faction": "NOD",
+      "good_against": [
+        "Vehicle"
+      ],
+      "health": 1233,
+      "id": "unit_nod_wraith",
       "range": 2.5,
-      "cooldown": 0.035,
-      "weapon_count": 1,
+      "rarity": "Epic",
+      "speed": 8,
+      "start_major": 5,
       "tags": [
         "Aircraft",
         "override_aircraft"
       ],
-      "good_against": [
-        "Vehicle"
-      ],
+      "variant": "wraith",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_wolverine",
-      "faction": "GDI",
-      "variant": "wolverine",
-      "health": 2800,
-      "speed": 5.5424,
       "cost": 80,
       "damage": 45,
       "damage_overrides": [
@@ -1360,25 +1439,27 @@
           50
         ]
       ],
-      "range": 2.5,
-      "weapon_count": 1,
-      "tags": [
-        "Vehicle",
-        "override_vehicle"
-      ],
+      "faction": "GDI",
       "good_against": [
         "Infantry",
         "Aircraft"
       ],
+      "health": 2800,
+      "id": "unit_gdi_wolverine",
+      "range": 2.5,
+      "rarity": "Common",
+      "speed": 5.5424,
+      "start_major": 1,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "variant": "wolverine",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_beamcannon",
-      "faction": "NOD",
-      "variant": "beamcannon",
-      "health": 1455,
-      "speed": 5.5424,
       "cost": 80,
       "damage": 150,
       "damage_overrides": [
@@ -1391,46 +1472,51 @@
           150
         ]
       ],
-      "range": 2.5,
-      "weapon_count": 1,
-      "tags": [
-        "Vehicle",
-        "override_vehicle"
-      ],
+      "faction": "NOD",
       "good_against": [
         "Vehicle",
         "Structure"
       ],
-      "wave_size": 1,
-      "vision_range": 2
-    },
-    {
-      "unit_id": "unit_nod_widowmaker",
-      "faction": "NOD",
-      "variant": "widowmaker",
-      "health": 2800,
-      "speed": 5.5424,
-      "cost": 80,
+      "health": 1455,
+      "id": "unit_nod_beamcannon",
       "range": 2.5,
-      "weapon_count": 2,
+      "rarity": "Epic",
+      "speed": 5.5424,
+      "start_major": 5,
       "tags": [
         "Vehicle",
         "override_vehicle"
       ],
+      "variant": "beamcannon",
+      "vision_range": 2,
+      "wave_size": 1,
+      "weapon_count": 1
+    },
+    {
+      "cost": 80,
+      "faction": "NOD",
       "good_against": [
         "Infantry",
         "Aircraft",
         "Structure"
       ],
+      "health": 2800,
+      "id": "unit_nod_widowmaker",
+      "range": 2.5,
+      "rarity": "Common",
+      "speed": 5.5424,
+      "start_major": 1,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "variant": "widowmaker",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 2
     },
     {
-      "unit_id": "unit_gdi_apc",
-      "faction": "GDI",
-      "variant": "apc",
-      "health": 3300,
-      "speed": 4.5,
+      "cooldown": 0.85,
       "cost": 90,
       "damage": 90,
       "damage_overrides": [
@@ -1439,26 +1525,28 @@
           45
         ]
       ],
-      "range": 2.5,
-      "cooldown": 0.85,
-      "weapon_count": 1,
-      "tags": [
-        "Vehicle",
-        "override_vehicle"
-      ],
+      "faction": "GDI",
       "good_against": [
         "Aircraft",
         "Infantry"
       ],
+      "health": 3300,
+      "id": "unit_gdi_apc",
+      "range": 2.5,
+      "rarity": "Epic",
+      "speed": 4.5,
+      "start_major": 5,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "variant": "apc",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_batteringram",
-      "faction": "GDI",
-      "variant": "batteringram",
-      "health": 3300,
-      "speed": 3.958857,
+      "cooldown": 3,
       "cost": 90,
       "damage": 600,
       "damage_overrides": [
@@ -1471,25 +1559,27 @@
           3000
         ]
       ],
+      "faction": "GDI",
+      "good_against": [
+        "Structure"
+      ],
+      "health": 3300,
+      "id": "unit_gdi_batteringram",
       "range": 2.5,
-      "cooldown": 3,
-      "weapon_count": 1,
+      "rarity": "Common",
+      "speed": 3.958857,
+      "start_major": 1,
       "tags": [
         "Vehicle",
         "override_vehicle"
       ],
-      "good_against": [
-        "Structure"
-      ],
+      "variant": "batteringram",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_hammerhead",
-      "faction": "GDI",
-      "variant": "hammerhead",
-      "health": 1950,
-      "speed": 9.237333,
+      "cooldown": 1.6,
       "cost": 90,
       "damage": 585,
       "damage_overrides": [
@@ -1498,65 +1588,71 @@
           425
         ]
       ],
+      "faction": "GDI",
+      "good_against": [
+        "Aircraft"
+      ],
+      "health": 1950,
+      "id": "unit_gdi_hammerhead",
       "range": 1.1,
-      "cooldown": 1.6,
-      "weapon_count": 1,
+      "rarity": "Common",
+      "speed": 9.237333,
+      "start_major": 1,
       "tags": [
         "Aircraft",
         "override_aircraft"
       ],
-      "good_against": [
-        "Aircraft"
-      ],
+      "variant": "hammerhead",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_flametank",
-      "faction": "NOD",
-      "variant": "flametank",
-      "health": 3050,
-      "speed": 6.928,
       "cost": 90,
-      "range": 2.5,
-      "weapon_count": 1,
-      "tags": [
-        "Vehicle",
-        "override_vehicle"
-      ],
+      "faction": "NOD",
       "good_against": [
         "Infantry",
         "Structure"
       ],
+      "health": 3050,
+      "id": "unit_nod_flametank",
+      "range": 2.5,
+      "rarity": "Epic",
+      "speed": 6.928,
+      "start_major": 5,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "variant": "flametank",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_orcabomber",
-      "faction": "GDI",
-      "variant": "orcabomber",
-      "health": 1715,
-      "speed": 8,
+      "cooldown": 1,
       "cost": 100,
+      "faction": "GDI",
+      "good_against": [
+        "Vehicle"
+      ],
+      "health": 1715,
+      "id": "unit_gdi_orcabomber",
       "range": 1.1,
-      "cooldown": 1.0,
-      "weapon_count": 2,
+      "rarity": "Epic",
+      "speed": 8,
+      "start_major": 5,
       "tags": [
         "Aircraft",
         "override_aircraft"
       ],
-      "good_against": [
-        "Vehicle"
-      ],
+      "variant": "orcabomber",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 2
     },
     {
-      "unit_id": "unit_nod_centurion",
-      "faction": "NOD",
-      "variant": "centurion",
-      "health": 3800,
-      "speed": 6.928,
+      "cooldown": 1.72,
       "cost": 100,
       "damage": 555,
       "damage_overrides": [
@@ -1565,25 +1661,26 @@
           100
         ]
       ],
+      "faction": "NOD",
+      "good_against": [
+        "Vehicle"
+      ],
+      "health": 3800,
+      "id": "unit_nod_centurion",
       "range": 2.5,
-      "cooldown": 1.72,
-      "weapon_count": 1,
+      "rarity": "Epic",
+      "speed": 6.928,
+      "start_major": 5,
       "tags": [
         "Vehicle",
         "override_vehicle"
       ],
-      "good_against": [
-        "Vehicle"
-      ],
+      "variant": "centurion",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_confessor",
-      "faction": "NOD",
-      "variant": "confessor",
-      "health": 800,
-      "speed": 5.5424,
       "cost": 100,
       "damage": 40,
       "damage_overrides": [
@@ -1596,47 +1693,52 @@
           45
         ]
       ],
-      "range": 2.5,
-      "weapon_count": 1,
-      "tags": [
-        "Infantry",
-        "override_infantry"
-      ],
+      "faction": "NOD",
       "good_against": [
         "Infantry",
         "Aircraft"
       ],
+      "health": 800,
+      "id": "unit_nod_confessor",
+      "range": 2.5,
+      "rarity": "Rare",
+      "speed": 5.5424,
+      "start_major": 3,
+      "tags": [
+        "Infantry",
+        "override_infantry"
+      ],
+      "variant": "confessor",
+      "vision_range": 2,
       "wave_size": 3,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_firebomber",
-      "faction": "NOD",
-      "variant": "firebomber",
-      "health": 1715,
-      "speed": 5.5424,
-      "cost": 100,
-      "range": 2.5,
       "cooldown": 3.2,
-      "weapon_count": 1,
-      "tags": [
-        "Aircraft",
-        "override_aircraft"
-      ],
+      "cost": 100,
+      "faction": "NOD",
       "good_against": [
         "Infantry",
         "Structure",
         "Vehicle"
       ],
+      "health": 1715,
+      "id": "unit_nod_firebomber",
+      "range": 2.5,
+      "rarity": "Epic",
+      "speed": 5.5424,
+      "start_major": 5,
+      "tags": [
+        "Aircraft",
+        "override_aircraft"
+      ],
+      "variant": "firebomber",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_stealthtank",
-      "faction": "NOD",
-      "variant": "stealthtank",
-      "health": 1800,
-      "speed": 9.237333,
+      "cooldown": 0.25,
       "cost": 100,
       "damage": 382,
       "damage_overrides": [
@@ -1649,26 +1751,28 @@
           510
         ]
       ],
-      "range": 2.5,
-      "cooldown": 0.25,
-      "weapon_count": 1,
-      "tags": [
-        "Vehicle",
-        "override_vehicle"
-      ],
+      "faction": "NOD",
       "good_against": [
         "Vehicle",
         "Aircraft"
       ],
+      "health": 1800,
+      "id": "unit_nod_stealthtank",
+      "range": 2.5,
+      "rarity": "Epic",
+      "speed": 9.237333,
+      "start_major": 5,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "variant": "stealthtank",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_viper",
-      "faction": "NOD",
-      "variant": "viper",
-      "health": 1665,
-      "speed": 9.237333,
+      "cooldown": 0.25,
       "cost": 100,
       "damage": 378,
       "damage_overrides": [
@@ -1677,114 +1781,124 @@
           450
         ]
       ],
+      "faction": "NOD",
+      "good_against": [
+        "Aircraft"
+      ],
+      "health": 1665,
+      "id": "unit_nod_viper",
       "range": 1.1,
-      "cooldown": 0.25,
-      "weapon_count": 1,
+      "rarity": "Rare",
+      "speed": 9.237333,
+      "start_major": 3,
       "tags": [
         "Aircraft",
         "override_aircraft"
       ],
-      "good_against": [
-        "Aircraft"
-      ],
+      "variant": "viper",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_artillery",
-      "faction": "NOD",
-      "variant": "artillery",
-      "health": 1650,
-      "speed": 5.5424,
-      "cost": 110,
-      "range": 2.5,
       "cooldown": 3.9,
-      "weapon_count": 1,
-      "tags": [
-        "Vehicle",
-        "override_vehicle"
-      ],
+      "cost": 110,
+      "faction": "NOD",
       "good_against": [
         "Infantry",
         "Vehicle",
         "Structure"
       ],
-      "wave_size": 1,
-      "vision_range": 2
-    },
-    {
-      "unit_id": "unit_gdi_disruptor",
-      "faction": "GDI",
-      "variant": "disruptor",
-      "health": 3300,
-      "speed": 3.958857,
-      "cost": 120,
-      "range": 1.25,
-      "weapon_count": 1,
-      "tags": [
-        "Vehicle",
-        "override_vehicle"
-      ],
-      "good_against": [
-        "Infantry",
-        "Structure"
-      ],
-      "wave_size": 1,
-      "vision_range": 2
-    },
-    {
-      "unit_id": "unit_gdi_juggernaut",
-      "faction": "GDI",
-      "variant": "juggernaut",
-      "health": 2400,
+      "health": 1650,
+      "id": "unit_nod_artillery",
+      "range": 2.5,
+      "rarity": "Epic",
       "speed": 5.5424,
-      "cost": 120,
-      "range": 3.5,
-      "cooldown": 4,
-      "weapon_count": 1,
+      "start_major": 5,
       "tags": [
         "Vehicle",
         "override_vehicle"
       ],
+      "variant": "artillery",
+      "vision_range": 2,
+      "wave_size": 1,
+      "weapon_count": 1
+    },
+    {
+      "cost": 120,
+      "faction": "GDI",
+      "good_against": [
+        "Infantry",
+        "Structure"
+      ],
+      "health": 3300,
+      "id": "unit_gdi_disruptor",
+      "range": 1.25,
+      "rarity": "Rare",
+      "speed": 3.958857,
+      "start_major": 3,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "variant": "disruptor",
+      "vision_range": 2,
+      "wave_size": 1,
+      "weapon_count": 1
+    },
+    {
+      "cooldown": 4,
+      "cost": 120,
+      "faction": "GDI",
       "good_against": [
         "Infantry",
         "Vehicle",
         "Structure"
       ],
+      "health": 2400,
+      "id": "unit_gdi_juggernaut",
+      "range": 3.5,
+      "rarity": "Epic",
+      "speed": 5.5424,
+      "start_major": 5,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "variant": "juggernaut",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_juggernaut_ST",
+      "cooldown": 1.425,
+      "cost": 120,
       "faction": "GDI",
-      "variant": "juggernaut",
+      "good_against": [
+        "Infantry",
+        "Vehicle",
+        "Structure"
+      ],
+      "health": 2400,
+      "id": "unit_gdi_juggernaut_ST",
+      "range": 3.5,
+      "rarity": "Epic",
+      "speed": 5.5424,
+      "start_major": 5,
       "suffixes": [
         "ST"
       ],
-      "health": 2400,
-      "speed": 5.5424,
-      "cost": 120,
-      "range": 3.5,
-      "cooldown": 1.425,
-      "weapon_count": 1,
       "tags": [
         "Vehicle",
         "override_vehicle"
       ],
-      "good_against": [
-        "Infantry",
-        "Vehicle",
-        "Structure"
-      ],
+      "variant": "juggernaut",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_zonetrooper",
-      "faction": "GDI",
-      "variant": "zonetrooper",
-      "health": 875,
-      "speed": 5.5424,
+      "cooldown": 3,
       "cost": 120,
       "damage": 620,
       "damage_overrides": [
@@ -1793,29 +1907,28 @@
           90
         ]
       ],
-      "range": 2.5,
-      "cooldown": 3,
-      "weapon_count": 1,
-      "tags": [
-        "Infantry",
-        "override_infantry"
-      ],
+      "faction": "GDI",
       "good_against": [
         "Vehicle",
         "Aircraft"
       ],
+      "health": 875,
+      "id": "unit_gdi_zonetrooper",
+      "range": 2.5,
+      "rarity": "Epic",
+      "speed": 5.5424,
+      "start_major": 5,
+      "tags": [
+        "Infantry",
+        "override_infantry"
+      ],
+      "variant": "zonetrooper",
+      "vision_range": 2,
       "wave_size": 2,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_zonetrooper_ST",
-      "faction": "GDI",
-      "variant": "zonetrooper",
-      "suffixes": [
-        "ST"
-      ],
-      "health": 1000,
-      "speed": 5.5424,
+      "cooldown": 3,
       "cost": 120,
       "damage": 620,
       "damage_overrides": [
@@ -1824,65 +1937,73 @@
           125
         ]
       ],
-      "range": 2.5,
-      "cooldown": 3.0,
-      "weapon_count": 1,
-      "tags": [
-        "Infantry",
-        "override_infantry"
-      ],
+      "faction": "GDI",
       "good_against": [
         "Vehicle",
         "Aircraft"
       ],
+      "health": 1000,
+      "id": "unit_gdi_zonetrooper_ST",
+      "range": 2.5,
+      "rarity": "Epic",
+      "speed": 5.5424,
+      "start_major": 5,
+      "suffixes": [
+        "ST"
+      ],
+      "tags": [
+        "Infantry",
+        "override_infantry"
+      ],
+      "variant": "zonetrooper",
+      "vision_range": 2,
       "wave_size": 2,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_basilisk",
-      "faction": "NOD",
-      "variant": "basilisk",
-      "health": 2500,
-      "speed": 5.5424,
       "cost": 120,
-      "range": 2.5,
-      "weapon_count": 1,
-      "tags": [
-        "Aircraft",
-        "override_aircraft"
-      ],
+      "faction": "NOD",
       "good_against": [
         "Vehicle",
         "Structure"
       ],
+      "health": 2500,
+      "id": "unit_nod_basilisk",
+      "range": 2.5,
+      "rarity": "Rare",
+      "speed": 5.5424,
+      "start_major": 3,
+      "tags": [
+        "Aircraft",
+        "override_aircraft"
+      ],
+      "variant": "basilisk",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_rockwyrm",
-      "faction": "NOD",
-      "variant": "rockwyrm",
-      "health": 5000,
-      "speed": 5.5424,
       "cost": 120,
+      "faction": "NOD",
+      "good_against": [
+        "Vehicle"
+      ],
+      "health": 5000,
+      "id": "unit_nod_rockwyrm",
       "range": 2.5,
-      "weapon_count": 1,
+      "rarity": "Epic",
+      "speed": 5.5424,
+      "start_major": 5,
       "tags": [
         "Vehicle",
         "override_vehicle"
       ],
-      "good_against": [
-        "Vehicle"
-      ],
+      "variant": "rockwyrm",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_kodiak",
-      "faction": "GDI",
-      "variant": "kodiak",
-      "health": 3465,
-      "speed": 5.5424,
       "cost": 130,
       "damage": 1500,
       "damage_overrides": [
@@ -1891,24 +2012,26 @@
           150
         ]
       ],
+      "faction": "GDI",
+      "good_against": [
+        "Vehicle"
+      ],
+      "health": 3465,
+      "id": "unit_gdi_kodiak",
       "range": 2.5,
-      "weapon_count": 1,
+      "rarity": "Rare",
+      "speed": 5.5424,
+      "start_major": 3,
       "tags": [
         "Aircraft",
         "override_aircraft"
       ],
-      "good_against": [
-        "Vehicle"
-      ],
+      "variant": "kodiak",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_sandstorm",
-      "faction": "GDI",
-      "variant": "sandstorm",
-      "health": 3623,
-      "speed": 5.5424,
       "cost": 130,
       "damage": 150,
       "damage_overrides": [
@@ -1921,28 +2044,27 @@
           100
         ]
       ],
-      "range": 2.5,
-      "weapon_count": 1,
-      "tags": [
-        "Vehicle",
-        "override_vehicle"
-      ],
+      "faction": "GDI",
       "good_against": [
         "Vehicle",
         "Aircraft"
       ],
+      "health": 3623,
+      "id": "unit_gdi_sandstorm",
+      "range": 2.5,
+      "rarity": "Epic",
+      "speed": 5.5424,
+      "start_major": 5,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "variant": "sandstorm",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_sandstorm_ST",
-      "faction": "GDI",
-      "variant": "sandstorm",
-      "suffixes": [
-        "ST"
-      ],
-      "health": 3550,
-      "speed": 8,
       "cost": 130,
       "damage": 150,
       "damage_overrides": [
@@ -1955,45 +2077,53 @@
           40
         ]
       ],
-      "range": 2.5,
-      "weapon_count": 1,
-      "tags": [
-        "Vehicle",
-        "override_vehicle"
-      ],
+      "faction": "GDI",
       "good_against": [
         "Vehicle",
         "Aircraft"
       ],
-      "wave_size": 1,
-      "vision_range": 2
-    },
-    {
-      "unit_id": "unit_gdi_titan",
-      "faction": "GDI",
-      "variant": "titan",
-      "health": 5500,
-      "speed": 5.5424,
-      "cost": 130,
+      "health": 3550,
+      "id": "unit_gdi_sandstorm_ST",
       "range": 2.5,
-      "cooldown": 5,
-      "weapon_count": 1,
+      "rarity": "Epic",
+      "speed": 8,
+      "start_major": 5,
+      "suffixes": [
+        "ST"
+      ],
       "tags": [
         "Vehicle",
         "override_vehicle"
       ],
+      "variant": "sandstorm",
+      "vision_range": 2,
+      "wave_size": 1,
+      "weapon_count": 1
+    },
+    {
+      "cooldown": 5,
+      "cost": 130,
+      "faction": "GDI",
       "good_against": [
         "Vehicle"
       ],
+      "health": 5500,
+      "id": "unit_gdi_titan",
+      "range": 2.5,
+      "rarity": "Epic",
+      "speed": 5.5424,
+      "start_major": 5,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "variant": "titan",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_cyborg",
-      "faction": "NOD",
-      "variant": "cyborg",
-      "health": 900,
-      "speed": 6.928,
+      "cooldown": 2,
       "cost": 130,
       "damage": 400,
       "damage_overrides": [
@@ -2002,26 +2132,28 @@
           75
         ]
       ],
-      "range": 2.5,
-      "cooldown": 2,
-      "weapon_count": 1,
-      "tags": [
-        "Infantry",
-        "override_infantry"
-      ],
+      "faction": "NOD",
       "good_against": [
         "Vehicle",
         "Aircraft"
       ],
+      "health": 900,
+      "id": "unit_nod_cyborg",
+      "range": 2.5,
+      "rarity": "Epic",
+      "speed": 6.928,
+      "start_major": 5,
+      "tags": [
+        "Infantry",
+        "override_infantry"
+      ],
+      "variant": "cyborg",
+      "vision_range": 2,
       "wave_size": 2,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_mammothtank",
-      "faction": "GDI",
-      "variant": "mammothtank",
-      "health": 6900,
-      "speed": 3,
+      "cooldown": 4,
       "cost": 230,
       "damage": 1065,
       "damage_overrides": [
@@ -2030,116 +2162,118 @@
           100
         ]
       ],
-      "range": 1.25,
-      "cooldown": 4,
-      "weapon_count": 2,
-      "tags": [
-        "Vehicle",
-        "override_vehicle"
-      ],
+      "faction": "GDI",
       "good_against": [
         "Vehicle",
         "Infantry"
       ],
-      "wave_size": 1,
-      "vision_range": 2
-    },
-    {
-      "unit_id": "unit_nod_avatar",
-      "faction": "NOD",
-      "variant": "avatar",
-      "health": 6200,
-      "speed": 4.5,
-      "cost": 230,
+      "health": 6900,
+      "id": "unit_gdi_mammothtank",
       "range": 1.25,
-      "weapon_count": 2,
+      "rarity": "Epic",
+      "speed": 3,
+      "start_major": 5,
       "tags": [
         "Vehicle",
         "override_vehicle"
       ],
+      "variant": "mammothtank",
+      "vision_range": 2,
+      "wave_size": 1,
+      "weapon_count": 2
+    },
+    {
+      "cost": 230,
+      "faction": "NOD",
       "good_against": [
         "Vehicle",
         "Infantry",
         "Structure"
       ],
+      "health": 6200,
+      "id": "unit_nod_avatar",
+      "range": 1.25,
+      "rarity": "Epic",
+      "speed": 4.5,
+      "start_major": 5,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "variant": "avatar",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 2
     },
     {
-      "unit_id": "unit_dlc_test",
       "faction": "UNKNOWN",
+      "id": "unit_dlc_test",
       "variant": "unit_dlc_test"
     },
     {
-      "unit_id": "unit_example",
       "faction": "UNKNOWN",
+      "id": "unit_example",
       "variant": "unit_example"
     },
     {
-      "unit_id": "unit_gdi_repairdrone",
-      "faction": "GDI",
-      "variant": "repairdrone",
-      "health": 150,
-      "speed": 3,
-      "damage": 0,
-      "range": 2.5,
       "cooldown": 3,
-      "weapon_count": 1,
+      "damage": 0,
+      "faction": "GDI",
+      "health": 150,
+      "id": "unit_gdi_repairdrone",
+      "range": 2.5,
+      "speed": 3,
       "tags": [
         "Aircraft",
         "override_aircraft"
       ],
+      "variant": "repairdrone",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_repairdrone_CR",
+      "cooldown": 3,
+      "damage": 0,
       "faction": "GDI",
-      "variant": "repairdrone",
+      "health": 1850,
+      "id": "unit_gdi_repairdrone_CR",
+      "range": 2.5,
+      "speed": 9.237333,
       "suffixes": [
         "CR"
       ],
-      "health": 1850,
-      "speed": 9.237333,
-      "damage": 0,
-      "range": 2.5,
-      "cooldown": 3,
-      "weapon_count": 1,
       "tags": [
         "Aircraft",
         "override_aircraft"
       ],
+      "variant": "repairdrone",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_turret",
-      "faction": "GDI",
-      "variant": "turret",
-      "health": 2400,
-      "damage": 60,
-      "range": 2.5,
       "cooldown": 0.5,
-      "weapon_count": 1,
-      "tags": [
-        "Structure",
-        "override_structure"
-      ],
+      "damage": 60,
+      "faction": "GDI",
       "good_against": [
         "Infantry",
         "Aircraft"
       ],
+      "health": 2400,
+      "id": "unit_gdi_turret",
+      "range": 2.5,
+      "tags": [
+        "Structure",
+        "override_structure"
+      ],
+      "variant": "turret",
+      "vision_range": 1,
       "wave_size": 1,
-      "vision_range": 1
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_gdi_turret_CR",
-      "faction": "GDI",
-      "variant": "turret",
-      "suffixes": [
-        "CR"
-      ],
-      "health": 3800,
+      "cooldown": 0.05,
       "damage": 20,
       "damage_overrides": [
         [
@@ -2155,25 +2289,28 @@
           10
         ]
       ],
-      "range": 2.5,
-      "cooldown": 0.05,
-      "weapon_count": 1,
-      "tags": [
-        "Structure",
-        "override_structure"
-      ],
+      "faction": "GDI",
       "good_against": [
         "Infantry",
         "Aircraft"
       ],
+      "health": 3800,
+      "id": "unit_gdi_turret_CR",
+      "range": 2.5,
+      "suffixes": [
+        "CR"
+      ],
+      "tags": [
+        "Structure",
+        "override_structure"
+      ],
+      "variant": "turret",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_obelisk",
-      "faction": "NOD",
-      "variant": "obelisk",
-      "health": 5000,
+      "cooldown": 4,
       "damage": 3000,
       "damage_overrides": [
         [
@@ -2181,28 +2318,25 @@
           500
         ]
       ],
-      "range": 2.5,
-      "cooldown": 4,
-      "weapon_count": 1,
-      "tags": [
-        "Structure",
-        "override_structure"
-      ],
+      "faction": "NOD",
       "good_against": [
         "Vehicle",
         "Infantry"
       ],
+      "health": 5000,
+      "id": "unit_nod_obelisk",
+      "range": 2.5,
+      "tags": [
+        "Structure",
+        "override_structure"
+      ],
+      "variant": "obelisk",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     },
     {
-      "unit_id": "unit_nod_obelisk_CR",
-      "faction": "NOD",
-      "variant": "obelisk",
-      "suffixes": [
-        "CR"
-      ],
-      "health": 3500,
+      "cooldown": 3.25,
       "damage": 1000,
       "damage_overrides": [
         [
@@ -2210,19 +2344,25 @@
           500
         ]
       ],
-      "range": 2.5,
-      "cooldown": 3.25,
-      "weapon_count": 1,
-      "tags": [
-        "Structure",
-        "override_structure"
-      ],
+      "faction": "NOD",
       "good_against": [
         "Vehicle",
         "Infantry"
       ],
+      "health": 3500,
+      "id": "unit_nod_obelisk_CR",
+      "range": 2.5,
+      "suffixes": [
+        "CR"
+      ],
+      "tags": [
+        "Structure",
+        "override_structure"
+      ],
+      "variant": "obelisk",
+      "vision_range": 2,
       "wave_size": 1,
-      "vision_range": 2
+      "weapon_count": 1
     }
   ]
 }

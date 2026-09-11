@@ -4,7 +4,11 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./levels": "./src/levels.ts",
+    "./query": "./src/query.ts",
+    "./extract": "./src/extract/index.ts"
   },
   "scripts": {
     "test": "vitest run",
@@ -13,5 +17,8 @@
   "devDependencies": {
     "@types/node": "^22.20.2",
     "vitest": "^5.0.0"
+  },
+  "dependencies": {
+    "wasmoon": "1.16.0"
   }
 }

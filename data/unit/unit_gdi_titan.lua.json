@@ -1,0 +1,103 @@
+{
+  "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "config": {
+    "combatStoreTuning": {
+      "addIncreaseCountOnPurchase": true,
+      "subtractIncreaseCountOnDeath": true,
+      "tiberiumCost": 130,
+      "useGlobalCooldown": true
+    },
+    "combatantTuning": {
+      "aggroRadiusInTiles": 2.5,
+      "angularSpeed": 180,
+      "avoidanceRadius": 2.7,
+      "descriptors": [
+        8,
+        32,
+        2,
+        4
+      ],
+      "goodAgainstTags": [
+        "Vehicle"
+      ],
+      "health": 5500,
+      "speed": 5.5424,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "weaponTunings": [
+        {
+          "burstTiming": {
+            "chargeUpDuration": 0.3,
+            "cooldown": 5,
+            "numToBurst": 1
+          },
+          "descriptors": [
+            8,
+            16
+          ],
+          "maxRangeInTiles": 2.5,
+          "modifier_shot": {
+            "behaviour": {},
+            "name": "ability_titan_energy_shot",
+            "tuning": {
+              "ARMY_FILTER_FLAG": "kQueryArmyFilter_None",
+              "DESCRIPTOR_FILTERS": 8,
+              "beamLength": 25,
+              "beamWidth": 2,
+              "damage": {
+                "default": 2000,
+                "override": [
+                  "Infantry"
+                ]
+              },
+              "durationMs": 1000
+            }
+          },
+          "muzzleCount": 1,
+          "name": "laser",
+          "projectile": {
+            "homing": true,
+            "initialSpeed": 125,
+            "maxRangeTimeToHit": 10,
+            "minRangeTimeToHit": 5
+          },
+          "targetSelector": "unit_antiInfantry",
+          "turret": {
+            "pitch": {},
+            "yaw": {
+              "enable": true,
+              "speed": 225
+            }
+          },
+          "weaponType": "projectile"
+        }
+      ]
+    },
+    "name": "unit_gdi_titan",
+    "squadTuning": {
+      "accelerationDistance": 2,
+      "decelerationDistance": 1,
+      "hexReservationRadius": 3.5,
+      "maxAttackRangeInTiles": 1,
+      "visionRangeInTiles": 2,
+      "waveSize": 1
+    }
+  },
+  "desc_en": "Fires through its target, also damaging any enemy in the tile behind its target.",
+  "desc_zh": "攻击可穿透目标，并对目标身后一格内的任何敌人造成伤害。",
+  "faction": "GDI",
+  "id": "unit_gdi_titan",
+  "name_en": "Titan",
+  "name_zh": "泰坦机甲",
+  "pb": {
+    "rarity": "Epic",
+    "start_major": 5
+  },
+  "source": "gameplay/units/unit_gdi_titan.lua",
+  "variant": "titan",
+  "warnings": [
+    "已丢弃占位/未解析字段：GetStatInfo=<function>, oldTuning.GetStatInfo=<function>"
+  ]
+}

@@ -13,7 +13,7 @@
     "web": "pnpm --filter @rivals/web dev",
     "web:build": "pnpm --filter @rivals/web build",
     "cli": "pnpm --filter @rivals/cli start",
-    "extract": "uv run rivals extract tmp/com.ea.gp.candcwarzones"
+    "extract": "pnpm --filter @rivals/cli start extract tmp/com.ea.gp.candcwarzones"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

@@ -1,0 +1,96 @@
+{
+  "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "config": {
+    "combatStoreTuning": {
+      "addIncreaseCountOnPurchase": true,
+      "subtractIncreaseCountOnDeath": true,
+      "tiberiumCost": 100,
+      "useGlobalCooldown": true
+    },
+    "combatantTuning": {
+      "aggroRadiusInTiles": 2.5,
+      "angularSpeed": 180,
+      "avoidanceRadius": 2.7,
+      "descriptors": [
+        8,
+        32,
+        2,
+        4
+      ],
+      "goodAgainstTags": [
+        "Vehicle"
+      ],
+      "health": 3800,
+      "speed": 6.928,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "weaponTunings": [
+        {
+          "burstTiming": {
+            "chargeUpDuration": 0.5,
+            "chargeUpLockOnTime": 0.25,
+            "cooldown": 1.72,
+            "numToBurst": 1
+          },
+          "damageTuning": {
+            "default": 555,
+            "overrides": [
+              [
+                "Infantry",
+                100
+              ]
+            ]
+          },
+          "descriptors": [
+            8,
+            16
+          ],
+          "maxRangeInTiles": 2.5,
+          "muzzleCount": 1,
+          "name": "laser",
+          "projectile": {
+            "homing": true,
+            "initialSpeed": 125
+          },
+          "targetSelector": "unit_antiInfantry",
+          "targetingTuning": {
+            "centerSpread": 8,
+            "targetMode": "kCenter"
+          },
+          "weaponType": "projectile"
+        }
+      ]
+    },
+    "name": "unit_nod_centurion",
+    "squadTuning": {
+      "accelerationDistance": 2,
+      "decelerationDistance": 1,
+      "hexReservationRadius": 3.5,
+      "maxAttackRangeInTiles": 1,
+      "modifier_spawn": {
+        "behaviour": {},
+        "name": "modifier_centurion_shield",
+        "tuning": {
+          "chargeTimeMs": 6000,
+          "durationMs": -1
+        }
+      },
+      "visionRangeInTiles": 2,
+      "waveSize": 1
+    }
+  },
+  "desc_en": "Periodically negates incoming damage.",
+  "desc_zh": "周期性无视受到的伤害。",
+  "faction": "NOD",
+  "id": "unit_nod_centurion",
+  "name_en": "Centurion",
+  "name_zh": "百夫长",
+  "pb": {
+    "rarity": "Epic",
+    "start_major": 5
+  },
+  "source": "gameplay/units/unit_nod_centurion.lua",
+  "variant": "centurion"
+}

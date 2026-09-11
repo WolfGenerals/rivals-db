@@ -1,0 +1,59 @@
+{
+  "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "config": {
+    "applyResonanceFieldTuning": {
+      "MODIFIER": "modifier_resonance_field",
+      "doesTargetHex": true,
+      "durationMs": 0,
+      "maxNumberUntriggeredMines": 2,
+      "minDistanceFromHQ": 4,
+      "range": 0,
+      "shouldAllowSpawnInFog": false,
+      "shouldAllowSpawnOnOccupiedTile": true
+    },
+    "combatStoreTuning": {
+      "purchaseCooldownMS": 30000,
+      "startCooldownMS": 30000,
+      "tiberiumCost": 40
+    },
+    "name": "cmdr_gdi_mcneil",
+    "resonanceFieldTuning": {
+      "ARMY_FILTER_FLAG": "kQueryArmyFilter_Enemy",
+      "DESCRIPTOR_FILTERS": 128,
+      "activeState": {
+        "MODIFIER": "modifier_resonance_field_squad",
+        "applicationHexRadius": 1,
+        "durationMs": 8000,
+        "emp": {
+          "MODIFIER": "modifier_resonance_field_combatant",
+          "durationMs": -1,
+          "stats": {
+            "AngularSpeedPercentDecrease": 0.2,
+            "AttackSpeedDecrease": 0.55,
+            "MovementSpeedPercentDecrease": 0.15,
+            "ReloadSpeedPercentDecrease": 0.7
+          }
+        }
+      },
+      "durationMs": -1,
+      "tickPeriodMs": 250,
+      "timeToSetupMs": 300,
+      "triggerState": {
+        "detectionHexRadius": 1,
+        "timeToActivateMs": 500
+      }
+    }
+  },
+  "desc_en": "Deploys a mine that will trigger when an enemy unit steps into its radius. Lasts for 10 seconds and reduces Attack Speed by 30% and Movement Speed by 40%.",
+  "desc_zh": "部署一枚地雷，在敌方单位进入其爆炸半径内时触发。持续10秒，使攻击速度降低30%，移动速度降低40%。",
+  "faction": "GDI",
+  "id": "cmdr_gdi_mcneil",
+  "name_en": "Cdr. McNeil",
+  "name_zh": "麦克尼尔中校",
+  "source": "gameplay/commanders/cmdr_gdi_mcneil.lua",
+  "variant": "mcneil",
+  "warnings": [
+    "缺少 combatantTuning.health（可能是占位/测试单位）",
+    "已丢弃占位/未解析字段：GetGoodAgainstInfo=<function>, GetStatInfo=<function>"
+  ]
+}

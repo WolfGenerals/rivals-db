@@ -1,0 +1,105 @@
+{
+  "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "config": {
+    "combatStoreTuning": {
+      "addIncreaseCountOnPurchase": true,
+      "subtractIncreaseCountOnDeath": true,
+      "tiberiumCost": 90,
+      "useGlobalCooldown": true
+    },
+    "combatantTuning": {
+      "aggroRadiusInTiles": 2.5,
+      "angularSpeed": 200,
+      "avoidanceRadius": 1.7,
+      "descriptors": [
+        8,
+        32,
+        2,
+        4,
+        262144,
+        131072
+      ],
+      "flyingHeight": 2.325,
+      "flyingHeightDelta": 1.661,
+      "flyingTuning": {
+        "offsetsToSearchForDescend": [
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            5.1
+          ],
+          [
+            -1,
+            0
+          ]
+        ]
+      },
+      "goodAgainstTags": [
+        "Structure"
+      ],
+      "health": 3300,
+      "speed": 3.958857,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "weaponTunings": [
+        {
+          "burstTiming": {
+            "chargeUpDuration": 1.2,
+            "cooldown": 3,
+            "numToBurst": 1
+          },
+          "damageTuning": {
+            "default": 600,
+            "overrides": [
+              [
+                "Vehicle",
+                180
+              ],
+              [
+                "Structure",
+                3000
+              ]
+            ]
+          },
+          "descriptors": [
+            8,
+            512
+          ],
+          "fireAnimTime": 0.01,
+          "maxRangeInTiles": 2.5,
+          "muzzleCount": 1,
+          "name": "cannon",
+          "projectile": {},
+          "targetSelector": "unit_antiInfantry",
+          "weaponType": "instant"
+        }
+      ]
+    },
+    "name": "unit_gdi_batteringram",
+    "squadTuning": {
+      "accelerationDistance": 2,
+      "decelerationDistance": 2,
+      "hexReservationRadius": 4,
+      "maxAttackRangeInTiles": 1,
+      "visionRangeInTiles": 2,
+      "waveSize": 1
+    }
+  },
+  "desc_en": "Can climb over and stand on rocks. Can ONLY attack structures.\r\n",
+  "desc_zh": "可以攀爬和翻越岩石。只能攻击建筑。\n",
+  "faction": "GDI",
+  "id": "unit_gdi_batteringram",
+  "name_en": "Battering Ram",
+  "name_zh": "攻城槌",
+  "pb": {
+    "rarity": "Common",
+    "start_major": 1
+  },
+  "source": "gameplay/units/unit_gdi_batteringram.lua",
+  "variant": "batteringram"
+}

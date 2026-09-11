@@ -1,0 +1,112 @@
+{
+  "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "config": {
+    "combatStoreTuning": {
+      "addIncreaseCountOnPurchase": true,
+      "subtractIncreaseCountOnDeath": true,
+      "tiberiumCost": 100,
+      "useGlobalCooldown": true
+    },
+    "combatantTuning": {
+      "aggroRadiusInTiles": 2.5,
+      "angularSpeed": 720,
+      "avoidanceRadius": 1.098,
+      "descriptors": [
+        64,
+        32,
+        2,
+        4
+      ],
+      "flyingHeight": 6,
+      "goodAgainstTags": [
+        "Infantry",
+        "Structure",
+        "Vehicle"
+      ],
+      "health": 1715,
+      "minFlyingHeight": 6,
+      "speed": 5.5424,
+      "tags": [
+        "Aircraft",
+        "override_aircraft"
+      ],
+      "weaponTunings": [
+        {
+          "burstTiming": {
+            "chargeUpDuration": 0.25,
+            "cooldown": 3.2,
+            "numToBurst": 1
+          },
+          "descriptors": [
+            8,
+            16
+          ],
+          "maxRangeInTiles": 2.5,
+          "muzzleCount": 1,
+          "name": "missile",
+          "projectile": {
+            "acceleration": 0,
+            "homing": true,
+            "initialSpeed": 24,
+            "maxRangeTimeToHit": 10,
+            "minRangeTimeToHit": 5,
+            "modifier": {
+              "behaviour": {},
+              "name": "modifier_fire_bomber_projectile",
+              "tuning": {
+                "ARMY_FILTER_FLAG": "kQueryArmyFilter_None",
+                "DESCRIPTOR_FILTERS": 8,
+                "MODIFIER_FIRE": "modifier_fire_bomber_fire",
+                "SECOND_IMPACT_DELAY": 300,
+                "damage1": {
+                  "default": 2040,
+                  "override": [
+                    "Infantry"
+                  ]
+                },
+                "damage2": {
+                  "default": 2040,
+                  "override": [
+                    "Infantry"
+                  ]
+                },
+                "durationMs": 3000
+              }
+            }
+          },
+          "reloadTuning": {
+            "clipSize": 1,
+            "reloadTimeMs": 13000,
+            "speedPercModWhileEmpty": 0.2
+          },
+          "targetSelector": "unit_antiInfantry",
+          "weaponType": "projectile"
+        }
+      ]
+    },
+    "name": "unit_nod_firebomber",
+    "squadTuning": {
+      "accelerationDistance": 2,
+      "decelerationDistance": 2,
+      "hexReservationRadius": 2.5,
+      "maxAttackRangeInTiles": 1,
+      "visionRangeInTiles": 2,
+      "waveSize": 1
+    }
+  },
+  "desc_en": "Attacks two tiles in a line, creating fire that damages ANY ground unit. Moves <stat|ReloadSpeedBoost>% faster while reloading. Flying.",
+  "desc_zh": "攻击一条直线上的两格，产生可对所有地面单位造成伤害的火焰。装填时的移动速度提高<stat|ReloadSpeedBoost>%。飞行单位。",
+  "faction": "NOD",
+  "id": "unit_nod_firebomber",
+  "name_en": "Inferno",
+  "name_zh": "地狱火",
+  "pb": {
+    "rarity": "Epic",
+    "start_major": 5
+  },
+  "source": "gameplay/units/unit_nod_firebomber.lua",
+  "variant": "firebomber",
+  "warnings": [
+    "已丢弃占位/未解析字段：GetStatInfo=<function>, SetStatOverrides=<function>, oldTuning.GetStatInfo=<function>, oldTuning.SetStatOverrides=<function>"
+  ]
+}

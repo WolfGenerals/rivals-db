@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "@rivals/web",
   "version": "0.0.0",
   "private": true,
@@ -8,8 +8,17 @@
     "dev": "pnpm sync-data && vite",
     "build": "pnpm sync-data && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "vue-tsc --noEmit"
   },
-  "dependencies": { "@rivals/core": "workspace:*" },
-  "devDependencies": { "vite": "^8.3.0", "typescript": "^5.9.3" }
+  "dependencies": {
+    "@rivals/core": "workspace:*",
+    "vue": "^3.5.42",
+    "vue-router": "^5.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.8",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.0",
+    "vue-tsc": "^3.3.11"
+  }
 }

@@ -1,0 +1,99 @@
+{
+  "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "config": {
+    "combatStoreTuning": {
+      "addIncreaseCountOnPurchase": true,
+      "subtractIncreaseCountOnDeath": true,
+      "tiberiumCost": 90,
+      "useGlobalCooldown": true
+    },
+    "combatantTuning": {
+      "aggroRadiusInTiles": 2.5,
+      "angularSpeed": 400,
+      "avoidanceRadius": 2.7,
+      "descriptors": [
+        8,
+        32,
+        2,
+        4
+      ],
+      "goodAgainstTags": [
+        "Aircraft",
+        "Infantry"
+      ],
+      "health": 3300,
+      "maxSimultaneousTargets": 2,
+      "speed": 4.5,
+      "tags": [
+        "Vehicle",
+        "override_vehicle"
+      ],
+      "weaponTunings": [
+        {
+          "burstTiming": {
+            "chargeUpDuration": 0.5,
+            "cooldown": 0.85,
+            "numToBurst": 1
+          },
+          "damageTuning": {
+            "default": 90,
+            "overrides": [
+              [
+                "Vehicle",
+                45
+              ]
+            ]
+          },
+          "descriptors": [
+            128,
+            16
+          ],
+          "maxRangeInTiles": 2.5,
+          "muzzleCount": 1,
+          "name": "cannon",
+          "projectile": {
+            "homing": true,
+            "initialSpeed": 125,
+            "maxRangeTimeToHit": 10,
+            "minRangeTimeToHit": 5
+          },
+          "targetSelector": "unit_antiInfantry",
+          "turret": {
+            "pitch": {},
+            "yaw": {
+              "enable": true,
+              "speed": 800
+            }
+          },
+          "weaponType": "projectile"
+        }
+      ]
+    },
+    "name": "unit_gdi_apc",
+    "squadTuning": {
+      "accelerationDistance": 2,
+      "decelerationDistance": 2,
+      "hexReservationRadius": 3.5,
+      "maxAttackRangeInTiles": 1,
+      "squadDeathUnitSpawn": {
+        "initialCombatantsToDamage": 4,
+        "initialDamagePercToUnit": 0,
+        "unitNameId": "Unit_Gdi_RocketTroopers"
+      },
+      "visionRangeInTiles": 2,
+      "waveSize": 1
+    }
+  },
+  "desc_en": "Leaves behind a Missile Squad upon death.",
+  "desc_zh": "被摧毁时可留下一支飞弹小队。",
+  "faction": "GDI",
+  "id": "unit_gdi_apc",
+  "name_en": "A.P.C.",
+  "name_zh": "装甲运兵车",
+  "pb": {
+    "rarity": "Epic",
+    "start_major": 5
+  },
+  "source": "gameplay/units/unit_gdi_apc.lua",
+  "variant": "apc"
+}

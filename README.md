@@ -190,6 +190,11 @@ data/
 提取原理（lupa 求值、宿主桩、踩过的坑）见
 **[docs/extraction.md](docs/extraction.md)**。
 
+**所有结论的台账**（每条都带可复查证据，含已推翻的旧结论）见
+**[docs/findings.md](docs/findings.md)**。字段语义陷阱见
+**[docs/data-semantics.md](docs/data-semantics.md)**，等级倍率公式见
+**[docs/level-scaling.md](docs/level-scaling.md)**。
+
 仓库结构与「什么入库 / 什么不入库」见 **[MIGRATION.md](MIGRATION.md)**。
 
 ### 为什么用 JSON 而不是 TOML
@@ -234,7 +239,7 @@ Rivals/
 ├── core/                     ✅ 共享纯逻辑（TS，不依赖 DOM / Node API）
 ├── cli/                      ✅ 命令行查询工具
 ├── web/                      ✅ 网页（vite）
-├── docs/                     ✅ 输出格式与提取原理
+├── docs/                     ✅ 输出格式、提取原理、结论台账
 ├── tmp/                      ❌ 游戏原始资产（386 MiB，版权）
 └── pnpm-workspace.yaml       工作区定义
 ```

@@ -1,0 +1,191 @@
+{
+  "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "config": {
+    "combatStoreTuning": {
+      "addIncreaseCountOnPurchase": true,
+      "subtractIncreaseCountOnDeath": true,
+      "tiberiumCost": 60,
+      "useGlobalCooldown": true
+    },
+    "combatantTuning": {
+      "aggroRadiusInTiles": 2.5,
+      "angularSpeed": 450,
+      "avoidanceRadius": 1.7,
+      "descriptors": [
+        64,
+        32,
+        2,
+        4
+      ],
+      "flyingHeight": 6,
+      "goodAgainstTags": [
+        "Infantry"
+      ],
+      "health": 1530,
+      "minFlyingHeight": 6,
+      "speed": 8,
+      "tags": [
+        "Aircraft",
+        "override_aircraft"
+      ],
+      "weaponTunings": [
+        {
+          "burstTiming": {
+            "numToBurst": 1
+          },
+          "damageTuning": {
+            "default": 25,
+            "overrides": [
+              [
+                "Vehicle",
+                20
+              ]
+            ]
+          },
+          "descriptors": [
+            8,
+            16
+          ],
+          "displayName": "UI_NOD_CATALYSTGUNSHIP_CHEMICALSPRAY_DISPLAYNAME",
+          "maxRangeInTiles": 2.5,
+          "modifier_sequence": {
+            "behaviour": {},
+            "name": "ability_catalystgunship_weapon_sequence",
+            "tuning": {
+              "catalystBurst": {
+                "cooldown": 1600,
+                "initialChargeUpMs": 0
+              },
+              "gasBurst": {
+                "cooldown": 6000,
+                "initialChargeUpMs": 4500
+              },
+              "gasCloudModifierId": "modifier_chem_warrior_gas_cloud",
+              "initialChargeUpMs": 0,
+              "storeGasChargeTimeMs": 1000
+            }
+          },
+          "modifier_spawn": {
+            "behaviour": {},
+            "name": "modifier_catalystgunship_gas_weapon",
+            "tuning": {
+              "fullChargeLostMs": 6000
+            }
+          },
+          "muzzleCount": 1,
+          "muzzleStrategy": "All",
+          "name": "gasWeapon",
+          "projectile": {
+            "acceleration": 400,
+            "homing": true,
+            "initialSpeed": 0,
+            "maxRangeTimeToHit": 2,
+            "minRangeTimeToHit": 1
+          },
+          "targetSelector": "unit_antiInfantry",
+          "turret": {
+            "pitch": {
+              "relaxOnDeath": true
+            },
+            "yaw": {
+              "relaxOnDeath": true
+            }
+          },
+          "weaponType": "projectile"
+        },
+        {
+          "burstTiming": {
+            "chargeUpDuration": 0.08,
+            "cooldown": 3,
+            "numToBurst": 1
+          },
+          "damageTuning": {
+            "default": 270,
+            "overrides": [
+              [
+                "Vehicle",
+                50
+              ]
+            ]
+          },
+          "descriptors": {},
+          "displayName": "UI_NOD_CATALYST_ROCKETLAUNCHER_DISPLAYNAME",
+          "maxRangeInTiles": 2.5,
+          "muzzleCount": 1,
+          "name": "catalystWeapon",
+          "projectile": {
+            "acceleration": 400,
+            "homing": true,
+            "initialSpeed": 0,
+            "maxRangeTimeToHit": 10,
+            "minRangeTimeToHit": 5,
+            "modifier": {
+              "behaviour": {},
+              "name": "modifier_catalystgunship_projectile",
+              "tuning": {
+                "ARMY_FILTER_FLAG": "kQueryArmyFilter_None",
+                "DESCRIPTOR_FILTERS": 8,
+                "EXPLOSION_MODIFIER": "ability_catalyst_explosion",
+                "MODIFIER_THAT_ACTIVATES_EXPLOSION": "modifier_chem_warrior_gas_cloud",
+                "damage": {
+                  "default": 50,
+                  "override": [
+                    "Structure",
+                    "Infantry"
+                  ]
+                },
+                "radius": 6
+              }
+            }
+          },
+          "targetSelector": "unit_antiInfantry",
+          "turret": {
+            "pitch": {
+              "relaxOnDeath": true
+            },
+            "yaw": {
+              "relaxOnDeath": true
+            }
+          },
+          "weaponType": "projectile"
+        }
+      ]
+    },
+    "name": "unit_nod_catalystgunship",
+    "squadTuning": {
+      "accelerationDistance": 2,
+      "decelerationDistance": 2,
+      "maxAttackRangeInTiles": 1,
+      "visionRangeInTiles": 2,
+      "waveSize": 1
+    },
+    "tiberiumExplosionTuning": {
+      "ARMY_FILTER_FLAG": "kQueryArmyFilter_None",
+      "DAMAGE_TIME": 300,
+      "DESCRIPTOR_FILTERS": 8,
+      "NUM_RINGS_EXPLOSION": 2,
+      "damageMain": {
+        "default": 800,
+        "override": [
+          "Structure",
+          "Infantry"
+        ]
+      }
+    }
+  },
+  "desc_en": "Launches a Tiberium gas grenade that leaves behind Tiberium gas on impact every 5 seconds. Deals bonus damage to a unit sitting in Tiberium gas.",
+  "desc_zh": "每5秒发射一发泰晶瓦斯榴弹，命中后会留下一片泰晶瓦斯。对处于泰晶瓦斯内的单位造成额外伤害。",
+  "faction": "NOD",
+  "id": "unit_nod_catalystgunship",
+  "name_en": "Catalyst Gunship",
+  "name_zh": "催化剂武装直升机",
+  "pb": {
+    "rarity": "Rare",
+    "start_major": 3
+  },
+  "source": "gameplay/units/unit_nod_catalystgunship.lua",
+  "variant": "catalystgunship",
+  "warnings": [
+    "已丢弃占位/未解析字段：GetStatInfo=<function>, oldTuning.GetStatInfo=<function>"
+  ]
+}

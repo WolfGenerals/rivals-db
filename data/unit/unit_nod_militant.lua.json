@@ -1,0 +1,101 @@
+{
+  "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "config": {
+    "combatStoreTuning": {
+      "addIncreaseCountOnPurchase": true,
+      "subtractIncreaseCountOnDeath": true,
+      "tiberiumCost": 10,
+      "useGlobalCooldown": true
+    },
+    "combatantTuning": {
+      "aggroRadiusInTiles": 2.5,
+      "angularSpeed": 900,
+      "avoidanceRadius": 1.7,
+      "descriptors": [
+        8,
+        256,
+        2,
+        4
+      ],
+      "goodAgainstTags": [
+        "Infantry"
+      ],
+      "health": 130,
+      "speed": 6.928,
+      "tags": [
+        "Infantry",
+        "override_infantry"
+      ],
+      "weaponTunings": [
+        {
+          "burstTiming": {
+            "chargeUpDuration": 0,
+            "cooldown": 1.72,
+            "numToBurst": 1
+          },
+          "damageTuning": {
+            "default": 38,
+            "overrides": [
+              [
+                "Vehicle",
+                15
+              ]
+            ]
+          },
+          "descriptors": [
+            8,
+            16
+          ],
+          "maxRangeInTiles": 2.5,
+          "muzzleCount": 1,
+          "name": "rifle",
+          "projectile": {
+            "homing": true,
+            "initialSpeed": 125,
+            "maxRangeTimeToHit": 10,
+            "minRangeTimeToHit": 5
+          },
+          "targetSelector": "unit_antiInfantry",
+          "targetingTuning": {
+            "randomBurstMax": 5,
+            "randomBurstMin": 2,
+            "targetMode": "kRandom"
+          },
+          "turret": {
+            "pitch": {
+              "relaxOnDeath": true
+            },
+            "yaw": {
+              "relaxOnDeath": true
+            }
+          },
+          "weaponType": "projectile"
+        }
+      ]
+    },
+    "name": "unit_nod_militant",
+    "squadTuning": {
+      "accelerationDistance": 1,
+      "attackSeparationDurationMS": 344,
+      "canBeCrushed": true,
+      "decelerationDistance": 1,
+      "hexReservationRadius": 3,
+      "maxAttackRangeInTiles": 1,
+      "stealthDetectionRangeInTiles": 1,
+      "visionRangeInTiles": 3,
+      "waveSize": 5
+    }
+  },
+  "desc_en": "Provides vision up to 3 tiles away and reveals adjacent stealthed units.",
+  "desc_zh": "可提供最远3格距离的视野范围并可暴露相邻的隐形单位。",
+  "faction": "NOD",
+  "id": "unit_nod_militant",
+  "name_en": "Militant",
+  "name_zh": "激进分子",
+  "pb": {
+    "rarity": "Common",
+    "start_major": 1
+  },
+  "source": "gameplay/units/unit_nod_militant.lua",
+  "variant": "militant"
+}

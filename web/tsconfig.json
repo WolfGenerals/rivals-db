@@ -1,5 +1,10 @@
-﻿{
+{
   "extends": "../tsconfig.base.json",
-  "compilerOptions": { "lib": ["ES2022", "DOM", "DOM.Iterable"] },
-  "include": ["src", "vite.config.ts"]
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    // Vue 单文件组件的模板类型推导需要保留 JSX 语义
+    "jsx": "preserve",
+    "types": ["vite/client"]
+  },
+  "include": ["src", "vite.config.ts", "env.d.ts"]
 }

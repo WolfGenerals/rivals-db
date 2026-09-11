@@ -1,0 +1,120 @@
+{
+  "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "config": {
+    "combatStoreTuning": {
+      "addIncreaseCountOnPurchase": true,
+      "subtractIncreaseCountOnDeath": true,
+      "tiberiumCost": 100,
+      "useGlobalCooldown": true
+    },
+    "combatantTuning": {
+      "aggroRadiusInTiles": 2.5,
+      "angularSpeed": 720,
+      "avoidanceRadius": 1.7,
+      "descriptors": [
+        64,
+        32,
+        2,
+        4
+      ],
+      "flyingHeight": 6,
+      "goodAgainstTags": [
+        "Aircraft"
+      ],
+      "health": 1665,
+      "minFlyingHeight": 6,
+      "speed": 9.237333,
+      "tags": [
+        "Aircraft",
+        "override_aircraft"
+      ],
+      "weaponTunings": [
+        {
+          "burstTiming": {
+            "chargeUpDuration": 0,
+            "cooldown": 0.25,
+            "numToBurst": 1
+          },
+          "canShootWhileMoving": true,
+          "damageTuning": {
+            "default": 378,
+            "overrides": [
+              [
+                "Structure",
+                450
+              ]
+            ]
+          },
+          "descriptors": [
+            4096,
+            16
+          ],
+          "maxRangeInTiles": 1.1,
+          "muzzleCount": 2,
+          "name": "rocketLauncher",
+          "projectile": {
+            "acceleration": 400,
+            "homing": true,
+            "initialSpeed": 0,
+            "maxRangeTimeToHit": 10,
+            "minRangeTimeToHit": 5,
+            "modifier": {
+              "behaviour": {},
+              "name": "modifier_viper_projectile",
+              "tuning": {
+                "ARMY_FILTER_FLAG": "kQueryArmyFilter_None",
+                "DESCRIPTOR_FILTERS": 32,
+                "MODIFIER": "modifier_viper_emp",
+                "emp": {
+                  "MODIFIER": "modifier_viper_emp_combatant",
+                  "durationMs": 4000,
+                  "stats": {
+                    "AngularSpeedPercentDecrease": 0.3,
+                    "AttackSpeedDecrease": 0.5,
+                    "MovementSpeedPercentDecrease": 0.3,
+                    "ReloadSpeedPercentDecrease": 0.5
+                  }
+                }
+              }
+            }
+          },
+          "reloadTuning": {
+            "clipSize": 4,
+            "idleTimeBeforeReloadMs": 0,
+            "reloadTimeMs": 8000
+          },
+          "targetSelector": "unit_antiInfantry",
+          "turret": {
+            "pitch": {
+              "relaxOnDeath": true
+            },
+            "yaw": {
+              "relaxOnDeath": true
+            }
+          },
+          "weaponType": "projectile"
+        }
+      ]
+    },
+    "name": "unit_nod_viper",
+    "squadTuning": {
+      "accelerationDistance": 0.5,
+      "decelerationDistance": 0.5,
+      "maxAttackRangeInTiles": 1,
+      "visionRangeInTiles": 2,
+      "waveSize": 1
+    }
+  },
+  "desc_en": "Attacks against aircraft slow their Attack Speed and Movement Speed. Can also attack the enemy base. Flying.",
+  "desc_zh": "对空中单位的攻击会减缓他们的攻击和移动速度。它还可以攻击敌军基地。飞行单位。",
+  "faction": "NOD",
+  "id": "unit_nod_viper",
+  "name_en": "Phantom",
+  "name_zh": "幻影战机",
+  "pb": {
+    "rarity": "Rare",
+    "start_major": 3
+  },
+  "source": "gameplay/units/unit_nod_viper.lua",
+  "variant": "viper"
+}

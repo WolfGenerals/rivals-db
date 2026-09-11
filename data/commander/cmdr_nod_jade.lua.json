@@ -1,0 +1,70 @@
+{
+  "_note": "combatantTuning.descriptors / weaponTunings[].descriptors 是位掩码占位值（枚举定义在宿主 C++ 中，Lua 源码里没有），不要当作真实数值使用。tags / goodAgainstTags 是枚举名字符串，语义正确。注意 health 是每员血量，小队总血 = health × squadTuning.waveSize；goodAgainstTags 是 AI 索敌偏好而非伤害加成，真实伤害见 damageTuning.overrides。",
+  "config": {
+    "combatStoreTuning": {
+      "purchaseCooldownMS": 30000,
+      "startCooldownMS": 30000,
+      "tiberiumCost": 80
+    },
+    "name": "cmdr_nod_jade",
+    "tiberiumExplosionTuning": {
+      "ARMY_FILTER_FLAG": "kQueryArmyFilter_None",
+      "DAMAGE_TIME": 300,
+      "DESCRIPTOR_FILTERS": 128,
+      "EXPLOSION_MODIFIER": "ability_tiberium_explosion",
+      "NUM_RINGS_EXPLOSION": 2,
+      "PERMANENT_MODIFIER_THAT_ACTIVATES_EXPLOSION": "modifier_tiberium_field_gas_cloud",
+      "TEMPORAL_MODIFIER_THAT_ACTIVATES_EXPLOSION": "modifier_chem_warrior_gas_cloud",
+      "UNIT_THAT_ACTIVATED_EXPLOSION1": "Unit_Nod_ChemicalWarrior",
+      "UNIT_THAT_ACTIVATED_EXPLOSION2": "Unit_Nod_ChemQuad",
+      "damageMain": {
+        "default": 2500,
+        "override": [
+          "Harvester",
+          "Structure"
+        ]
+      },
+      "damageSide": {
+        "default": 3000,
+        "override": [
+          "Harvester",
+          "Structure"
+        ]
+      }
+    },
+    "tiberiumStrikeTuning": {
+      "ARMY_FILTER_FLAG": "kQueryArmyFilter_None",
+      "DESCRIPTOR_FILTERS": 128,
+      "arrow": {
+        "launchTime": 0,
+        "previewDelay": 0,
+        "speedMultiplier": 10
+      },
+      "damage": {
+        "default": 3500,
+        "override": [
+          "Harvester",
+          "Structure"
+        ]
+      },
+      "rocket": {
+        "flightTimePerHex": 0,
+        "impactCompleteMs": 300,
+        "impactOffsetMs": 10,
+        "launchTime": 0,
+        "minDistance": 3,
+        "minTime": 2500
+      }
+    }
+  },
+  "faction": "NOD",
+  "id": "cmdr_nod_jade",
+  "name_en": "Jade",
+  "name_zh": "婕德",
+  "source": "gameplay/commanders/cmdr_nod_jade.lua",
+  "variant": "jade",
+  "warnings": [
+    "缺少 combatantTuning.health（可能是占位/测试单位）",
+    "已丢弃占位/未解析字段：GetGoodAgainstInfo=<function>, GetStatInfo=<function>"
+  ]
+}

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 建筑：坡顶房子 + 门洞 + 两扇窗。建筑类最通用的符号 -->
+  <path fill="currentColor" fill-rule="evenodd" d="
+    M32 7
+    L57 28
+    L57 57
+    L7 57
+    L7 28
+    Z
+    M26 57 L26 42 L38 42 L38 57 Z
+    M18 33 L26 33 L26 41 L18 41 Z
+    M38 33 L46 33 L46 41 L38 41 Z"/>
+</svg>

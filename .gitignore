@@ -41,5 +41,11 @@ node_modules/
 # 临时输出
 /out/
 
+# 反解过程中的一次性脚本（下划线前缀）
+_*.py
+_*.mjs
+_*.js
+_*.ps1
+
 # 网页构建时从 data/ 同步进来的副本（唯一真相是仓库根的 data/）
 /web/public/data/

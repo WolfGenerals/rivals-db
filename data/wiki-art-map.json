@@ -1,0 +1,964 @@
+{
+  "_note": "单位 id -> cnc-central wiki 图片。匹配依据是**游戏内显示名**（来自 data/locale），因为 Lua 变量名与显示名经常不同源（rangers -> 'Sniper Team'、firebomber -> 'Inferno'）。card = 卡片图（270x324），art = 艺术图（大图），action = 姿态/动作图。变体（_CR/_mayhem/_ST）继承本体的图。命名不规范者（如 PitbullRivals.jpg）也一并纳入。",
+  "source": "https://cnc-central.fandom.com (MediaWiki API)",
+  "match_basis": "in-game display name (data/locale)",
+  "kinds": {
+    "card": "卡片立绘 270x324",
+    "art": "艺术图",
+    "action": "姿态/动作图"
+  },
+  "art": {
+    "cmdr_dlc_test": {},
+    "cmdr_gdi_jackson": {
+      "card": {
+        "stem": "Jackson",
+        "url": "https://static.wikia.nocookie.net/cnc/images/5/5a/Jackson.jpg/revision/latest?cb=20180619092507",
+        "width": 755,
+        "height": 575
+      }
+    },
+    "cmdr_gdi_jackson_CR": {
+      "card": {
+        "stem": "Jackson",
+        "url": "https://static.wikia.nocookie.net/cnc/images/5/5a/Jackson.jpg/revision/latest?cb=20180619092507",
+        "width": 755,
+        "height": 575
+      }
+    },
+    "cmdr_gdi_liang": {},
+    "cmdr_gdi_liang_CR": {},
+    "cmdr_gdi_mcneil": {},
+    "cmdr_gdi_solomon": {},
+    "cmdr_gdi_solomon_CR": {},
+    "cmdr_gdi_strongarm": {
+      "card": {
+        "stem": "Strongarm",
+        "url": "https://static.wikia.nocookie.net/cnc/images/9/9b/Strongarm.jpg/revision/latest?cb=20180610043416",
+        "width": 393,
+        "height": 474
+      }
+    },
+    "cmdr_gdi_strongarm_CR": {
+      "card": {
+        "stem": "Strongarm",
+        "url": "https://static.wikia.nocookie.net/cnc/images/9/9b/Strongarm.jpg/revision/latest?cb=20180610043416",
+        "width": 393,
+        "height": 474
+      }
+    },
+    "cmdr_nod_jade": {},
+    "cmdr_nod_jade_CR": {},
+    "cmdr_nod_kane": {},
+    "cmdr_nod_kane_CR": {},
+    "cmdr_nod_marcion": {},
+    "cmdr_nod_oxanna": {},
+    "cmdr_nod_oxanna_CR": {},
+    "cmdr_nod_seth": {},
+    "cmdr_nod_seth_CR": {},
+    "unit_dlc_test": {},
+    "unit_example": {},
+    "unit_gdi_apc": {
+      "card": {
+        "stem": "A.P.C.",
+        "url": "https://static.wikia.nocookie.net/cnc/images/d/db/CNCRiv_A.P.C..png/revision/latest?cb=20200615045822",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_batteringram": {},
+    "unit_gdi_disruptor": {
+      "card": {
+        "stem": "Disruptor",
+        "url": "https://static.wikia.nocookie.net/cnc/images/2/2a/CNCRiv_Disruptor.png/revision/latest?cb=20200615050300",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_droneswarm": {
+      "card": {
+        "stem": "Drone_Swarm",
+        "url": "https://static.wikia.nocookie.net/cnc/images/9/94/CNCRiv_Drone_Swarm.png/revision/latest?cb=20200615045853",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_grenadier": {
+      "card": {
+        "stem": "Grenadier",
+        "url": "https://static.wikia.nocookie.net/cnc/images/c/c7/CNCRiv_Grenadier.png/revision/latest?cb=20200615045202",
+        "width": 270,
+        "height": 324
+      },
+      "art": {
+        "stem": "Grenadier_concept_art",
+        "url": "https://static.wikia.nocookie.net/cnc/images/1/15/CNCRiv_Grenadier_concept_art.jpg/revision/latest?cb=20200626081951",
+        "width": 1120,
+        "height": 630
+      },
+      "action": {
+        "stem": "Grenadier_stand",
+        "url": "https://static.wikia.nocookie.net/cnc/images/6/60/CNCRiv_Grenadier_stand.png/revision/latest?cb=20200701053607",
+        "width": 300,
+        "height": 300
+      }
+    },
+    "unit_gdi_hammerhead": {
+      "card": {
+        "stem": "Hammerhead",
+        "url": "https://static.wikia.nocookie.net/cnc/images/d/d0/CNCRiv_Hammerhead.png/revision/latest?cb=20200615050600",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_harvester": {
+      "card": {
+        "stem": "GDI_Harvesters",
+        "url": "https://static.wikia.nocookie.net/cnc/images/3/36/CNCRiv_GDI_Harvesters.png/revision/latest?cb=20200626080509",
+        "width": 392,
+        "height": 205
+      }
+    },
+    "unit_gdi_harvester_mayhem": {
+      "card": {
+        "stem": "GDI_Harvesters",
+        "url": "https://static.wikia.nocookie.net/cnc/images/3/36/CNCRiv_GDI_Harvesters.png/revision/latest?cb=20200626080509",
+        "width": 392,
+        "height": 205
+      }
+    },
+    "unit_gdi_juggernaut": {
+      "card": {
+        "stem": "Juggernaut",
+        "url": "https://static.wikia.nocookie.net/cnc/images/9/96/CNCRiv_Juggernaut.png/revision/latest?cb=20200615050325",
+        "width": 270,
+        "height": 324
+      },
+      "art": {
+        "stem": "Juggernaut_art",
+        "url": "https://static.wikia.nocookie.net/cnc/images/3/3d/CNCRiv_Juggernaut_art.png/revision/latest?cb=20200703153057",
+        "width": 1683,
+        "height": 864
+      },
+      "action": {
+        "stem": "Juggernaut_stand",
+        "url": "https://static.wikia.nocookie.net/cnc/images/4/42/CNCRiv_Juggernaut_stand.png/revision/latest?cb=20200703153349",
+        "width": 350,
+        "height": 350
+      }
+    },
+    "unit_gdi_juggernaut_ST": {
+      "card": {
+        "stem": "Juggernaut",
+        "url": "https://static.wikia.nocookie.net/cnc/images/9/96/CNCRiv_Juggernaut.png/revision/latest?cb=20200615050325",
+        "width": 270,
+        "height": 324
+      },
+      "art": {
+        "stem": "Juggernaut_art",
+        "url": "https://static.wikia.nocookie.net/cnc/images/3/3d/CNCRiv_Juggernaut_art.png/revision/latest?cb=20200703153057",
+        "width": 1683,
+        "height": 864
+      },
+      "action": {
+        "stem": "Juggernaut_stand",
+        "url": "https://static.wikia.nocookie.net/cnc/images/4/42/CNCRiv_Juggernaut_stand.png/revision/latest?cb=20200703153349",
+        "width": 350,
+        "height": 350
+      }
+    },
+    "unit_gdi_jumptroopers": {
+      "card": {
+        "stem": "Jump_Jet_Troopers",
+        "url": "https://static.wikia.nocookie.net/cnc/images/0/0a/CNCRiv_Jump_Jet_Troopers.png/revision/latest?cb=20200615045016",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_kodiak": {
+      "card": {
+        "stem": "Kodiak",
+        "url": "https://static.wikia.nocookie.net/cnc/images/2/25/CNCRiv_Kodiak.png/revision/latest?cb=20200615050743",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_mammothtank": {
+      "card": {
+        "stem": "Mammoth_Tank",
+        "url": "https://static.wikia.nocookie.net/cnc/images/b/bf/CNCRiv_Mammoth_Tank.png/revision/latest?cb=20200615050500",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_mgsquad": {
+      "card": {
+        "stem": "MG_Squad",
+        "url": "https://static.wikia.nocookie.net/cnc/images/0/0d/CNCRiv_MG_Squad.png/revision/latest?cb=20200615045108",
+        "width": 270,
+        "height": 324
+      },
+      "action": {
+        "stem": "MG_Squad_move",
+        "url": "https://static.wikia.nocookie.net/cnc/images/9/95/CNCRiv_MG_Squad_move.png/revision/latest?cb=20200702020314",
+        "width": 300,
+        "height": 300
+      }
+    },
+    "unit_gdi_mlrs": {
+      "card": {
+        "stem": "M.L.R.S.",
+        "url": "https://static.wikia.nocookie.net/cnc/images/1/1d/CNCRiv_M.L.R.S..png/revision/latest?cb=20200615045733",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_mohawkgunship": {
+      "card": {
+        "stem": "Mohawk_Gunship",
+        "url": "https://static.wikia.nocookie.net/cnc/images/8/89/CNCRiv_Mohawk_Gunship.png/revision/latest?cb=20200615050054",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_mohawkgunship_ST": {
+      "card": {
+        "stem": "Mohawk_Gunship",
+        "url": "https://static.wikia.nocookie.net/cnc/images/8/89/CNCRiv_Mohawk_Gunship.png/revision/latest?cb=20200615050054",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_msv": {
+      "card": {
+        "stem": "M.S.V.",
+        "url": "https://static.wikia.nocookie.net/cnc/images/c/c7/CNCRiv_M.S.V..png/revision/latest?cb=20200615045708",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_orca": {
+      "card": {
+        "stem": "Orca",
+        "url": "https://static.wikia.nocookie.net/cnc/images/1/10/CNCRiv_Orca.png/revision/latest?cb=20200615050028",
+        "width": 270,
+        "height": 324
+      },
+      "art": {
+        "stem": "Orca_art",
+        "url": "https://static.wikia.nocookie.net/cnc/images/4/49/CNCRiv_Orca_art.png/revision/latest?cb=20200705002136",
+        "width": 1184,
+        "height": 608
+      },
+      "action": {
+        "stem": "Orca_stand",
+        "url": "https://static.wikia.nocookie.net/cnc/images/a/a5/CNCRiv_Orca_stand.png/revision/latest?cb=20200705002907",
+        "width": 350,
+        "height": 350
+      }
+    },
+    "unit_gdi_orcabomber": {
+      "card": {
+        "stem": "Orca_Bomber",
+        "url": "https://static.wikia.nocookie.net/cnc/images/d/d6/CNCRiv_Orca_Bomber.png/revision/latest?cb=20200615050715",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_pitbull": {
+      "card": {
+        "stem": "Pitbull",
+        "url": "https://static.wikia.nocookie.net/cnc/images/d/d9/CNCRiv_Pitbull.png/revision/latest?cb=20200615045500",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_predatortank": {
+      "card": {
+        "stem": "Predator_Tank",
+        "url": "https://static.wikia.nocookie.net/cnc/images/5/58/CNCRiv_Predator_Tank.png/revision/latest?cb=20200615045627",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_rangers": {
+      "card": {
+        "stem": "Sniper_Team",
+        "url": "https://static.wikia.nocookie.net/cnc/images/d/dc/CNCRiv_Sniper_Team.png/revision/latest?cb=20200615050136",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_razorback": {
+      "card": {
+        "stem": "Razorback",
+        "url": "https://static.wikia.nocookie.net/cnc/images/4/45/CNCRiv_Razorback.png/revision/latest?cb=20200615045935",
+        "width": 270,
+        "height": 324
+      },
+      "art": {
+        "stem": "Razorback_art",
+        "url": "https://static.wikia.nocookie.net/cnc/images/2/2c/CNCRiv_Razorback_art.png/revision/latest?cb=20200702030439",
+        "width": 1184,
+        "height": 608
+      },
+      "action": {
+        "stem": "Razorback_stand",
+        "url": "https://static.wikia.nocookie.net/cnc/images/5/56/CNCRiv_Razorback_stand.png/revision/latest?cb=20200702030354",
+        "width": 350,
+        "height": 350
+      }
+    },
+    "unit_gdi_repairdrone": {
+      "card": {
+        "stem": "Repair_Drone",
+        "url": "https://static.wikia.nocookie.net/cnc/images/5/57/CNCRiv_Repair_Drone.png/revision/latest?cb=20200615052925",
+        "width": 270,
+        "height": 324
+      },
+      "action": {
+        "stem": "Repair_Drone_stand",
+        "url": "https://static.wikia.nocookie.net/cnc/images/4/4e/CNCRiv_Repair_Drone_stand.png/revision/latest?cb=20200705005735",
+        "width": 250,
+        "height": 250
+      }
+    },
+    "unit_gdi_repairdrone_CR": {
+      "card": {
+        "stem": "Repair_Drone",
+        "url": "https://static.wikia.nocookie.net/cnc/images/5/57/CNCRiv_Repair_Drone.png/revision/latest?cb=20200615052925",
+        "width": 270,
+        "height": 324
+      },
+      "action": {
+        "stem": "Repair_Drone_stand",
+        "url": "https://static.wikia.nocookie.net/cnc/images/4/4e/CNCRiv_Repair_Drone_stand.png/revision/latest?cb=20200705005735",
+        "width": 250,
+        "height": 250
+      }
+    },
+    "unit_gdi_rhino": {
+      "card": {
+        "stem": "Rhino",
+        "url": "https://static.wikia.nocookie.net/cnc/images/4/41/CNCRiv_Rhino.png/revision/latest?cb=20200615045349",
+        "width": 270,
+        "height": 324
+      },
+      "art": {
+        "stem": "Rhino_art_promo_crop",
+        "url": "https://static.wikia.nocookie.net/cnc/images/0/0c/CNCRiv_Rhino_art_promo_crop.png/revision/latest?cb=20200702022728",
+        "width": 333,
+        "height": 355
+      },
+      "action": {
+        "stem": "Rhino_stand",
+        "url": "https://static.wikia.nocookie.net/cnc/images/c/c0/CNCRiv_Rhino_stand.png/revision/latest?cb=20200702022746",
+        "width": 250,
+        "height": 250
+      }
+    },
+    "unit_gdi_riflemen": {
+      "card": {
+        "stem": "Riflemen",
+        "url": "https://static.wikia.nocookie.net/cnc/images/2/20/CNCRiv_Riflemen.png/revision/latest?cb=20200614230857",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_robodogs": {
+      "card": {
+        "stem": "War_Dogs",
+        "url": "https://static.wikia.nocookie.net/cnc/images/b/bf/CNCRiv_War_Dogs.png/revision/latest?cb=20200615045314",
+        "width": 270,
+        "height": 324
+      },
+      "art": {
+        "stem": "War_Dogs_art",
+        "url": "https://static.wikia.nocookie.net/cnc/images/b/b0/CNCRiv_War_Dogs_art.png/revision/latest?cb=20200626073720",
+        "width": 1683,
+        "height": 864
+      },
+      "action": {
+        "stem": "War_Dogs_stand",
+        "url": "https://static.wikia.nocookie.net/cnc/images/7/7c/CNCRiv_War_Dogs_stand.png/revision/latest?cb=20200701222225",
+        "width": 300,
+        "height": 300
+      }
+    },
+    "unit_gdi_rockettroopers": {
+      "card": {
+        "stem": "Missile_Squad",
+        "url": "https://static.wikia.nocookie.net/cnc/images/7/79/CNCRiv_Missile_Squad.png/revision/latest?cb=20200614230358",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_rockettroopers_mayhem": {
+      "card": {
+        "stem": "Missile_Squad",
+        "url": "https://static.wikia.nocookie.net/cnc/images/7/79/CNCRiv_Missile_Squad.png/revision/latest?cb=20200614230358",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_sandstorm": {
+      "card": {
+        "stem": "Sandstorm",
+        "url": "https://static.wikia.nocookie.net/cnc/images/f/fb/CNCRiv_Sandstorm.png/revision/latest?cb=20200615050351",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_sandstorm_ST": {
+      "card": {
+        "stem": "Sandstorm",
+        "url": "https://static.wikia.nocookie.net/cnc/images/f/fb/CNCRiv_Sandstorm.png/revision/latest?cb=20200615050351",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_shatterer": {
+      "card": {
+        "stem": "Shatterer",
+        "url": "https://static.wikia.nocookie.net/cnc/images/0/0c/CNCRiv_Shatterer.png/revision/latest?cb=20200615045424",
+        "width": 270,
+        "height": 324
+      },
+      "art": {
+        "stem": "Shatterer_art",
+        "url": "https://static.wikia.nocookie.net/cnc/images/8/82/CNCRiv_Shatterer_art.png/revision/latest?cb=20200703142015",
+        "width": 1685,
+        "height": 867
+      },
+      "action": {
+        "stem": "Shatterer_stand",
+        "url": "https://static.wikia.nocookie.net/cnc/images/2/23/CNCRiv_Shatterer_stand.png/revision/latest?cb=20200703142109",
+        "width": 300,
+        "height": 300
+      }
+    },
+    "unit_gdi_shocktroopers": {
+      "card": {
+        "stem": "Shockwave_Troopers",
+        "url": "https://static.wikia.nocookie.net/cnc/images/5/55/CNCRiv_Shockwave_Troopers.png/revision/latest?cb=20200615044912",
+        "width": 270,
+        "height": 324
+      },
+      "art": {
+        "stem": "Shockwave_Troopers_art",
+        "url": "https://static.wikia.nocookie.net/cnc/images/7/78/CNCRiv_Shockwave_Troopers_art.png/revision/latest?cb=20200609114324",
+        "width": 1685,
+        "height": 867
+      }
+    },
+    "unit_gdi_slingshot": {
+      "card": {
+        "stem": "Slingshot",
+        "url": "https://static.wikia.nocookie.net/cnc/images/1/1d/CNCRiv_Slingshot.png/revision/latest?cb=20200615045546",
+        "width": 270,
+        "height": 324
+      },
+      "art": {
+        "stem": "Slingshot_concept_art",
+        "url": "https://static.wikia.nocookie.net/cnc/images/1/15/CNCRiv_Slingshot_concept_art.jpg/revision/latest?cb=20200703145204",
+        "width": 1239,
+        "height": 697
+      },
+      "action": {
+        "stem": "Slingshot_stand",
+        "url": "https://static.wikia.nocookie.net/cnc/images/1/1b/CNCRiv_Slingshot_stand.png/revision/latest?cb=20200703145136",
+        "width": 300,
+        "height": 300
+      }
+    },
+    "unit_gdi_talon": {
+      "card": {
+        "stem": "Talon",
+        "url": "https://static.wikia.nocookie.net/cnc/images/0/06/CNCRiv_Talon.png/revision/latest?cb=20200615050001",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_titan": {
+      "card": {
+        "stem": "Titan",
+        "url": "https://static.wikia.nocookie.net/cnc/images/2/2e/CNCRiv_Titan.png/revision/latest?cb=20200615050424",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_turret": {},
+    "unit_gdi_turret_CR": {},
+    "unit_gdi_wolverine": {
+      "card": {
+        "stem": "Wolverine",
+        "url": "https://static.wikia.nocookie.net/cnc/images/0/0c/CNCRiv_Wolverine.png/revision/latest?cb=20200615050235",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_gdi_zonetrooper": {
+      "card": {
+        "stem": "Zone_Troopers",
+        "url": "https://static.wikia.nocookie.net/cnc/images/a/ac/CNCRiv_Zone_Troopers.png/revision/latest?cb=20200529021344",
+        "width": 229,
+        "height": 204
+      }
+    },
+    "unit_gdi_zonetrooper_ST": {
+      "card": {
+        "stem": "Zone_Troopers",
+        "url": "https://static.wikia.nocookie.net/cnc/images/a/ac/CNCRiv_Zone_Troopers.png/revision/latest?cb=20200529021344",
+        "width": 229,
+        "height": 204
+      }
+    },
+    "unit_nod_artillery": {
+      "card": {
+        "stem": "Artillery",
+        "url": "https://static.wikia.nocookie.net/cnc/images/6/64/CNCRiv_Artillery.png/revision/latest?cb=20200705044951",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_nod_attackbike": {
+      "card": {
+        "stem": "Attack_Bikes",
+        "url": "https://static.wikia.nocookie.net/cnc/images/d/d3/CNCRiv_Attack_Bikes.png/revision/latest?cb=20200705024541",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_nod_avatar": {
+      "card": {
+        "stem": "Avatar",
+        "url": "https://static.wikia.nocookie.net/cnc/images/f/fc/CNCRiv_Avatar.png/revision/latest?cb=20200705045011",
+        "width": 270,
+        "height": 324
+      },
+      "art": {
+        "stem": "Avatar_art",
+        "url": "https://static.wikia.nocookie.net/cnc/images/7/7e/CNCRiv_Avatar_art.png/revision/latest?cb=20200701042656",
+        "width": 1683,
+        "height": 864
+      },
+      "action": {
+        "stem": "Avatar_stand",
+        "url": "https://static.wikia.nocookie.net/cnc/images/b/bf/CNCRiv_Avatar_stand.png/revision/latest?cb=20200701041808",
+        "width": 350,
+        "height": 350
+      }
+    },
+    "unit_nod_banshee": {
+      "card": {
+        "stem": "Banshee",
+        "url": "https://static.wikia.nocookie.net/cnc/images/d/d6/CNCRiv_Banshee.png/revision/latest?cb=20200705030758",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_nod_basilisk": {
+      "card": {
+        "stem": "Basilisk",
+        "url": "https://static.wikia.nocookie.net/cnc/images/6/68/CNCRiv_Basilisk.png/revision/latest?cb=20200705045021",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_nod_beamcannon": {
+      "card": {
+        "stem": "Giga-Cannon",
+        "url": "https://static.wikia.nocookie.net/cnc/images/e/ec/CNCRiv_Giga-Cannon.png/revision/latest?cb=20200705024630",
+        "width": 270,
+        "height": 324
+      },
+      "art": {
+        "stem": "Giga_Cannon_concept_art",
+        "url": "https://static.wikia.nocookie.net/cnc/images/0/09/CNCRiv_Giga_Cannon_concept_art.jpg/revision/latest?cb=20200719015723",
+        "width": 1920,
+        "height": 1080
+      },
+      "action": {
+        "stem": "Giga_Cannon_stand",
+        "url": "https://static.wikia.nocookie.net/cnc/images/1/19/CNCRiv_Giga_Cannon_stand.png/revision/latest?cb=20200719015621",
+        "width": 250,
+        "height": 250
+      }
+    },
+    "unit_nod_buggy": {
+      "card": {
+        "stem": "Buggy",
+        "url": "https://static.wikia.nocookie.net/cnc/images/6/6f/CNCRiv_Buggy.png/revision/latest?cb=20200705024550",
+        "width": 270,
+        "height": 324
+      },
+      "action": {
+        "stem": "Buggy_stand",
+        "url": "https://static.wikia.nocookie.net/cnc/images/f/fe/CNCRiv_Buggy_stand.png/revision/latest?cb=20200702013120",
+        "width": 250,
+        "height": 250
+      }
+    },
+    "unit_nod_catalystgunship": {
+      "card": {
+        "stem": "Catalyst_Gunship",
+        "url": "https://static.wikia.nocookie.net/cnc/images/e/e9/CNCRiv_Catalyst_Gunship.png/revision/latest?cb=20200705030748",
+        "width": 270,
+        "height": 324
+      },
+      "art": {
+        "stem": "Catalyst_Gunship_art",
+        "url": "https://static.wikia.nocookie.net/cnc/images/7/7b/CNCRiv_Catalyst_Gunship_art.jpg/revision/latest?cb=20200626074914",
+        "width": 1455,
+        "height": 818
+      },
+      "action": {
+        "stem": "Catalyst_Gunship_stand",
+        "url": "https://static.wikia.nocookie.net/cnc/images/d/dd/CNCRiv_Catalyst_Gunship_stand.png/revision/latest?cb=20200705051451",
+        "width": 300,
+        "height": 300
+      }
+    },
+    "unit_nod_centurion": {
+      "card": {
+        "stem": "Centurion",
+        "url": "https://static.wikia.nocookie.net/cnc/images/6/6d/CNCRiv_Centurion.png/revision/latest?cb=20200705044941",
+        "width": 270,
+        "height": 324
+      },
+      "art": {
+        "stem": "Centurion_art",
+        "url": "https://static.wikia.nocookie.net/cnc/images/e/e1/CNCRiv_Centurion_art.png/revision/latest?cb=20200702002701",
+        "width": 1184,
+        "height": 609
+      },
+      "action": {
+        "stem": "Centurion_stand",
+        "url": "https://static.wikia.nocookie.net/cnc/images/7/74/CNCRiv_Centurion_stand.png/revision/latest?cb=20200702003328",
+        "width": 250,
+        "height": 250
+      }
+    },
+    "unit_nod_chemicalwarrior": {
+      "card": {
+        "stem": "Chemical_Warriors",
+        "url": "https://static.wikia.nocookie.net/cnc/images/7/73/CNCRiv_Chemical_Warriors.png/revision/latest?cb=20200705020055",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_nod_chemquad": {
+      "card": {
+        "stem": "Chem_Buggy",
+        "url": "https://static.wikia.nocookie.net/cnc/images/1/17/CNCRiv_Chem_Buggy.png/revision/latest?cb=20200705024601",
+        "width": 270,
+        "height": 324
+      },
+      "art": {
+        "stem": "Chem_Buggy_art",
+        "url": "https://static.wikia.nocookie.net/cnc/images/f/fc/CNCRiv_Chem_Buggy_art.jpg/revision/latest?cb=20200702024542",
+        "width": 1455,
+        "height": 818
+      },
+      "action": {
+        "stem": "Chem_Buggy_stand",
+        "url": "https://static.wikia.nocookie.net/cnc/images/9/93/CNCRiv_Chem_Buggy_stand.png/revision/latest?cb=20200702024454",
+        "width": 250,
+        "height": 250
+      }
+    },
+    "unit_nod_confessor": {
+      "card": {
+        "stem": "Confessor",
+        "url": "https://static.wikia.nocookie.net/cnc/images/2/2a/CNCRiv_Confessor.png/revision/latest?cb=20200705033011",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_nod_cyberwheel": {
+      "card": {
+        "stem": "Cyberwheel",
+        "url": "https://static.wikia.nocookie.net/cnc/images/4/48/CNCRiv_Cyberwheel.png/revision/latest?cb=20200705024532",
+        "width": 270,
+        "height": 324
+      },
+      "art": {
+        "stem": "Cyberwheel_art",
+        "url": "https://static.wikia.nocookie.net/cnc/images/a/a4/CNCRiv_Cyberwheel_art.png/revision/latest?cb=20200701220207",
+        "width": 1685,
+        "height": 867
+      },
+      "action": {
+        "stem": "Cyberwheel_stand",
+        "url": "https://static.wikia.nocookie.net/cnc/images/f/fa/CNCRiv_Cyberwheel_stand.png/revision/latest?cb=20200701220331",
+        "width": 300,
+        "height": 300
+      }
+    },
+    "unit_nod_cyborg": {
+      "card": {
+        "stem": "Cyborg",
+        "url": "https://static.wikia.nocookie.net/cnc/images/f/f4/CNCRiv_Cyborg.png/revision/latest?cb=20200705033021",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_nod_drillpod": {
+      "card": {
+        "stem": "Drill_Pod",
+        "url": "https://static.wikia.nocookie.net/cnc/images/4/4c/CNCRiv_Drill_Pod.png/revision/latest?cb=20200705012510",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_nod_drillpod_CR": {
+      "card": {
+        "stem": "Drill_Pod",
+        "url": "https://static.wikia.nocookie.net/cnc/images/4/4c/CNCRiv_Drill_Pod.png/revision/latest?cb=20200705012510",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_nod_fanatic": {
+      "card": {
+        "stem": "Fanatic",
+        "url": "https://static.wikia.nocookie.net/cnc/images/0/0a/CNCRiv_Fanatic.png/revision/latest?cb=20200705020016",
+        "width": 270,
+        "height": 324
+      },
+      "art": {
+        "stem": "Fanatic_art",
+        "url": "https://static.wikia.nocookie.net/cnc/images/e/ee/CNCRiv_Fanatic_art.png/revision/latest?cb=20200702005316",
+        "width": 1683,
+        "height": 864
+      },
+      "action": {
+        "stem": "Fanatic_stand",
+        "url": "https://static.wikia.nocookie.net/cnc/images/5/52/CNCRiv_Fanatic_stand.png/revision/latest?cb=20200702005957",
+        "width": 250,
+        "height": 250
+      }
+    },
+    "unit_nod_firebomber": {
+      "card": {
+        "stem": "Inferno",
+        "url": "https://static.wikia.nocookie.net/cnc/images/6/67/CNCRiv_Inferno.png/revision/latest?cb=20200705030858",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_nod_flametank": {
+      "card": {
+        "stem": "Flame_Tank",
+        "url": "https://static.wikia.nocookie.net/cnc/images/0/0c/CNCRiv_Flame_Tank.png/revision/latest?cb=20200705044932",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_nod_flametroopers": {
+      "card": {
+        "stem": "Flame_Troopers",
+        "url": "https://static.wikia.nocookie.net/cnc/images/e/ee/CNCRiv_Flame_Troopers.png/revision/latest?cb=20200705020035",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_nod_harvester": {
+      "card": {
+        "stem": "Nod_Harvesters",
+        "url": "https://static.wikia.nocookie.net/cnc/images/e/e8/CNCRiv_Nod_Harvesters.png/revision/latest?cb=20200626080451",
+        "width": 218,
+        "height": 248
+      }
+    },
+    "unit_nod_harvester_mayhem": {
+      "card": {
+        "stem": "Nod_Harvesters",
+        "url": "https://static.wikia.nocookie.net/cnc/images/e/e8/CNCRiv_Nod_Harvesters.png/revision/latest?cb=20200626080451",
+        "width": 218,
+        "height": 248
+      }
+    },
+    "unit_nod_laserdrone": {
+      "card": {
+        "stem": "Laser_Drone",
+        "url": "https://static.wikia.nocookie.net/cnc/images/1/19/CNCRiv_Laser_Drone.png/revision/latest?cb=20200705030728",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_nod_militant": {
+      "card": {
+        "stem": "Militant",
+        "url": "https://static.wikia.nocookie.net/cnc/images/3/3e/CNCRiv_Militant.png/revision/latest?cb=20200705015955",
+        "width": 270,
+        "height": 324
+      },
+      "art": {
+        "stem": "Militant_art",
+        "url": "https://static.wikia.nocookie.net/cnc/images/8/8e/CNCRiv_Militant_art.png/revision/latest?cb=20200626075709",
+        "width": 1685,
+        "height": 867
+      }
+    },
+    "unit_nod_mutantmarauder": {
+      "card": {
+        "stem": "Mutant_Marauder",
+        "url": "https://static.wikia.nocookie.net/cnc/images/c/c7/CNCRiv_Mutant_Marauder.png/revision/latest?cb=20200705020105",
+        "width": 270,
+        "height": 324
+      },
+      "art": {
+        "stem": "Mutant_Marauder_art",
+        "url": "https://static.wikia.nocookie.net/cnc/images/a/a2/CNCRiv_Mutant_Marauder_art.png/revision/latest?cb=20200701052736",
+        "width": 1683,
+        "height": 864
+      }
+    },
+    "unit_nod_obelisk": {
+      "card": {
+        "stem": "Obelisk_of_Light",
+        "url": "https://static.wikia.nocookie.net/cnc/images/b/b8/CNCRiv_Obelisk_of_Light.png/revision/latest?cb=20200705012613",
+        "width": 270,
+        "height": 324
+      },
+      "action": {
+        "stem": "Obelisk_of_Light_engage",
+        "url": "https://static.wikia.nocookie.net/cnc/images/b/b0/CNCRiv_Obelisk_of_Light_engage.png/revision/latest?cb=20200609184738",
+        "width": 500,
+        "height": 500
+      }
+    },
+    "unit_nod_obelisk_CR": {
+      "card": {
+        "stem": "Obelisk_of_Light",
+        "url": "https://static.wikia.nocookie.net/cnc/images/b/b8/CNCRiv_Obelisk_of_Light.png/revision/latest?cb=20200705012613",
+        "width": 270,
+        "height": 324
+      },
+      "action": {
+        "stem": "Obelisk_of_Light_engage",
+        "url": "https://static.wikia.nocookie.net/cnc/images/b/b0/CNCRiv_Obelisk_of_Light_engage.png/revision/latest?cb=20200609184738",
+        "width": 500,
+        "height": 500
+      }
+    },
+    "unit_nod_rockwyrm": {
+      "card": {
+        "stem": "Rockworm",
+        "url": "https://static.wikia.nocookie.net/cnc/images/6/68/CNCRiv_Rockworm.png/revision/latest?cb=20200705045001",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_nod_scarab": {
+      "card": {
+        "stem": "Scarabs",
+        "url": "https://static.wikia.nocookie.net/cnc/images/f/ff/CNCRiv_Scarabs.png/revision/latest?cb=20200705020046",
+        "width": 270,
+        "height": 324
+      },
+      "art": {
+        "stem": "Scarabs_art",
+        "url": "https://static.wikia.nocookie.net/cnc/images/0/05/CNCRiv_Scarabs_art.png/revision/latest?cb=20200928212657",
+        "width": 1184,
+        "height": 608
+      },
+      "action": {
+        "stem": "Scarabs_stand",
+        "url": "https://static.wikia.nocookie.net/cnc/images/b/bf/CNCRiv_Scarabs_stand.png/revision/latest?cb=20200928212745",
+        "width": 300,
+        "height": 300
+      }
+    },
+    "unit_nod_scavenger": {
+      "card": {
+        "stem": "Scavenger",
+        "url": "https://static.wikia.nocookie.net/cnc/images/0/06/CNCRiv_Scavenger.png/revision/latest?cb=20200705020026",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_nod_scorpiontank": {
+      "card": {
+        "stem": "Scorpion_Tank",
+        "url": "https://static.wikia.nocookie.net/cnc/images/f/f6/CNCRiv_Scorpion_Tank.png/revision/latest?cb=20200705024610",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_nod_stealthtank": {
+      "card": {
+        "stem": "Stealth_Tank",
+        "url": "https://static.wikia.nocookie.net/cnc/images/f/f1/CNCRiv_Stealth_Tank.png/revision/latest?cb=20200705024641",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_nod_stormtroopers": {},
+    "unit_nod_stormtroopers_mayhem": {},
+    "unit_nod_ticktank": {
+      "card": {
+        "stem": "Tick_Tank",
+        "url": "https://static.wikia.nocookie.net/cnc/images/0/00/CNCRiv_Tick_Tank.png/revision/latest?cb=20200705024620",
+        "width": 270,
+        "height": 324
+      },
+      "art": {
+        "stem": "Tick_Tank_art",
+        "url": "https://static.wikia.nocookie.net/cnc/images/5/53/CNCRiv_Tick_Tank_art.png/revision/latest?cb=20200719023444",
+        "width": 1683,
+        "height": 864
+      },
+      "action": {
+        "stem": "Tick_Tank_rear",
+        "url": "https://static.wikia.nocookie.net/cnc/images/0/02/CNCRiv_Tick_Tank_rear.png/revision/latest?cb=20200719023222",
+        "width": 250,
+        "height": 250
+      }
+    },
+    "unit_nod_venom": {
+      "card": {
+        "stem": "Venom",
+        "url": "https://static.wikia.nocookie.net/cnc/images/4/40/CNCRiv_Venom.png/revision/latest?cb=20200705030739",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_nod_viper": {
+      "card": {
+        "stem": "Phantom",
+        "url": "https://static.wikia.nocookie.net/cnc/images/8/8e/CNCRiv_Phantom.png/revision/latest?cb=20200705030910",
+        "width": 270,
+        "height": 324
+      }
+    },
+    "unit_nod_widowmaker": {
+      "card": {
+        "stem": "Widowmaker",
+        "url": "https://static.wikia.nocookie.net/cnc/images/5/58/CNCRiv_Widowmaker.png/revision/latest?cb=20200705044923",
+        "width": 270,
+        "height": 324
+      },
+      "art": {
+        "stem": "Widowmaker_art",
+        "url": "https://static.wikia.nocookie.net/cnc/images/8/82/CNCRiv_Widowmaker_art.png/revision/latest?cb=20200928221923",
+        "width": 1683,
+        "height": 864
+      },
+      "action": {
+        "stem": "Widowmaker_stand",
+        "url": "https://static.wikia.nocookie.net/cnc/images/d/df/CNCRiv_Widowmaker_stand.png/revision/latest?cb=20200928221738",
+        "width": 300,
+        "height": 300
+      }
+    },
+    "unit_nod_wraith": {
+      "card": {
+        "stem": "Shade",
+        "url": "https://static.wikia.nocookie.net/cnc/images/0/09/CNCRiv_Shade.png/revision/latest?cb=20200705030809",
+        "width": 270,
+        "height": 324
+      }
+    }
+  }
+}
