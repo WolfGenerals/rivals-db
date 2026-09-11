@@ -142,7 +142,38 @@ function statsOf(rec: EntityRecord): Record<string, unknown> {
   const put = (k: string, v: unknown) => {
     if (v !== undefined && v !== null) s[k] = v;
   };
-  put("unit_type", baseUnitType(rec));
+  /*
+   * **`unit_type` 在提取时算准，别让消费方各判各的。**
+   *
+   * `baseUnitType()` 取的是**第一个非 `override_` 标签**，而采矿车的 tags 是
+   * `[Vehicle, override_harvester, override_vehicle]` → 得到 `Vehicle`，
+   * 于是过滤/分组把它归进载具（用户发现）。**`override_harvester` 必须优先判**。
+   *
+   * 总部的 tags 只有 `[override_structure]`，`baseUnitType()` 返回空 → 补 `Structure`。
+   */
+  const tags = cfg.combatantTuning?.tags ?? [];
+  put(
+    "unit_type",
+    tags.includes("override_harvester")
+      ? "Harvester"
+      : (baseUnitType(rec) ?? (tags.includes("override_structure") ? "Structure" : undefined)),
+  );
+  /*
+   * **隐藏单位** = 不在正常阵容里的条目，列表默认不显示：
+   *   · 后缀 `_ST`（钢爪）/ `_CR`（指挥官衍生）/ `_mayhem` 的变体
+   *   · 测试桩 `unit_dlc_test` / `unit_example` / `cmdr_dlc_test`
+   *
+   * ⚠️ 测试桩**不能按 `variant` 判** —— `splitVariant` 只剥 `unit_<faction>_` 这种前缀，
+   * 而它们的 stem 是 `unit_dlc_test`（第二段是 `dlc` 不是阵营），所以 `variant` 是**整个 stem**。
+   */
+  const HIDDEN_SUFFIXES = ["ST", "CR", "mayhem"];
+  const HIDDEN_IDS = ["unit_dlc_test", "unit_example", "cmdr_dlc_test"];
+  if (
+    (rec.suffixes ?? []).some((s) => HIDDEN_SUFFIXES.includes(s)) ||
+    HIDDEN_IDS.includes(rec.id)
+  ) {
+    s.hidden = true;
+  }
   put("cost", cfg.combatStoreTuning?.tiberiumCost);
   put("speed", cfg.combatantTuning?.speed);
   put("vision_tiles", cfg.squadTuning?.visionRangeInTiles);

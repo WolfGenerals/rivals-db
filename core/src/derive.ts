@@ -495,6 +495,12 @@ export interface DerivedStats {
   min_attack_range_tiles?: number;
   /** EMP 半径（格，已由 1/8 格换算）。幽灵原始 18 → 2.25 */
   emp_radius_tiles?: number;
+  /**
+   * **隐藏单位** —— 不在正常阵容里的条目，列表默认不显示：
+   *   · 后缀 `_ST`（钢爪）/ `_CR`（指挥官衍生）/ `_mayhem` 的变体
+   *   · 两个测试桩 `unit_dlc_test` / `unit_example`
+   */
+  hidden?: boolean;
 }
 
 export interface DerivedHealth {

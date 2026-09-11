@@ -39,6 +39,11 @@ const sort = ref<"cost" | "name" | "hp" | "dps">("cost");
 /** 分组维度。默认**按类型** —— 一屏里同类单位挨在一起才好比。 */
 const group = ref<"none" | "type" | "faction">("type");
 
+/** 类型过滤。取值来自 `derived.stats.unit_type` */
+const type = ref("");
+/** 隐藏单位：`hidden` = 后缀为 ST / CR / mayhem 的变体。**默认不显示** */
+const hiddenMode = ref<"hide" | "only" | "all">("hide");
+
 /** 类型分组的显示顺序与中文名。`derived.stats.unit_type` 的取值就是这些 */
 const TYPE_ORDER = ["Infantry", "Vehicle", "Aircraft", "Structure", "Harvester"];
 const TYPE_LABEL: Record<string, string> = {
@@ -70,17 +75,21 @@ function sortKey(rec: DatasetEntry): number {
 }
 
 const shown = computed(() => {
-  const needle = q.value.trim().toLowerCase();
   const wantCommander = Boolean(props.commandersOnly);
 
   const list = records.value.filter((rec) => {
     if (wantCommander !== rec.id.startsWith("cmdr_")) return false;
     if (faction.value && rec.faction !== faction.value) return false;
     if (rarity.value && (rec.pb?.rarity ?? "") !== rarity.value) return false;
-    if (needle) {
-      const hay = `${rec.id} ${rec.variant} ${rec.name_zh ?? ""} ${rec.name_en ?? ""}`.toLowerCase();
-      if (!hay.includes(needle)) return false;
-    }
+    // 类型：空字符串（总部这类 `unit_type` 缺失的）只在"全部类型"下出现
+    if (type.value && (rec.derived.stats.unit_type ?? "") !== type.value) return false;
+    /*
+     * 隐藏单位（后缀 ST / CR / mayhem）。
+     * **默认隐藏** —— 它们是特殊/活动变体，混在正常阵容里会把列表撑成两倍且难比。
+     */
+    const isHidden = rec.derived.stats.hidden === true;
+    if (hiddenMode.value === "hide" && isHidden) return false;
+    if (hiddenMode.value === "only" && !isHidden) return false;
     return true;
   });
 
@@ -146,7 +155,6 @@ const costSpread = computed(() => {
 
 <template>
   <div class="filters">
-    <input v-model="q" type="search" placeholder="搜索中文名 / 英文名 / id…" />
     <select v-model="faction">
       <option value="">全部阵营</option>
       <option value="GDI">GDI</option>
@@ -157,6 +165,15 @@ const costSpread = computed(() => {
       <option value="Common">Common</option>
       <option value="Rare">Rare</option>
       <option value="Epic">Epic</option>
+    </select>
+    <select v-model="type">
+      <option value="">全部类型</option>
+      <option v-for="t in TYPE_ORDER" :key="t" :value="t">{{ TYPE_LABEL[t] }}</option>
+    </select>
+    <select v-model="hiddenMode">
+      <option value="hide">不显示隐藏单位</option>
+      <option value="only">只显示隐藏单位</option>
+      <option value="all">全部单位</option>
     </select>
     <select v-model="sort">
       <option value="cost">按造价</option>
@@ -171,16 +188,8 @@ const costSpread = computed(() => {
     </select>
   </div>
 
-  <p v-if="loading" class="muted">正在加载 {{ total }} 个条目…</p>
+  <p v-if="loading" class="muted">正在加载…</p>
   <template v-else>
-    <p class="muted summary">
-      {{ shown.length }} / {{ total }} 个条目
-      <span v-if="costSpread.length" class="spread">
-        · 造价分布
-        <span v-for="[c, n] in costSpread" :key="c" class="pill">{{ c }}<i>×{{ n }}</i></span>
-      </span>
-    </p>
-
     <p v-if="!shown.length" class="muted">没有符合筛选条件的条目。</p>
 
     <!-- 分组：每节一个小标题 + 数量，节内仍是一张网格 -->
