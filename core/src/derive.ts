@@ -478,6 +478,8 @@ export interface DerivedStats {
   turn_speed?: number;
   /** 避免拥挤的半径（格），影响阵型 */
   avoidance_radius?: number;
+  /** 伤害减免百分比（已 ×100）。仅壁虱坦克的壕沟有 —— 来自 modifier_intro.tuning.damageReductionPercent */
+  damage_reduction_pct?: number;
 }
 
 export interface DerivedHealth {

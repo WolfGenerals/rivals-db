@@ -178,6 +178,27 @@ function statsOf(rec: EntityRecord): Record<string, unknown> {
   if (und) s.undeploy_ms = und;
   const ranges = wts.map((w) => w.maxRangeInTiles).filter((x): x is number => typeof x === "number");
   if (ranges.length) s.range_tiles = Math.max(...ranges);
+
+  /*
+   * **文案占位符能算的值**（<stat|X>）。
+   *
+   * 描述里的 <stat|BuffEffect> 之类，游戏会在运行期由**每个单位自己的**
+   * GetStatInfo.overrideTable[X] 函数填值（如 unit_nod_ticktank.lua:172）。
+   * 那些函数的取值来源就是各单位自己的 tuning —— 我们手里有，所以直接算好。
+   *
+   * 目前只解出有明确来源的：**伤害减免百分比**（壁虱坦克的壕沟 70%）。
+   * 其余 12 种占位符（DebuffDuration/Clip/RampTime…）来源未查明，
+   * 按 AGENTS.md 第 6 条**不猜**，UI 会显示成未被解码的占位符。
+   */
+  const pcts = wts
+    .flatMap((w) => [
+      (w.modifier_intro as { tuning?: Record<string, unknown> } | undefined)?.tuning,
+      (w.modifier_outro as { tuning?: Record<string, unknown> } | undefined)?.tuning,
+    ])
+    .map((tt) => tt?.["damageReductionPercent"])
+    .filter((v): v is number => typeof v === "number");
+  if (pcts.length) s.damage_reduction_pct = Math.round(Math.max(...pcts) * 100);
+
   return s;
 }
 

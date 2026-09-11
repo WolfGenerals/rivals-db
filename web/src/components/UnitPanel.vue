@@ -65,8 +65,14 @@ const unitType = computed(() => {
 });
 
 /**
- * 本地化文本里的 `<stat|X>` 是**游戏运行时替换的数值占位符**（全库仅 14 种、37 处，
- * 集中在指挥官技能描述）。能算的算，算不出的换 `—`。
+ * 本地化文本里的 `<stat|X>` 是**游戏运行时替换的数值占位符**（全库 13 种、37 处）。
+ *
+ * 游戏的做法是**每个单位在自己的 `GetStatInfo` 里**定义 `overrideTable["X"]` 函数
+ * （如 `unit_nod_ticktank.lua:172` 取 `modifier_intro.tuning.damageReductionPercent`）。
+ * 我们只解出来源明确的那些，值在**提取时**算好放进 `derived.stats`。
+ *
+ * ⚠️ **没解出来的不编**（AGENTS.md 第 6 条）—— 显示成 `⟨X⟩` 让读者看出"这里有个
+ * 未解码的占位符"，而不是一个看着像正常内容的 `—`。
  */
 const STAT_TOKENS: Record<string, (r: DatasetEntry) => string | undefined> = {
   VisionRange: (r) => {
@@ -74,15 +80,27 @@ const STAT_TOKENS: Record<string, (r: DatasetEntry) => string | undefined> = {
     return v === undefined ? undefined : `${v} 格`;
   },
   ExtendedAttackRange: (r) => {
-    const v = r.derived.stats.range_tiles;
+    const v = r.derived.stats.attack_range_tiles;
     return v === undefined ? undefined : `${v} 格`;
+  },
+  /** 壁虱坦克的壕沟：`modifier_intro.tuning.damageReductionPercent`×100 = 70 */
+  BuffEffect: (r) => {
+    const v = r.derived.stats.damage_reduction_pct;
+    return v === undefined ? undefined : String(v);
+  },
+  BuffEffect2: (r) => {
+    const v = r.derived.stats.damage_reduction_pct;
+    return v === undefined ? undefined : String(v);
   },
 };
 
 const desc = computed(() => {
   const r = props.unit;
   if (!r.desc_zh) return "";
-  return r.desc_zh.replace(/<stat\|([A-Za-z0-9_]+)>/g, (_, key: string) => STAT_TOKENS[key]?.(r) ?? "—");
+  return r.desc_zh.replace(/<stat\|([A-Za-z0-9_]+)>/g, (_, key: string) => {
+    const v = STAT_TOKENS[key]?.(r);
+    return v ?? `⟨${key}⟩`; // 未解码：显式标出，不写 —
+  });
 });
 
 /** 总览里的关键值：随等级变 */
