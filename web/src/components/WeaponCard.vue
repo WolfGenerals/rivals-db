@@ -105,8 +105,14 @@ const areaText = computed(() => {
 
 const minor = computed(() => {
   const out: Array<[string, string]> = [];
-  // 引擎内部的逐武器距离。**不是**面板的「攻击距离」（那个在单位总览行）—— 见 findings I126
-  if (props.weapon.range_tiles !== undefined) out.push(["武器射程（引擎值）", `${props.weapon.range_tiles} 格`]);
+  /*
+   * ⚠️ **不展示 `weapon.range_tiles`。**
+   *
+   * 它是 `weapon.maxRangeInTiles`，但**无法作为射程使用**：步枪兵（基础步兵，攻击距离 1）
+   * 与 MLRS（炮兵，攻击距离 2）**都是 2.5** —— 连最基本的角色差异都区分不了。
+   * 游戏面板的攻击距离用的是 `squadTuning.maxAttackRangeInTiles`（单位总览行已显示）。
+   * 见 findings I126/I127/I129。
+   */
   if (props.weapon.homing !== undefined) out.push(["弹道", props.weapon.homing ? "追踪（难躲）" : "不追踪（可走位躲）"]);
   if (props.weapon.targeting_unknown) out.push(["索敌", "未知（数据缺失，不猜）"]);
   return out;
