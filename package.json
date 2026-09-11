@@ -13,9 +13,11 @@
     "web": "pnpm --filter @rivals/web dev",
     "web:build": "pnpm --filter @rivals/web build",
     "cli": "pnpm --filter @rivals/cli start",
-    "extract": "pnpm --filter @rivals/cli start extract tmp/com.ea.gp.candcwarzones"
+    "extract": "pnpm --filter @rivals/cli start extract tmp/com.ea.gp.candcwarzones",
+    "deploy": "pnpm --filter @rivals/web build && gh-pages -d web/dist --nojekyll"
   },
   "devDependencies": {
+    "gh-pages": "^6.3.0",
     "typescript": "^5.9.3"
   }
 }
