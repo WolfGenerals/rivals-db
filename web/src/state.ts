@@ -58,6 +58,24 @@ function withCapped(lv: Level, capped: boolean): LevelDisplay {
 }
 
 /**
+ * DPS 统计口径。
+ *
+ * 三个口径各有用处，**不是随便选一个**：
+ *   `game`  —— 与游戏面板一致，用来**核对**我们的数据对不对
+ *   `burst` —— 射击**期间**的速率（`damage ÷ interval`），看"打起来多猛"
+ *   `avg`   —— 含蓄力/装填/空档的长期平均，看"实际能打出多少"
+ *
+ * 音波坦克最能说明差别：游戏/爆发 = 650，平均 = **137**（3 秒蓄力摊进去）。
+ * 见 findings I164。
+ */
+export const dpsMode: Ref<"game" | "burst" | "avg"> = ref("game");
+export const DPS_MODES: Array<{ key: "game" | "burst" | "avg"; label: string; title: string }> = [
+  { key: "game", label: "游戏", title: "与游戏内面板一致，用于核对数据" },
+  { key: "burst", label: "爆发", title: "射击期间的速率 = 伤害 ÷ 两下之间的间隔" },
+  { key: "avg", label: "平均", title: "含蓄力/装填/空档的长期平均" },
+];
+
+/**
  * 表格的排序状态。
  *
  * ⚠️ **必须是模块级单例，不能放在 `UnitList` 组件内** —— 点单位进详情页再返回会

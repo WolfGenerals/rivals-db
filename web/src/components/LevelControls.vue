@@ -13,7 +13,7 @@ import { computed, ref } from "vue";
 
 import { MAX_MAJOR, MINOR_MAX } from "@rivals/core/levels";
 
-import { levelLabel, MAX_ORDINAL, ordinal, relativeToStart } from "../state.ts";
+import { DPS_MODES, dpsMode, levelLabel, MAX_ORDINAL, ordinal, relativeToStart } from "../state.ts";
 
 const MAJORS = Array.from({ length: MAX_MAJOR }, (_, i) => i + 1);
 const MINORS = Array.from({ length: MINOR_MAX + 1 }, (_, i) => MINOR_MAX - i);
@@ -35,6 +35,24 @@ const step = (d: number) =>
 
 <template>
   <div class="level-controls">
+    <!--
+      DPS 统计口径 —— **全局设置**（`state.ts` 的 `dpsMode`），所以放顶栏而不是某个武器区。
+      面板页右上角、任何页面都能切，切了所有 DPS 数字一起变。
+    -->
+    <div class="dps-modes">
+      <span class="cap">DPS</span>
+      <button
+        v-for="m in DPS_MODES"
+        :key="m.key"
+        type="button"
+        :class="{ on: dpsMode === m.key }"
+        :title="m.title"
+        @click="dpsMode = m.key"
+      >
+        {{ m.label }}
+      </button>
+    </div>
+
     <label class="toggle" title="勾选后，等级从该条目自己的起始等级算起（普通 1-0 / 稀有 3-0 / 史诗 5-0）">
       <input v-model="relativeToStart" type="checkbox" />
       <span>从各自起始等级算</span>
@@ -91,6 +109,33 @@ const step = (d: number) =>
   gap: 10px;
   margin-left: auto;
   font-variant-numeric: tabular-nums;
+}
+
+/* DPS 口径：分段按钮 */
+.dps-modes {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.dps-modes button {
+  padding: 2px 9px;
+  font-size: 11px;
+}
+.dps-modes button:first-of-type {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.dps-modes button:last-of-type {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.dps-modes button + button {
+  border-left: none;
+}
+.dps-modes button.on {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: #cfe4ff;
 }
 
 .toggle {

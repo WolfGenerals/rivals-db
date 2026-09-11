@@ -35,6 +35,7 @@ const COMP_LABEL: Record<string, string> = {
     <h3>
       武器 <span class="at-level">{{ weapons.length }} 件</span>
       <span v-if="comp !== 'single'" class="at-level">{{ COMP_LABEL[comp] }}</span>
+      <!-- DPS 口径选择器在**顶栏**（它是全局设置，不属于某个武器区） -->
     </h3>
     <WeaponCard
       v-for="(w, i) in weapons"
@@ -46,6 +47,7 @@ const COMP_LABEL: Record<string, string> = {
       :level="level"
       :wave-size="unit.derived.squad?.wave_size ?? 1"
       :separation-ms="unit.derived.squad?.member_offset_ms ?? 0"
+      :primary-dps="i === primaryIndex ? unit.derived.dps : null"
     />
   </section>
 </template>

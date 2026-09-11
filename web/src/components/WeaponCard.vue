@@ -14,6 +14,7 @@
 import { computed } from "vue";
 
 import type { Track, Weapon } from "@rivals/core/derive";
+import { DPS_MODES, dpsMode } from "../state.ts";
 import type { Level } from "@rivals/core/levels";
 
 import DamageMatrix from "./DamageMatrix.vue";
@@ -31,6 +32,8 @@ const props = defineProps<{
   /** 小队人数与成员错开 —— 时序条要按它们画每条队员的轴 */
   waveSize?: number;
   separationMs?: number;
+  /** 单位的面板 DPS（`derived.dps`）—— `game` 口径直接用它 */
+  primaryDps?: number | null;
 }>();
 
 /**
@@ -42,34 +45,67 @@ const props = defineProps<{
  */
 
 /**
- * 一把武器的 DPS —— **统一式子**：
+ * 一把武器的三个 DPS 口径 + 单轮总伤害。
  *
  * ```
- * dps = damage × hits × waveSize × 1000 / cycle_ms
+ * 单轮总伤害 = damage × hits
+ * burst（爆发） = damage × hits ÷ (hits × interval) = damage ÷ interval
+ * avg（平均）   = damage × hits ÷ 完整周期      ← 蓄力/装填/空档都摊进去
+ * game（游戏）  = 面板的口径（`derived.dps`，随等级缩放）
  * ```
  *
- * `interval_ms` / `gap_ms` 只是展示细化，不参与计算。
+ * 音波坦克最能说明差别：`game`/`burst` = 650，`avg` = **137**（3 秒蓄力摊进去）。
+ * 见 findings I164。
  */
-const baseDps = computed(() => {
+interface DpsSet {
+  /** 单轮总伤害（1-0 基准） */
+  volley: number;
+  /** 一轮打几下 */
+  hits: number;
+  burst: number;
+  avg: number;
+}
+
+const dpsSet = computed<DpsSet>(() => {
   const wave = props.waveSize ?? 1;
-  let best = 0;
+  let volley = 0;
+  let hits = 0;
+  let burst = 0;
+  let avg = 0;
   for (const t of props.tracks) {
     const tm = t.timing;
-    let hits: number;
-    let cycle: number;
     if (tm.kind === "一次") continue; // 一次性不计持续输出
-    else if (tm.kind === "装填") {
-      hits = tm.clip;
-      cycle = tm.reload_ms;
-    } else {
-      hits = tm.hits;
-      cycle = tm.cycle_ms;
-    }
-    if (cycle > 0) best = Math.max(best, (props.weapon.damage * hits * wave * 1000) / cycle);
+    const h = tm.kind === "装填" ? tm.clip : tm.hits;
+    const iv = tm.interval_ms ?? (tm.kind === "单发" ? tm.cycle_ms : 0);
+    const cycle =
+      tm.kind === "装填" ? tm.clip * iv + tm.reload_ms : tm.cycle_ms;
+    const dmg = props.weapon.damage;
+    volley += dmg * h;
+    hits += h;
+    // 爆发：射击期间的速率。单发（hits=1）时"期间"就是它的间隔
+    if (iv > 0) burst = Math.max(burst, (dmg * h * wave * 1000) / (h * iv));
+    // 平均：完整周期。蓄力在周期外时（`chargeInCycle === false`）要加进去
+    const full = t.chargeInCycle === false ? cycle + (t.charge_ms ?? 0) : cycle;
+    if (full > 0) avg = Math.max(avg, (dmg * h * wave * 1000) / full);
   }
-  return best;
+  return { volley, hits, burst, avg };
+});
+
+/** 按当前口径取 1-0 基准 DPS */
+const baseDps = computed(() => {
+  if (props.primaryDps != null && dpsMode.value === "game") return props.primaryDps;
+  return dpsMode.value === "avg" ? dpsSet.value.avg : dpsSet.value.burst;
 });
 const levelDps = computed(() => (baseDps.value > 0 ? props.level.dps(baseDps.value) : undefined));
+
+/** 当前口径的显示名，用在 DPS 标签上 */
+const DPS_LABEL = computed(() => DPS_MODES.find((m) => m.key === dpsMode.value)?.label ?? "");
+
+/** 单轮总伤害也随等级缩放（与单发、DPS 同一个系数） */
+const levelVolley = computed(() => {
+  const v = dpsSet.value.volley;
+  return v > 0 ? Math.round(props.level.dps(v)) : 0;
+});
 
 /**
  * **单发伤害也要随等级缩放。**
@@ -199,7 +235,12 @@ const minor = computed(() => {
       </div>
       <div class="key-item">
         <StatIcon name="dps" />
-        <span>DPS</span>
+        <span>单轮总伤害</span>
+        <b>{{ levelVolley }}</b>
+      </div>
+      <div class="key-item">
+        <StatIcon name="dps" />
+        <span>DPS（{{ DPS_LABEL }}）</span>
         <b>{{ levelDps?.toFixed(1) ?? "—" }}</b>
       </div>
     </div>
