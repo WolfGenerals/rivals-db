@@ -60,6 +60,18 @@ const baseDps = computed(() => {
 });
 const levelDps = computed(() => (baseDps.value > 0 ? props.level.dps(baseDps.value) : undefined));
 
+/**
+ * **单发伤害也要随等级缩放。**
+ *
+ * `weapon.damage` 是 **1-0 基准值**，必须乘上同样的等级系数 —— 否则会出现
+ * "单发伤害 45 但 DPS 180" 这种对不上的组合（DPS 变了、单发没变）。
+ * 用 `level.dps()` 而不是 `level.hp()`：伤害与 DPS 同一个系数，与血量无关。
+ */
+const levelDamage = computed(() => {
+  const d = props.weapon.damage;
+  return d > 0 ? Math.round(props.level.dps(d)) : d;
+});
+
 const fmtMs = (ms: number) => (ms >= 1000 ? `${(ms / 1000).toFixed(2)}s` : `${Math.round(ms)}ms`);
 const fmtSec = (ms: number) => `${(ms / 1000).toFixed(ms % 1000 === 0 ? 1 : 2)}s`;
 
@@ -155,7 +167,7 @@ const minor = computed(() => {
       <div class="key-item">
         <StatIcon name="dps" />
         <span>单发伤害</span>
-        <b>{{ weapon.damage }}</b>
+        <b>{{ levelDamage }}</b>
       </div>
       <div class="key-item">
         <StatIcon name="dps" />
