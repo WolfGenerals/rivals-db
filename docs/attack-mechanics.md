@@ -301,9 +301,17 @@ initialChargeUpMs = 1750, shotCooldownMs = 500
 | 15 | `ability_scarab_weapon_sequence_behaviour` | 52 | 圣甲虫 | 前摇后**只开一枪**，然后 `TakeHiddenDestroyDamage()` **自爆** |
 | — | `ability_empty_weapon_sequence` | 16 | （无） | 空壳，只被 orcabomber 的 `targetSelector` 占位桩引用 |
 
-### 9.1 `MUZZLE_INFO` 的语义（游戏自己的断言确认）
+### 9.1 `MUZZLE_INFO` 的语义：**一次攻击打几下**
 
-`ability_kodiak_weapon_sequence.lua:19`：
+> ⚠️ 早先这里写的是「枪口数」「一轮发数」，**都不准确**（用户纠正）。它不是枪口数 ——
+> 神像是 `[0,0,0]`，三下都从**同一个**枪口出。
+
+`MUZZLE_INFO` 是**一次攻击动作的击打序列**：
+
+- **条目数 = 这一次攻击打几下**
+- **每条目的 `muzzleIndex` = 这一下从哪个枪口出**
+
+引擎自己的断言印证了「几下」这层含义（`ability_kodiak_weapon_sequence.lua:19`）：
 
 ```lua
 IM_ASSERT(self.tuning.durationBetweenVolley >=
@@ -311,16 +319,32 @@ IM_ASSERT(self.tuning.durationBetweenVolley >=
   "Kodiak assumes that it can charge up, fire the shots in the volley time" .. self.id)
 ```
 
-**`#MUZZLE_INFO` = 一轮的发数** —— 这是引擎代码自己算的，不是推测。
+即：一轮（`durationBetweenVolley`）必须能塞下 **`#MUZZLE_INFO` 下**攻击。
 
 | 单位 | `MUZZLE_INFO` | `muzzleIndex` | 含义 |
 | --- | --- | --- | --- |
-| 神像机甲 | 3 条 | `[0,0,0]` | 3 发，**同一枪口连发** |
-| 科迪亚克 | 3 条 | `[0,1,2]` | 3 发，3 个不同枪口 |
-| 沙暴 | 2 条 | `[0,1]` | 2 个枪口**轮转**；发数由 `missileCount` 给 |
+| 神像机甲 | 3 条 | `[0,0,0]` | 一次攻击 **3 下**，都从枪口 0 出 |
+| 科迪亚克 | 3 条 | `[0,1,2]` | 一次攻击 **3 下**，分别从 0/1/2 出 |
+| 沙暴 | 2 条 | `[0,1]` | 实现用 `missileCount`（12）**覆盖**了击打数，`[0,1]` 只是**枪口轮转周期** |
 
-所以：**发数 = 显式发数（`missileCount` / `attackCount` / `numToBurst`） ?? `#MUZZLE_INFO` ?? 1**，
-且 `MUZZLE_INFO[i].muzzleIndex` 是「逻辑枪口号 → 物理枪口号」的映射，**枪口数从不乘 DPS**。
+#### 击打数怎么进 DPS：看**伤害的粒度**
+
+这一点是关键 —— 「乘不乘 `#MUZZLE_INFO`」**不是**由这个数本身决定，而是由**伤害写的是每下还是一次攻击的总和**决定：
+
+| 单位 | 伤害字段 | 粒度 | 算法 |
+| --- | --- | --- | --- |
+| 神像机甲 | `projectile.modifier.damage = 400` | **每下** | `400 × 3 / 2.5 = 480` ✅ |
+| 科迪亚克 | `damageTuning.default = 1500` | **一次攻击总和**（3 下合计） | `1500 / 3.0 = 500` ✅ |
+| 沙暴 | `projectile.modifier.damage = 150` | 每下，但击打数由 `missileCount` 给 | `12 × 150 / 4.0 = 450` ✅ |
+
+所以正确的表述是：
+
+```
+击打数 = 实现显式指定的（missileCount / attackCount） ?? #MUZZLE_INFO ?? 1
+DPS   = （伤害是每下值 ? 伤害 × 击打数 : 伤害） × waveSize ÷ 周期
+```
+
+**`muzzleCount` / `muzzleStrategy` 一概不参与 DPS 计算**，它们只决定这几下怎么分配到枪口。
 
 ### 9.2 另一处未提取的实现：`unit_*.GetStatInfo()`
 

@@ -8,7 +8,7 @@
  * | `health` 是每员血量，不是小队总血 | `squadHealth()` 而非裸读字段 |
  * | `goodAgainstTags` 是索敌偏好，不是伤害加成 | 类型上叫 `targetingIntent`，注释写明 |
  * | `overrides` 大多比 `default` **低** | `damageAgainst()` 统一取值 |
- * | `muzzleCount` 多数不生效 | `baseDps()` 内置 `muzzleStrategy` 判断 |
+ * | `muzzleCount` 一概不计入 DPS | 只决定多下怎么分配到枪口 |
  * | `descriptors` 是编造的占位值 | 标成 `Placeholder` 类型并在注释警告 |
  *
  * 原始数据不在这里重新解释，只是给出形状 + 安全取值。
@@ -191,12 +191,12 @@ export interface WeaponTuning {
   /** 射程（格） */
   maxRangeInTiles?: number;
   /**
-   * 枪口数。
+   * **一次攻击动作打几下。** 它和 `muzzleStrategy` **一概不参与 DPS 计算**，
+   * 只决定「这几下怎么分配到枪口」（`All` = 每口各一下，否则轮转）。
    *
-   * ⚠️ **它从不参与 DPS 计算**，只决定「多发怎么分配」（`All` = 每口各一发，
-   * 否则轮转）。早先写的「只有 `muzzleStrategy === "All"` 时才计入」是**错的**：
+   * ⚠️ 早先写的「只有 `muzzleStrategy === "All"` 时才计入 DPS」是**错的**：
    * 火焰坦克 `All` + `muzzleCount=2`，实测面板 380/0.5 = 760（×1），乘 2 会得 1520。
-   * 见 docs/attack-mechanics.md 9.1。
+   * 见 docs/attack-mechanics.md 9.1 与 findings I80。
    */
   muzzleCount?: number;
   /** 仅 15/83 个武器有，取值 `All` */
@@ -365,9 +365,9 @@ export interface EntityRecord {
   /**
    * 开火装备表（`unit_<id>_visual` / `cmdr_<id>_visual`）的**摘要**，按能力序列名分组。
    *
-   * 只留 `MUZZLE_INFO`，因为**一轮发数 = `#MUZZLE_INFO`** —— 这是引擎自己的规则，
-   * 见 `ability_kodiak_weapon_sequence.lua:19` 的断言与 `docs/attack-mechanics.md` 9.1。
-   * `muzzleInfo[i]` 是「逻辑枪口号 → 物理枪口号」的映射值，**枪口数不乘 DPS**。
+   * 只留 `MUZZLE_INFO` —— 它是**一次攻击的击打序列**：条目数 = 打几下，
+   * 每条的 `muzzleIndex` = 这一下从哪个枪口出。引擎自己的断言用 `#MUZZLE_INFO`
+   * 算一轮能否塞下这么多下（`ability_kodiak_weapon_sequence.lua:19`）。
    *
    * 只对定义了该全局的单位存在（全库 4 个：神像 ×2、沙暴 ×2）。
    */
@@ -624,9 +624,15 @@ export function damageAgainstTarget(weapon: WeaponTuning, target: DamageOverride
 /**
  * 基础 DPS（1-0 级，未套等级倍率）。
  *
- * 内置两个容易写错的判断：
  * - 有 `reloadTuning` 走弹夹式公式，否则走爆发式
- * - `muzzleCount` **只在 `muzzleStrategy === "All"` 时**才乘进去
+ * - **`muzzleCount` / `muzzleStrategy` 一概**不参与**计算** —— 它们只决定
+ *   「一次攻击的多下怎么分配枪口」。早先这里写了「`muzzleStrategy === "All"` 时乘
+ *   `muzzleCount`」，**是错的**：火焰坦克 `All` + `muzzleCount=2`，实测面板
+ *   `380/0.5 = 760`（×1），乘 2 会得 1520（findings I80）。
+ *
+ * ⚠️ **本函数只覆盖 62 把常规武器**（有 `burstTiming.cooldown` 的那些）。
+ * 22 把特殊武器的节奏在 `modifier_sequence` 里，**要用 `@rivals/core/attack` 的
+ * `UnitAttack.of(unit).dps()`** —— 那里按 `behaviourName` 精确派发，有 15 个观测点验证。
  *
  * 返回值是 1-0 级的值；等级换算见 docs/level-scaling.md。
  */
@@ -645,10 +651,7 @@ export function baseDps(weapon: WeaponTuning, waveSize = 1, targetTag?: DamageOv
   const burst = weapon.burstTiming ?? {};
   const cooldown = burst.cooldown ?? 0;
   if (!cooldown) return 0;
-  let mult = ((burst.numToBurst ?? 1) * waveSize) / cooldown;
-  // 只有这个组合才计入 muzzleCount —— Pitbull 写了 muzzleCount=2 但不生效
-  if (weapon.muzzleStrategy === "All") mult *= weapon.muzzleCount ?? 1;
-  return damage * mult;
+  return (damage * (burst.numToBurst ?? 1) * waveSize) / cooldown;
 }
 
 /**

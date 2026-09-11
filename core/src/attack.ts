@@ -20,7 +20,7 @@
  *
  * ## `WeaponAttack` 的职责
  *
- *   1. 持有输入 —— `weapon` / `waveSize` / `patternLength`
+ *   1. 持有输入 —— `weapon` / `waveSize` / `hitsPerAttack`
  *   2. 声明契约 —— `label` / `dps()` / `phases()`（抽象）
  *   3. 解析伤害来源 —— `damage()` 的三源回退链 + `projectileDamage()`
  *   4. 读参数表 —— `tuning()`（强类型 `SequenceTuning`）
@@ -50,30 +50,29 @@ export abstract class WeaponAttack {
   readonly weapon: WeaponTuning;
   readonly waveSize: number;
   /**
-   * 该武器序列的枪口分配模式长度（`unit_<id>_visual[<序列名>].MUZZLE_INFO` 的条目数）。
+   * **一次攻击动作打几下。**
    *
-   * ⚠️ **这是「枪口数」，不是「发数」。** 别把它当发数用。
+   * 来源：`unit_<id>_visual[<序列名>].MUZZLE_INFO` 的条目数。
+   * 每个条目对应**一下**，条目里的 `muzzleIndex` 是**这一下从哪个枪口出**
+   * （所以它不是「枪口数」—— 神像是 `[0,0,0]`，三下都从枪口 0 出）。
    *
-   * 反例（沙暴，用户指出）：`#MUZZLE_INFO = 2`，但一轮打 **12 发**（`missileCount`），
-   * 它的 Timeline 是**在 2 个枪口上轮转 12 发**：
-   * ```
-   * while totalMuzzlesFired < missileCount do
-   *   MUZZLE_INFO[totalMuzzlesFired % #MUZZLE_INFO + 1].muzzleIndex
-   * ```
+   * 引擎自己的断言印证了这个含义（`ability_kodiak_weapon_sequence.lua:19`）：
+   * `durationBetweenVolley >= volleyChargeUpTime + delayAfterShot × #MUZZLE_INFO`
+   * —— 一轮要能塞下 `#MUZZLE_INFO` **下**攻击。
    *
-   * `#MUZZLE_INFO` 只在「一发占一个枪口」的实现里恰好等于发数（科迪亚克 `ipairs(MUZZLE_INFO)`
-   * 遍历开火）；神像机甲的 3 发更是**硬编码的三个 `Fire()` 调用**，与 MUZZLE_INFO 只是巧合相等。
+   * ⚠️ **但派生公式不统一，要看伤害怎么写**：
+   *   · 神像机甲 —— `projectile.modifier.damage = 400` 是**每下** → 乘：`400 × 3 / 2.5 = 480` ✅
+   *   · 科迪亚克 —— `damageTuning = 1500` 是**一次攻击的总伤害** → 不乘：`1500 / 3.0 = 500` ✅
+   *   · 沙暴 —— 实现用 `missileCount`（12）**覆盖**了击打数，`[0,1]` 只是枪口轮转周期 → 不乘 ✅
    *
-   * 当前的 `VolleyAttack` 只在「伤害写在弹体上」时乘它 —— 那是一个**由实测拟合出来的窄规则**
-   * （正例神像机甲 ×3；反例沙暴 ×12、科迪亚克不乘），不是从引擎语义推出的定律。
-   * 见 `docs/attack-mechanics.md` 9.1 与 findings I91。
+   * 所以「乘不乘」由**伤害的粒度**决定，不是由这个数本身决定。
    */
-  readonly patternLength: number;
+  readonly hitsPerAttack: number;
 
-  constructor(weapon: WeaponTuning, waveSize: number, patternLength = 1) {
+  constructor(weapon: WeaponTuning, waveSize: number, hitsPerAttack = 1) {
     this.weapon = weapon;
     this.waveSize = waveSize;
-    this.patternLength = patternLength;
+    this.hitsPerAttack = hitsPerAttack;
   }
 
   abstract get label(): string;
@@ -272,7 +271,7 @@ export class DetonateAttack extends WeaponAttack {
   }
 }
 
-/** E 族 · 齐射：`每轮总伤害 ÷ durationBetweenVolley_s`。**不含**枪口模式乘法 */
+/** E 族 · 齐射：`每轮总伤害 ÷ durationBetweenVolley_s`。**不含**击打数乘法（由子类决定） */
 export class VolleyAttack extends WeaponAttack {
   get label() {
     return "齐射";
@@ -295,7 +294,7 @@ export class VolleyAttack extends WeaponAttack {
       label: "一轮",
       ms: this.cycleMs(),
       damage: this.damage(),
-      shots: this.patternLength,
+      shots: this.hitsPerAttack,
     });
     if (t.delayAfterShot) out.push({ kind: "fire", label: "副炮延迟", ms: t.delayAfterShot });
     return out;
@@ -332,8 +331,8 @@ export class TickAttack extends WeaponAttack {
 /** 认得出来但公式未定 —— **不猜**，如实标未知 */
 export class UnknownAttack extends WeaponAttack {
   readonly reason: string;
-  constructor(weapon: WeaponTuning, waveSize: number, patternLength: number, reason: string) {
-    super(weapon, waveSize, patternLength);
+  constructor(weapon: WeaponTuning, waveSize: number, hitsPerAttack: number, reason: string) {
+    super(weapon, waveSize, hitsPerAttack);
     this.reason = reason;
   }
   get label() {
@@ -392,7 +391,7 @@ export class BasicAttack extends WeaponAttack {
  * `ability_simple_weapon_sequence` —— 弹弓 / 狼獾 / 忏悔者 / 烈焰之手
  *
  * Lua：`while true` + `SetCooldown(burstCooldown)`，前摇在周期开头；
- * `muzzleStrategy` 只决定多发**怎么分配**，**不乘 DPS**。
+ * `muzzleStrategy` 只决定这几下**怎么分配到枪口**，**不乘 DPS**。
  */
 export class SimpleWeaponSequence extends ContinuousAttack {}
 
@@ -423,8 +422,8 @@ export class BasiliskWeaponSequence extends StagedAttack {}
 /**
  * `ability_kodiak_weapon_sequence_behaviour` —— 科迪亚克
  *
- * `damageTuning.default = 1500` 是**整轮总和**（3 个枪口分摊），所以**不乘**枪口数。
- * `1500 / 3.0 = 500` ✅
+ * 一次攻击 **3 下**（`MUZZLE_INFO` 三条），但 `damageTuning.default = 1500` 是
+ * **这三下的总和**，所以**不再乘**击打数：`1500 / 3.0 = 500` ✅
  */
 export class KodiakWeaponSequence extends VolleyAttack {}
 
@@ -432,25 +431,27 @@ export class KodiakWeaponSequence extends VolleyAttack {}
  * `ability_juggernaut_weapon_sequence_behaviour` —— 神像机甲 / 神像机甲_ST
  *
  * 一轮 **3 发**（Timeline 里硬编码三个 `Fire()`），伤害 `400` 写在
- * `projectile.modifier` 上是**每发值**，所以要乘枪口模式长度：
+ * `projectile.modifier` 上是**每下的值**，所以要乘击打数：
  * `400 × 3 / 2.5 = 480` ✅
  *
- * ⚠️ 这是**实测拟合的窄规则**，不是引擎语义：沙暴也是「伤害在弹体上」，
- * 但它的枪口模式只有 2 条而一轮打 12 发（见 `SandstormWeaponSequence`）。
+ * ⚠️ 「乘不乘」由**伤害的粒度**决定（每下 vs 一次攻击总和），不是由击打数本身决定。
+ * 沙暴是反例：伤害也在弹体上，但它的实现用 `missileCount` 覆盖了击打数
+ * （见 `SandstormWeaponSequence`）。
  */
 export class JuggernautWeaponSequence extends VolleyAttack {
   dps(): number {
     const cyc = this.cycleMs();
     if (!cyc) return 0;
-    return (this.damage() * this.patternLength * this.waveSize * 1000) / cyc;
+    return (this.damage() * this.hitsPerAttack * this.waveSize * 1000) / cyc;
   }
 }
 
 /**
  * `ability_sandstorm_weapon_sequence_behaviour` —— 沙暴 / 沙暴_ST
  *
- * 按目标小队数分档倾泻 `missileCount` 发；`MUZZLE_INFO` 只是**枪口轮转**用的
- * （2 个枪口轮流打 12 发），**不是发数**。`12 × 150 / 4.0 = 450` ✅
+ * 按目标小队数分档倾泻 `missileCount` 发；它的 `MUZZLE_INFO` 只有 2 条，
+ * 是因为实现**用 `missileCount`（12）覆盖了击打数**，`[0,1]` 只是枪口轮转周期。
+ * `12 × 150 / 4.0 = 450` ✅
  */
 export class SandstormWeaponSequence extends PourAttack {}
 
@@ -467,12 +468,12 @@ export class ScarabWeaponSequence extends BasicAttack {}
  * 没有周期参数，**公式未解**（也没有游戏内观测点）。如实标未知，不猜。
  */
 export class DisruptorWeaponSequence extends UnknownAttack {
-  constructor(weapon: WeaponTuning, waveSize: number, patternLength: number) {
-    super(weapon, waveSize, patternLength, "破坏者的 Timeline 分无限/有限光束两模式，tuning 里没有周期参数");
+  constructor(weapon: WeaponTuning, waveSize: number, hitsPerAttack: number) {
+    super(weapon, waveSize, hitsPerAttack, "破坏者的 Timeline 分无限/有限光束两模式，tuning 里没有周期参数");
   }
 }
 
-type BehaviourCtor = new (w: WeaponTuning, waveSize: number, patternLength: number) => WeaponAttack;
+type BehaviourCtor = new (w: WeaponTuning, waveSize: number, hitsPerAttack: number) => WeaponAttack;
 
 /** `behaviour` 名 → 实现类。键必须与 `gameplay/abilities/<名去掉 _behaviour>.lua` 对应 */
 export const BEHAVIOURS: Record<string, BehaviourCtor> = {
@@ -499,10 +500,10 @@ export const BEHAVIOURS: Record<string, BehaviourCtor> = {
  * **先按 `behaviourName` 精确派发**（22 把特殊武器），
  * 没有 behaviour 的（61 把常规武器）才退到字段驱动。
  */
-export function weaponAttackOf(weapon: WeaponTuning, waveSize: number, patternLength = 1): WeaponAttack {
+export function weaponAttackOf(weapon: WeaponTuning, waveSize: number, hitsPerAttack = 1): WeaponAttack {
   const beh = (weapon.modifier_sequence as { behaviourName?: string } | undefined)?.behaviourName;
   const Ctor = beh ? BEHAVIOURS[beh] : undefined;
-  if (Ctor) return new Ctor(weapon, waveSize, patternLength);
+  if (Ctor) return new Ctor(weapon, waveSize, hitsPerAttack);
 
   /*
    * 常规武器：`burstTiming.cooldown` 驱动。
@@ -514,14 +515,14 @@ export function weaponAttackOf(weapon: WeaponTuning, waveSize: number, patternLe
   const spawn = (weapon as { modifier_spawn?: { tuning?: { burstTuning?: { shotCooldownMs?: number } } } })
     .modifier_spawn;
   if (spawn?.tuning?.burstTuning?.shotCooldownMs) {
-    return new ContinuousAttack(weapon, waveSize, patternLength);
+    return new ContinuousAttack(weapon, waveSize, hitsPerAttack);
   }
   if ((weapon.burstTiming as { cooldown?: number })?.cooldown) {
-    return new BasicAttack(weapon, waveSize, patternLength);
+    return new BasicAttack(weapon, waveSize, hitsPerAttack);
   }
 
   const why = beh ? `认不出 behaviour「${beh}」` : "既无 behaviour，也无 burstTiming.cooldown";
-  return new UnknownAttack(weapon, waveSize, patternLength, why);
+  return new UnknownAttack(weapon, waveSize, hitsPerAttack, why);
 }
 
 /** 单位级聚合：双武器**取最大**（不求和），并带上小队信息 */
@@ -550,8 +551,8 @@ export class UnitAttack {
     const ws = (cfg.combatantTuning?.weaponTunings ?? []) as WeaponTuning[];
 
     /*
-     * 一轮发数 = `#MUZZLE_INFO`（引擎自己的规则，见类头注释）。
-     * 按武器的 `modifier_sequence.name` 去 `unit.visual` 里找对应的枪口模式。
+     * 一次攻击打几下 = `#MUZZLE_INFO`（引擎自己的断言，见字段注释）。
+     * 按武器的 `modifier_sequence.name` 去 `unit.visual` 里找对应的击打序列。
      */
     const patternFor = (w: WeaponTuning): number => {
       const seqName = (w.modifier_sequence as { name?: string } | undefined)?.name;
