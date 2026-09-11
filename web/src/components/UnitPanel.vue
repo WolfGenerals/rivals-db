@@ -38,6 +38,11 @@ const props = defineProps<{
 
 const waveSize = computed(() => props.unit.derived.health?.wave_size ?? 1);
 
+/** 该单位是否能攻击 —— 决定「敌人应对」那一块显不显示 */
+const canAttack = computed(() =>
+  props.unit.derived.weapons.some((w) => w.damage > 0 && w.can_attack.length > 0),
+);
+
 /** 本面板的独立等级。默认关闭开关，跟随全局 */
 const independent = ref(false);
 const localLevel = ref<Level>(props.level);
@@ -134,10 +139,7 @@ const basics = computed(() => {
    * 游戏里看得见射程的单位。这里仍然列出来，但把基线标出来 —— 否则一页全是「攻击距离 1 格」。
    */
   if (st.attack_range_tiles !== undefined) {
-    rows.push([
-      "攻击距离",
-      st.attack_range_tiles > 1 ? `${st.attack_range_tiles} 格` : `${st.attack_range_tiles} 格（基线）`,
-    ]);
+    rows.push(["攻击距离", `${st.attack_range_tiles} 格`]);
   }
   if (st.aggro_radius_tiles !== undefined) rows.push(["索敌半径", `${st.aggro_radius_tiles} 格`]);
   if (st.avoidance_radius !== undefined) rows.push(["避让半径", `${st.avoidance_radius} 格`]);
@@ -227,8 +229,11 @@ const squadRows = computed(() => {
       </div>
     </section>
 
-    <!-- ② 附加：敌人应对（索敌偏好 / 克制） -->
-    <section class="panel">
+    <!--
+      ② 附加：敌人应对（索敌偏好 / 克制）
+      **不能攻击的单位不显示** —— 采集车、无武器的指挥官等，"克制什么"没有意义。
+    -->
+    <section v-if="canAttack" class="panel">
       <h3>敌人应对</h3>
       <UnitAffinity :unit="unit" />
     </section>
