@@ -330,8 +330,15 @@ export async function extractAll(opts: ExtractOptions): Promise<ExtractResult> {
       throw new RivalsError(`在 ${join(root, "gameplay", "units")} 下没有 unit_*.lua`);
     }
     const cmdrSources = await readSources(join(root, "gameplay", "commanders"), root, /^cmdr_.*\.lua$/);
+    /*
+     * `gameplay/buildings/` —— **16 个建筑**，含**基地车（MCV）**与全部生产建筑
+     * （兵营/战车工厂/直升机坪/机器人实验室/建造厂、Nod 之手/神殿/机场/坦克厂…）。
+     * 这些和 `units/` 里的炮台、激光方尖碑一样是**战场实体**，所以并入 `units`。
+     * 文件名前缀不统一（`bldg_*` / `gdi_mcv` / `nod_protopad`），故不按前缀筛。
+     */
+    const bldgSources = await readSources(join(root, "gameplay", "buildings"), root, /\.lua$/);
 
-    const failures = await evalTwoPass(lua, [...unitSources, ...cmdrSources], onError);
+    const failures = await evalTwoPass(lua, [...unitSources, ...cmdrSources, ...bldgSources], onError);
 
     // pb 提供 Lua 里没有的稀有度
     const pbByLuaName = new Map<string, PbUnit>();
@@ -455,6 +462,18 @@ export async function extractAll(opts: ExtractOptions): Promise<ExtractResult> {
     };
 
     return {
+      /*
+       * ⚠️ **建筑暂不入库** —— `bldgSources` 已读入并参与 Lua 求值，但先不并进 `units`。
+       *
+       * 16 个建筑（含基地车 MCV、建造厂、兵营…）**四个条件都不满足**：
+       *   ① 全部**没有图标**（`data/img/` 里一个都没有）
+       *   ② **没有本地化**（键是 `Bldg_Gdi_Barracks` 这种，`_build_locale.py` 只认 `UI_*`）
+       *   ③ **阵营识别不出**（`faction` 未确定）
+       *   ④ `gdi_mcv`/`gdi_proto`/`gdi_protopad` 疑似**遗留占位桩**（血量与兵营同为 520、无造价、无 `combatStoreTuning`）
+       *
+       * 要入库先把这四条解决（图标来源、本地化键模式、阵营判定、占位桩去留）。
+       * 见 findings I135。
+       */
       units: collect(unitSources),
       commanders: collect(cmdrSources),
       factions,
