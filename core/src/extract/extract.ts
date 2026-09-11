@@ -83,7 +83,7 @@ export function splitVariant(stem: string): { variant: string; suffixes: string[
   let parts = stem.split("_");
   const hasPrefix =
     parts.length >= 3 &&
-    (parts[0] === "unit" || parts[0] === "cmdr") &&
+    (parts[0] === "unit" || parts[0] === "cmdr" || parts[0] === "bldg") &&
     (parts[1] === "gdi" || parts[1] === "nod");
   if (hasPrefix) parts = parts.slice(2);
   const suffixes: string[] = [];
@@ -97,10 +97,10 @@ export function splitVariant(stem: string): { variant: string; suffixes: string[
   return { variant: parts.join("_"), suffixes };
 }
 
-/** 从文件名推断派系。`cmdr_*` 与 `unit_*` 都适用。 */
+/** 从文件名推断派系。`cmdr_*` / `unit_*` / `bldg_*` 都适用。 */
 export function factionOf(stem: string): Faction {
-  if (/^(unit|cmdr)_gdi_/.test(stem)) return "GDI";
-  if (/^(unit|cmdr)_nod_/.test(stem)) return "NOD";
+  if (/^(unit|cmdr|bldg)_gdi_/.test(stem)) return "GDI";
+  if (/^(unit|cmdr|bldg)_nod_/.test(stem)) return "NOD";
   return "UNKNOWN";
 }
 
@@ -463,18 +463,17 @@ export async function extractAll(opts: ExtractOptions): Promise<ExtractResult> {
 
     return {
       /*
-       * ⚠️ **建筑暂不入库** —— `bldgSources` 已读入并参与 Lua 求值，但先不并进 `units`。
+       * ✅ **只收「总部 / 基地」** —— `bldg_<faction>_conyard`。
        *
-       * 16 个建筑（含基地车 MCV、建造厂、兵营…）**四个条件都不满足**：
-       *   ① 全部**没有图标**（`data/img/` 里一个都没有）
-       *   ② **没有本地化**（键是 `Bldg_Gdi_Barracks` 这种，`_build_locale.py` 只认 `UI_*`）
-       *   ③ **阵营识别不出**（`faction` 未确定）
-       *   ④ `gdi_mcv`/`gdi_proto`/`gdi_protopad` 疑似**遗留占位桩**（血量与兵营同为 520、无造价、无 `combatStoreTuning`）
+       * 依据：全库只有建造厂是 **30000 血**（其余建筑一律 520），且本地化键
+       * `UI_GDI_CONYARD` = **"Headquarters" / "总部"** —— 它就是要看血量的那个基地。
+       * 其余 14 个建筑（兵营/工厂/机场/Nod 神殿…）**不要**（用户决定）。
        *
-       * 要入库先把这四条解决（图标来源、本地化键模式、阵营判定、占位桩去留）。
-       * 见 findings I135。
+       * 已解决：前缀 `bldg_` 的解析（`splitVariant` / `factionOf` 都已支持）→
+       * `faction=GDI`、`variant=conyard`，于是 `_build_locale.py` 能算出 `UI_GDI_CONYARD`。
+       * 图标仍缺（`data/img/` 没有），UI 需容忍。
        */
-      units: collect(unitSources),
+      units: collect([...unitSources, ...bldgSources.filter((s) => /^bldg_(gdi|nod)_conyard$/.test(s.stem))]),
       commanders: collect(cmdrSources),
       factions,
       failures: [...failures.entries()].sort((a, b) => a[0].localeCompare(b[0])),

@@ -565,7 +565,7 @@
       ]
     }
   ],
-  "unit_count": 84,
+  "unit_count": 86,
   "units": [
     {
       "_schema": 3,
@@ -737,6 +737,41 @@
       },
       "source": "gameplay/units/unit_gdi_batteringram.lua",
       "variant": "batteringram"
+    },
+    {
+      "_schema": 3,
+      "derived": {
+        "attack": {
+          "composition": "single",
+          "cycle_ms": null,
+          "member_offset_ms": 0,
+          "tracks": []
+        },
+        "dps": null,
+        "health": {
+          "per_member": 30000,
+          "total": 30000,
+          "wave_size": 1
+        },
+        "primary": "",
+        "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 6,
+          "tags": [
+            "override_structure"
+          ],
+          "turn_speed": 900,
+          "vision_tiles": 2
+        },
+        "weapons": []
+      },
+      "faction": "GDI",
+      "id": "bldg_gdi_conyard",
+      "name_en": "Headquarters",
+      "name_zh": "总部",
+      "source": "gameplay/buildings/bldg_gdi_conyard.lua",
+      "variant": "conyard"
     },
     {
       "_schema": 3,
@@ -5668,6 +5703,39 @@
       "warnings": [
         "已丢弃占位/未解析字段：SetStatOverrides=<function>, oldTuning.SetStatOverrides=<function>"
       ]
+    },
+    {
+      "_schema": 3,
+      "derived": {
+        "attack": {
+          "composition": "single",
+          "cycle_ms": null,
+          "member_offset_ms": 0,
+          "tracks": []
+        },
+        "dps": null,
+        "health": {
+          "per_member": 30000,
+          "total": 30000,
+          "wave_size": 1
+        },
+        "primary": "",
+        "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 6,
+          "tags": [
+            "override_structure"
+          ],
+          "turn_speed": 900,
+          "vision_tiles": 2
+        },
+        "weapons": []
+      },
+      "faction": "NOD",
+      "id": "bldg_nod_conyard",
+      "source": "gameplay/buildings/bldg_nod_conyard.lua",
+      "variant": "conyard"
     },
     {
       "_schema": 3,
