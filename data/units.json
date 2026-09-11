@@ -5734,6 +5734,8 @@
       },
       "faction": "NOD",
       "id": "bldg_nod_conyard",
+      "name_en": "Headquarters",
+      "name_zh": "总部",
       "source": "gameplay/buildings/bldg_nod_conyard.lua",
       "variant": "conyard"
     },
