@@ -2,110 +2,84 @@
 /**
  * 左右分栏对比。
  *
- * **两个阶段，同一个路由**：
- *   `/compare`      —— **卡片墙选单位**（复用 `Arsenal` 的卡片墙 + 筛选/分组），
- *                      点第一张选左边、点第二张选右边
- *   `/compare/a/b`  —— **左右并排两个 `UnitDetail`**，与单独看某个单位的页面完全一致
+ * **每边一个卡片墙**（复用 `Arsenal`，搜索/筛选/类型分组都在），各自选自己那一边：
+ *   · 未选 → 该栏显示卡片墙，点任意一张即选中
+ *   · 已选 → 该栏显示该单位的完整详情（`UnitDetail`），点「换」回到卡片墙
  *
- * 为什么不自己做一套选择界面：卡片墙已经有搜索、阵营/稀有度筛选、类型分组、排序 ——
- * 再造一套只会更差。
+ * ⚠️ **选择只存本地 ref，不写进路由、不导航** —— 每次点卡片都 `router.push`
+ * 会触发导航回顶，在长卡片墙里点完一张就得重新往下翻（用户报过这个 bug）。
  */
 import { computed, ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
 
 import Arsenal from "./Arsenal.vue";
 import UnitDetail from "./UnitDetail.vue";
-import { useData } from "../useData.ts";
 
-const route = useRoute();
-const router = useRouter();
-const data = useData();
+const left = ref("");
+const right = ref("");
 
-/**
- * 第一阶段的选择**先攒在本地，两个都选了才导航**。
- *
- * ⚠️ 每选一个就 `router.push` 的话，每次都会触发导航 → 页面滚回顶部，
- * 在长卡片墙里点完第一个就得重新往下翻（用户报的 bug）。
- */
-const localLeft = ref("");
-const localRight = ref("");
+/** 每栏独立的「正在选」状态 —— 选完切详情，点「换」切回墙 */
+const pickingLeft = ref(true);
+const pickingRight = ref(true);
 
-const routeLeft = computed(() => String(route.params.left ?? ""));
-const routeRight = computed(() => String(route.params.right ?? ""))
-const left = computed(() => routeLeft.value || localLeft.value);
-const right = computed(() => routeRight.value || localRight.value);
-const picking = computed(() => !left.value || !right.value);
-
-/** 已选的（用于在卡片墙上画高亮） */
 const picked = computed(() => [left.value, right.value].filter(Boolean));
 
-function onPick(id: string) {
-  if (!left.value) {
-    localLeft.value = id;
-    return;
-  }
-  if (!right.value && id !== left.value) {
-    localRight.value = id;
-    router.push(`/compare/${encodeURIComponent(left.value)}/${encodeURIComponent(id)}`);
+/** 卡片墙是共用的：哪一栏在选，`pick` 就落到哪一栏 */
+function pick(side: "left" | "right", id: string) {
+  if (side === "left") {
+    left.value = id;
+    pickingLeft.value = false;
+  } else {
+    right.value = id;
+    pickingRight.value = false;
   }
 }
-
-const reset = () => {
-  localLeft.value = "";
-  localRight.value = "";
-  router.push("/compare");
-};
-const swap = () =>
-  router.push(`/compare/${encodeURIComponent(right.value)}/${encodeURIComponent(left.value)}`);
-const byId = computed(() => new Map((data.value?.dataset.units ?? []).map((e) => [e.id, e])));
-const nameOf = (id: string) => byId.value.get(id)?.name_zh ?? id.replace(/^unit_/, "");
 </script>
 
 <template>
   <div class="compare">
-    <!-- 阶段二：两个完整详情页并排 -->
-    <template v-if="!picking">
-      <div class="bar">
-        <h2>对比</h2>
-        <span class="muted">{{ nameOf(left) }} ↔ {{ nameOf(right) }}</span>
-        <button type="button" @click="swap">交换</button>
-        <button type="button" @click="reset">重选</button>
-      </div>
-      <div class="cols">
-        <!--
-          ⚠️ `min-width: 0` 不能省 —— grid 子项默认不肯收缩到内容以下，
-          少了这行长内容（武器时序那句长文本）会撑破分栏。
-        -->
-        <section class="col"><UnitDetail :id="left" embedded /></section>
-        <section class="col"><UnitDetail :id="right" embedded /></section>
-      </div>
-    </template>
+    <p class="bar">
+      <b>对比</b>
+      <span class="muted">左右各选一个单位；等级由顶栏统一控制</span>
+      <button v-if="picked.length" type="button" @click="((left = ''), (right = ''), (pickingLeft = true), (pickingRight = true))">
+        清空
+      </button>
+    </p>
 
-    <!-- 阶段一：卡片墙选单位 -->
-    <template v-else>
-      <div class="bar">
-        <h2>选两个单位对比</h2>
-        <span class="muted">
-          已选 {{ picked.length }}/2
-          <template v-if="left">　左边：{{ nameOf(left) }}</template>
-        </span>
-        <button v-if="picked.length" type="button" @click="reset">清空</button>
-      </div>
-      <Arsenal pickable :picked="picked" @pick="onPick" />
-    </template>
+    <div class="cols">
+      <!-- 左 -->
+      <section class="col">
+        <div class="col-head">
+          <span>左</span>
+          <b v-if="left">{{ left.replace(/^unit_/, "") }}</b>
+          <button v-if="left && !pickingLeft" type="button" @click="pickingLeft = true">换</button>
+        </div>
+        <Arsenal v-if="pickingLeft" pickable :picked="picked" @pick="pick('left', $event)" />
+        <UnitDetail v-else-if="left" :id="left" embedded />
+      </section>
+
+      <!-- 右 -->
+      <section class="col">
+        <div class="col-head">
+          <span>右</span>
+          <b v-if="right">{{ right.replace(/^unit_/, "") }}</b>
+          <button v-if="right && !pickingRight" type="button" @click="pickingRight = true">换</button>
+        </div>
+        <Arsenal v-if="pickingRight" pickable :picked="picked" @pick="pick('right', $event)" />
+        <UnitDetail v-else-if="right" :id="right" embedded />
+      </section>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.compare {
+  padding-top: 12px;
+}
 .bar {
   display: flex;
   align-items: baseline;
   gap: 12px;
-  margin-bottom: 10px;
-}
-.bar h2 {
-  margin: 0;
-  font-size: 16px;
+  margin: 0 0 10px;
 }
 .bar button {
   padding: 2px 10px;
@@ -127,14 +101,39 @@ const nameOf = (id: string) => byId.value.get(id)?.name_zh ?? id.replace(/^unit_
   gap: 16px;
   align-items: start;
 }
-/* 窄屏（<1200px）堆成一列 —— 两个详情页挤在一起比单栏还难读 */
+/* 窄屏（<1200px）堆成一列 */
 @media (max-width: 1200px) {
   .cols {
     grid-template-columns: 1fr;
   }
 }
+/* ⚠️ min-width:0 不能省 —— grid 子项默认不肯收缩，长内容会撑破分栏 */
 .col {
   min-width: 0;
+  border: 1px solid var(--line, #2b3038);
+  border-radius: 8px;
+  padding: 8px;
+}
+.col-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: #7f8aa6;
+}
+.col-head b {
+  color: #cfd8e6;
+}
+.col-head button {
+  margin-left: auto;
+  padding: 1px 8px;
+  font-size: 11px;
+  color: #b9c4dc;
+  background: #1d2430;
+  border: 1px solid var(--line, #2b3038);
+  border-radius: 5px;
+  cursor: pointer;
 }
 .muted {
   color: #7f8aa6;
