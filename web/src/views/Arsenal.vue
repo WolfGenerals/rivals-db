@@ -80,7 +80,7 @@ const shown = computed(() => {
   const wantCommander = Boolean(props.commandersOnly);
 
   const list = records.value.filter((rec) => {
-    if (wantCommander !== rec.id.startsWith("cmdr_")) return false;
+
     if (faction.value && rec.faction !== faction.value) return false;
     if (rarity.value && (rec.pb?.rarity ?? "") !== rarity.value) return false;
     // 类型：空字符串（总部这类 `unit_type` 缺失的）只在"全部类型"下出现
@@ -112,7 +112,7 @@ const shown = computed(() => {
 });
 
 const total = computed(() =>
-  records.value.filter((r) => Boolean(props.commandersOnly) === r.id.startsWith("cmdr_")).length,
+  records.value.length,
 );
 
 /**

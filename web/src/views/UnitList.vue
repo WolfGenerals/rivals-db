@@ -23,7 +23,7 @@ import { displayLevel, dpsMode } from "../state.ts";
 // 排序状态放 `state.ts` 的模块级单例 —— 组件内的 ref 会在路由切换时被重置
 import { useData } from "../useData.ts";
 
-const props = defineProps<{ commandersOnly?: boolean }>();
+// 指挥官已从界面移除（I142），表格只列单位
 const data = useData();
 
 /*
@@ -76,7 +76,7 @@ function toggleSort(key: string) {
 const RARITY_RANK: Record<string, number> = { Common: 1, Rare: 2, Epic: 3 };
 
 const source = computed(() =>
-  props.commandersOnly ? (data.value?.dataset.commanders ?? []) : (data.value?.all ?? []),
+  data.value?.dataset.units ?? [],
 );
 
 const entries = computed(() => {
