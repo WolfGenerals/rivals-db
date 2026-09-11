@@ -347,12 +347,59 @@ export async function extractAll(opts: ExtractOptions): Promise<ExtractResult> {
       }
     }
 
+    /**
+     * `unit_<stem>_visual` 里每个能力序列的 `MUZZLE_INFO` 摘要。
+     *
+     * 这张表在 `SetupModifierVisuals` 调用里，名字看着像纯美术，其实**决定了发数** ——
+     * `ability_kodiak_weapon_sequence.lua:19` 的断言直接用 `#self.visual.MUZZLE_INFO`
+     * 算一轮几发。不提取它就永远推不出神像机甲那个"3"。
+     */
+    const visualOf = (stem: string): EntityRecord["visual"] | undefined => {
+      // 变体（`_ST` / `_CR` / `_mayhem`）常常没有自己的 visual 全局，回退到基础名。
+      // 已知的游戏数据 bug：`unit_gdi_sandstorm_ST.lua:103` 写的是
+      // `unit_gdi_sandstorm_visual`（少了 `_ST`），把基础单位的 visual 覆盖掉了。
+      //
+      // ⚠️ 不能用「全局是否为 null」判断存在性 —— 运行时给未定义全局返回 autotable，
+      // 永远不是 null。改成：**哪一份能解析出 MUZZLE_INFO 就用哪一份**。
+      for (const b of [stem, stem.replace(/_(ST|CR|mayhem)$/, "")]) {
+        const raw = lua.get(`${b}_visual`);
+        if (raw === null || typeof raw !== "object" || Array.isArray(raw)) continue;
+        const out: Record<string, { muzzleInfo?: number[] }> = {};
+        for (const [seqName, entry] of Object.entries(raw as Record<string, unknown>)) {
+          if (entry === null || typeof entry !== "object") continue;
+          const mi = (entry as Record<string, unknown>)["MUZZLE_INFO"];
+          if (mi === null || typeof mi !== "object") continue;
+          /*
+           * wasmoon 对「纯整数键」的 Lua 表有时转成 JS 数组、有时转成数字键对象
+           * （神像的 `MUZZLE_INFO` 是对象、沙暴的是数组），两种都要收。
+           */
+          const items: unknown[] = Array.isArray(mi)
+            ? mi
+            : Object.keys(mi as object)
+                .filter((k) => /^\d+$/.test(k))
+                .sort((a, c) => Number(a) - Number(c))
+                .map((k) => (mi as Record<string, unknown>)[k]);
+          const indices: number[] = [];
+          for (const e of items) {
+            const v = e !== null && typeof e === "object" ? (e as Record<string, unknown>)["muzzleIndex"] : undefined;
+            if (typeof v === "number") indices.push(v);
+          }
+          if (indices.length) out[seqName] = { muzzleInfo: indices };
+        }
+        if (Object.keys(out).length) return out;
+      }
+      return undefined;
+    };
+
     const collect = (sources: SourceFile[]): EntityRecord[] => {
       const out: EntityRecord[] = [];
       for (const src of sources) {
         if (failures.has(src.stem)) continue;
         try {
-          out.push(buildRecord(src, lua.get(src.stem), pbByLuaName, []));
+          const rec = buildRecord(src, lua.get(src.stem), pbByLuaName, []);
+          const visual = visualOf(src.stem);
+          if (visual) rec.visual = visual;
+          out.push(rec);
         } catch (err) {
           failures.set(src.stem, firstLine(err));
         }

@@ -104,6 +104,15 @@
   },
   "source": "gameplay/units/unit_gdi_kodiak.lua",
   "variant": "kodiak",
+  "visual": {
+    "ability_kodiak_weapon_sequence": {
+      "muzzleInfo": [
+        0,
+        1,
+        2
+      ]
+    }
+  },
   "warnings": [
     "已丢弃占位/未解析字段：GetStatInfo=<function>, oldTuning.GetStatInfo=<function>"
   ]

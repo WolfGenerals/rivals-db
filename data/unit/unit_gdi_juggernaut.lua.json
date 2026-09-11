@@ -137,6 +137,15 @@
   },
   "source": "gameplay/units/unit_gdi_juggernaut.lua",
   "variant": "juggernaut",
+  "visual": {
+    "ability_juggernaut_weapon_sequence": {
+      "muzzleInfo": [
+        0,
+        0,
+        0
+      ]
+    }
+  },
   "warnings": [
     "已丢弃占位/未解析字段：GetStatInfo=<function>, oldTuning.GetStatInfo=<function>"
   ]

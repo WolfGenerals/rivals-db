@@ -288,6 +288,16 @@ export interface EntityRecord {
   warnings?: string[];
   pb?: RarityInfo;
   config: Config;
+  /**
+   * 开火装备表（`unit_<id>_visual` / `cmdr_<id>_visual`）的**摘要**，按能力序列名分组。
+   *
+   * 只留 `MUZZLE_INFO`，因为**一轮发数 = `#MUZZLE_INFO`** —— 这是引擎自己的规则，
+   * 见 `ability_kodiak_weapon_sequence.lua:19` 的断言与 `docs/attack-mechanics.md` 9.1。
+   * `muzzleInfo[i]` 是「逻辑枪口号 → 物理枪口号」的映射值，**枪口数不乘 DPS**。
+   *
+   * 只对定义了该全局的单位存在（全库 4 个：神像 ×2、沙暴 ×2）。
+   */
+  visual?: Record<string, { muzzleInfo?: number[] }>;
   /** 仅出现在 `unit_example` / `unit_dlc_test` 这类非调参表上 */
   raw_value?: unknown;
   _note?: string;

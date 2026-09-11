@@ -179,6 +179,14 @@
   },
   "source": "gameplay/units/unit_gdi_orcabomber.lua",
   "variant": "orcabomber",
+  "visual": {
+    "modifier_orcabomber_bomb": {
+      "muzzleInfo": [
+        0,
+        1
+      ]
+    }
+  },
   "warnings": [
     "已丢弃占位/未解析字段：GetStatInfo=<function>, TryGetDpsInfo=<function>, oldTuning.GetStatInfo=<function>, oldTuning.TryGetDpsInfo=<function>"
   ]

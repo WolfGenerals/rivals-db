@@ -140,6 +140,14 @@
     "ST"
   ],
   "variant": "sandstorm",
+  "visual": {
+    "ability_sandstorm_ST_weapon_sequence": {
+      "muzzleInfo": [
+        0,
+        1
+      ]
+    }
+  },
   "warnings": [
     "已丢弃占位/未解析字段：GetStatInfo=<function>, oldTuning.GetStatInfo=<function>"
   ]

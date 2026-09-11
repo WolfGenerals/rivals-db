@@ -103,6 +103,7 @@ export function payloadFor(rec: EntityRecord): Record<string, unknown> {
   if (rec.suffixes?.length) out.suffixes = rec.suffixes;
   out.source = rec.source;
   if (rec.pb) out.pb = rec.pb;
+  if (rec.visual) out.visual = rec.visual;
   if (rec.warnings?.length) out.warnings = rec.warnings;
   out.config = rec.config;
   return out;
