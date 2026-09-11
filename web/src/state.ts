@@ -8,7 +8,7 @@
 import { computed, ref, watch, type ComputedRef, type Ref } from "vue";
 
 import { fromOrdinal, level, MAX_ORDINAL, startingMajorOfRarity, type Level } from "@rivals/core/levels";
-import type { UnitSummary } from "@rivals/core/types";
+
 
 export { MAX_ORDINAL };
 
@@ -64,9 +64,9 @@ function withCapped(lv: Level, capped: boolean): LevelDisplay {
  * - **相对起始**：滑块 0 = 该条目**自己的起始等级**（普通 1-0 / 稀有 3-0 /
  *   史诗 5-0），用于比较「升同样级数的收益」。
  */
-export function displayLevel(u: Pick<UnitSummary, "rarity"> | undefined): LevelDisplay {
+export function displayLevel(u: { pb?: { rarity?: string } } | undefined): LevelDisplay {
   const base = fromOrdinal(ordinal.value);
-  const start = relativeToStart.value ? startingMajorOfRarity(u?.rarity) : null;
+  const start = relativeToStart.value ? startingMajorOfRarity(u?.pb?.rarity) : null;
   if (start === null) return withCapped(base, false);
 
   const shifted = level(start, 0).ordinal() + ordinal.value;
@@ -74,8 +74,8 @@ export function displayLevel(u: Pick<UnitSummary, "rarity"> | undefined): LevelD
 }
 
 /** 该条目从起始等级到当前等级升了几级。 */
-export function upgradeSteps(u: Pick<UnitSummary, "rarity"> | undefined): number {
-  const start = startingMajorOfRarity(u?.rarity);
+export function upgradeSteps(u: { pb?: { rarity?: string } } | undefined): number {
+  const start = startingMajorOfRarity(u?.pb?.rarity);
   if (start === null) return 0;
   return Math.max(0, displayLevel(u).stepsFrom(level(start, 0)));
 }

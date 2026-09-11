@@ -12,14 +12,14 @@
  */
 import { computed } from "vue";
 
-import type { DatasetEntry, WeaponTuning } from "@rivals/core/types";
+import type { DatasetEntry, Weapon } from "@rivals/core/derive";
 
 import { TARGET_LABELS, TARGET_TYPES, TIERS, targetDamage, type TargetDamage } from "../damageTiers.ts";
 import TypeIcon from "./TypeIcon.vue";
 
 const props = defineProps<{ unit: DatasetEntry }>();
 
-const weapons = computed<WeaponTuning[]>(() => props.unit.config.combatantTuning?.weaponTunings ?? []);
+const weapons = computed<Weapon[]>(() => props.unit.derived.weapons);
 
 const intent = computed(() => new Set<string>(props.unit.derived.stats.preferred_targets ?? []));
 

@@ -10,14 +10,14 @@
  */
 import { computed } from "vue";
 
-import type { WeaponTuning } from "@rivals/core/types";
+import type { Weapon } from "@rivals/core/derive";
 import type { Level } from "@rivals/core/levels";
 
 import { TARGET_LABELS, TARGET_TYPES, targetDamage } from "../damageTiers.ts";
 import TypeIcon from "./TypeIcon.vue";
 
 const props = defineProps<{
-  weapon: WeaponTuning;
+  weapon: Weapon;
   level: Level;
 }>();
 

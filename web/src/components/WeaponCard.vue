@@ -2,75 +2,106 @@
 /**
  * 单件武器。
  *
+ * 数据全部来自 `derived`：`weapon`（打出去的**是什么**）+ `tracks`（**什么时候**打）。
+ * **不再有 `WeaponAttack`**，也不在这里重算伤害。
+ *
  * 排版按「读者想知道什么」分层：
- *   ① 结论行     攻击方式 · 单发伤害 · DPS · 射程 —— 一眼看完
- *   ② 阶段明细   `WeaponAttack.phases()` 的表格（**图看形状、表看数字**）
- *   ③ 逐目标伤害 五类目标各打多少（`DamageMatrix`）
- *   ④ 次要参数   每轮发数 / 弹夹 / 弹道 / 枪口数，收成一行小字
- *
- * **DPS 与阶段都来自 `WeaponAttack`**（`@rivals/core/attack`），不在这里重算 ——
- * 那边按 `modifier_sequence.behaviourName` 精确派发到 15 个行为类，
- * 有 15 个游戏内面板观测点验证（`core/test/attack-verify.ts`）。
- *
- * ⚠️ 不再用 `baseDps()`：它只覆盖 62 把常规武器，对特殊武器一律返回 0。
+ *   ① 结论行     类型 · 单发伤害 · DPS · 射程
+ *   ② 时序       该武器的轨道（一轮打几下 / 一轮多长 / 一轮内间隔 / 空档）
+ *   ③ 范围       范围伤害机制（溅射目标数 / 半径衰减 / 相邻格伤害）
+ *   ④ 逐目标伤害 五类目标各打多少
  */
 import { computed } from "vue";
 
-import type { WeaponAttack } from "@rivals/core/attack";
+import type { Track, Weapon } from "@rivals/core/derive";
 import type { Level } from "@rivals/core/levels";
-import type { WeaponTuning } from "@rivals/core/types";
 
 import DamageMatrix from "./DamageMatrix.vue";
 import StatIcon from "./StatIcon.vue";
 
 const props = defineProps<{
-  weapon: WeaponTuning;
-  /** 该武器的攻击类型（来自 `UnitAttack.of(unit).weapons[i]`） */
-  attack?: WeaponAttack;
+  weapon: Weapon;
+  /** 指向这把武器的时序轨道（`sequence` 下每把武器各一条） */
+  tracks: Track[];
   index: number;
-  /** 是否是单位的主武器 —— 面板显示的是它 */
+  /** 是否是单位的主武器 —— 面板 DPS 显示的是它 */
   primary?: boolean;
   level: Level;
+  waveSize?: number;
 }>();
 
-/** 1-0 级基准 DPS → 当前等级 */
-const baseDps1 = computed(() => props.attack?.dps() ?? 0);
-const levelDps = computed(() => (baseDps1.value > 0 ? props.level.dps(baseDps1.value) : undefined));
+/**
+ * 一把武器的 DPS —— **统一式子**：
+ *
+ * ```
+ * dps = damage × hits × waveSize × 1000 / cycle_ms
+ * ```
+ *
+ * `interval_ms` / `gap_ms` 只是展示细化，不参与计算。
+ */
+const baseDps = computed(() => {
+  const wave = props.waveSize ?? 1;
+  let best = 0;
+  for (const t of props.tracks) {
+    const tm = t.timing;
+    let hits: number;
+    let cycle: number;
+    if (tm.kind === "一次") continue; // 一次性不计持续输出
+    else if (tm.kind === "装填") {
+      hits = tm.clip;
+      cycle = tm.reload_ms;
+    } else {
+      hits = tm.hits;
+      cycle = tm.cycle_ms;
+    }
+    if (cycle > 0) best = Math.max(best, (props.weapon.damage * hits * wave * 1000) / cycle);
+  }
+  return best;
+});
+const levelDps = computed(() => (baseDps.value > 0 ? props.level.dps(baseDps.value) : undefined));
 
-const phases = computed(() => props.attack?.phases() ?? []);
+/** 时序的一行文字 */
+function timingText(t: Track): string {
+  const tm = t.timing;
+  if (tm.kind === "装填") {
+    const parts = [`弹夹 ${tm.clip} 发`, `装填 ${(tm.reload_ms / 1000).toFixed(1)}s`];
+    if (tm.interval_ms) parts.push(`间隔 ${tm.interval_ms}ms`);
+    return parts.join(" · ");
+  }
+  if (tm.kind === "一次") return `蓄力 ${tm.charge_ms}ms 后一次性`;
+  const parts = [`一轮 ${tm.hits} 发`, `周期 ${(tm.cycle_ms / 1000).toFixed(2)}s`];
+  if (tm.interval_ms) parts.push(`间隔 ${tm.interval_ms}ms`);
+  if (tm.gap_ms) parts.push(`空档 ${(tm.gap_ms / 1000).toFixed(2)}s`);
+  return parts.join(" · ");
+}
 
-const bt = computed(() => props.weapon.burstTiming);
-const reload = computed(() => props.weapon.reloadTuning);
+/** 轨道的时间定位（`sequence` 用） */
+function whenText(t: Track): string {
+  const parts: string[] = [];
+  if (t.charge_ms) parts.push(`前摇 ${t.charge_ms}ms`);
+  if (t.after_ms !== undefined) parts.push(`${(t.after_ms / 1000).toFixed(2)}s 起`);
+  if (t.lasts_ms === null) parts.push("持续");
+  else if (t.lasts_ms !== undefined) parts.push(`持续 ${(t.lasts_ms / 1000).toFixed(1)}s`);
+  if (t.when?.target?.length) parts.push(`目标：${t.when.target.join("/")}`);
+  return parts.join(" · ");
+}
 
-const homingText = computed(() => {
-  const h = props.weapon.projectile?.homing;
-  if (h === undefined) return null;
-  return h ? "追踪（难躲）" : "不追踪（可走位躲）";
+/** 范围伤害机制 */
+const areaText = computed(() => {
+  const a = props.weapon.area;
+  if (a.kind === "side_targets") return `溅射 ${a.targets} 个目标`;
+  if (a.kind === "radius") {
+    const f = a.falloff?.length ? `，衰减 ${a.falloff.map((x) => `${x.distance}格${x.percent}%`).join(" → ")}` : "";
+    return `半径 ${a.radius_tiles} 格${f}`;
+  }
+  if (a.kind === "side_damage") return `相邻格 ${a.side_value}`;
+  return null;
 });
 
-/** 段的中文类型名 */
-const KIND_LABEL: Record<string, string> = {
-  charge: "前摇",
-  fire: "开火",
-  pause: "停顿",
-  reload: "装填",
-};
-
-const fmtMs = (ms: number | null | undefined) =>
-  ms === null || ms === undefined ? "持续" : ms >= 1000 ? `${(ms / 1000).toFixed(2)}s` : `${Math.round(ms)}ms`;
-
-/** ④ 次要参数，只收有值的 */
 const minor = computed(() => {
   const out: Array<[string, string]> = [];
-  if (bt.value?.numToBurst !== undefined) out.push(["每轮发数", String(bt.value.numToBurst)]);
-  if (reload.value) {
-    out.push([
-      "弹夹",
-      `${reload.value.clipSize ?? "?"} 发 / ${((reload.value.reloadTimeMs ?? 0) / 1000).toFixed(1)}s`,
-    ]);
-  }
-  if (homingText.value) out.push(["弹道", homingText.value]);
-  if (props.weapon.muzzleCount !== undefined) out.push(["枪口数", String(props.weapon.muzzleCount)]);
+  if (props.weapon.homing !== undefined) out.push(["弹道", props.weapon.homing ? "追踪（难躲）" : "不追踪（可走位躲）"]);
+  if (props.weapon.targeting_unknown) out.push(["索敌", "未知（数据缺失，不猜）"]);
   return out;
 });
 </script>
@@ -78,11 +109,10 @@ const minor = computed(() => {
 <template>
   <div class="weapon" :class="{ primary }">
     <div class="head">
-      <b>{{ weapon.name ?? "?" }}</b>
-      <span v-if="weapon.displayName" class="dim">{{ weapon.displayName }}</span>
-      <span class="dim">{{ weapon.weaponType ?? "" }}</span>
+      <b>{{ weapon.name }}</b>
+      <span class="dim">{{ weapon.type }}</span>
       <span v-if="primary" class="tag primary" title="面板 DPS 显示的是这把武器">主武器</span>
-      <span v-if="attack" class="tag kind">{{ attack.label }}</span>
+      <span v-if="weapon.targeting_unknown" class="tag warn">索敌未知</span>
       <span class="idx">武器 {{ index + 1 }}</span>
     </div>
 
@@ -91,7 +121,7 @@ const minor = computed(() => {
       <div class="key-item">
         <StatIcon name="dps" />
         <span>单发伤害</span>
-        <b>{{ attack?.damage() ?? "—" }}</b>
+        <b>{{ weapon.damage }}</b>
       </div>
       <div class="key-item">
         <StatIcon name="dps" />
@@ -101,45 +131,34 @@ const minor = computed(() => {
       <div class="key-item">
         <StatIcon name="range" />
         <span>射程</span>
-        <b>{{ weapon.maxRangeInTiles === undefined ? "—" : `${weapon.maxRangeInTiles} 格` }}</b>
+        <b>{{ weapon.range_tiles === undefined ? "—" : `${weapon.range_tiles} 格` }}</b>
       </div>
     </div>
 
-    <!-- ② 阶段明细 -->
-    <table v-if="phases.length" class="phases">
+    <!-- ② 时序 -->
+    <table v-if="tracks.length" class="timing">
       <thead>
         <tr>
-          <th>阶段</th>
-          <th>类型</th>
-          <th class="num">时长</th>
-          <th class="num">发数</th>
-          <th class="num">单发</th>
-          <th class="num">间隔</th>
-          <th class="num">溅射</th>
-          <th class="num">倍率</th>
+          <th>时序</th>
+          <th>时机</th>
+          <th>节奏</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(p, i) in phases" :key="i" :class="p.kind">
-          <td>{{ p.label }}</td>
-          <td class="dim">{{ KIND_LABEL[p.kind] ?? p.kind }}</td>
-          <td class="num">{{ fmtMs(p.ms) }}</td>
-          <td class="num">{{ p.shots ?? "—" }}</td>
-          <td class="num">{{ p.damage ?? "—" }}</td>
-          <td class="num">{{ p.intervalMs === undefined ? "—" : `${p.intervalMs}ms` }}</td>
-          <td class="num">{{ p.splash ?? "—" }}</td>
-          <td class="num ramp">{{ p.ramp ? `↑${p.ramp.toFixed(1)}×` : "" }}</td>
+        <tr v-for="(t, i) in tracks" :key="i">
+          <td>{{ t.timing.kind }}</td>
+          <td class="dim">{{ whenText(t) || "—" }}</td>
+          <td>{{ timingText(t) }}</td>
         </tr>
       </tbody>
     </table>
-    <p v-else class="dim tiny">
-      该武器没有可解析的开火阶段（常规武器由引擎内置序列驱动，参数见下方小字）。
-    </p>
 
-    <!-- ③ 逐目标伤害 -->
+    <!-- ③ 范围 -->
+    <p v-if="areaText" class="area"><span class="dim">范围</span>{{ areaText }}</p>
+
+    <!-- ④ 逐目标伤害 -->
     <DamageMatrix :weapon="weapon" :level="level" />
 
-    <!-- ④ 次要参数 -->
     <p v-if="minor.length" class="minor">
       <span v-for="[k, v] in minor" :key="k"><i>{{ k }}</i>{{ v }}</span>
     </p>
@@ -153,7 +172,6 @@ const minor = computed(() => {
   padding: 10px 12px;
   margin-bottom: 10px;
 }
-/* 主武器加一道左侧色条 —— 面板 DPS 取的就是它 */
 .weapon.primary {
   border-left: 3px solid #4a9eff;
 }
@@ -181,9 +199,9 @@ const minor = computed(() => {
   background: #1d3a5c;
   color: #8fc4ff;
 }
-.tag.kind {
-  border: 1px solid var(--line, #2a3550);
-  color: #b9c4dc;
+.tag.warn {
+  background: #4a3a1d;
+  color: #e0b050;
 }
 .idx {
   margin-left: auto;
@@ -211,13 +229,13 @@ const minor = computed(() => {
   font-variant-numeric: tabular-nums;
 }
 
-.phases {
+.timing {
   width: 100%;
   border-collapse: collapse;
   font-size: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
-.phases th {
+.timing th {
   text-align: left;
   font-weight: 500;
   color: #7f8aa6;
@@ -225,28 +243,19 @@ const minor = computed(() => {
   padding: 2px 8px 4px 0;
   border-bottom: 1px solid var(--line, #2a3550);
 }
-.phases td {
+.timing td {
   padding: 3px 8px 3px 0;
   border-bottom: 1px solid #232b3d;
   color: #b9c4dc;
 }
-.phases .num {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-.phases tr.charge td {
-  color: #d8a13c;
-}
-.phases tr.pause td {
-  color: #6b7a99;
-}
-.phases .ramp {
-  color: #8fc4ff;
-}
 
-.tiny {
-  font-size: 11px;
+.area {
   margin: 0 0 8px;
+  font-size: 12px;
+  color: #b9c4dc;
+}
+.area .dim {
+  margin-right: 8px;
 }
 
 .minor {

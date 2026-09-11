@@ -3,12 +3,10 @@
  * 武器区 —— 数量不定，有几件画几块。没有武器时整块不出现
  * （采集车 / 建筑 / 支持单位就是这种情况）。
  *
- * 这里**建一次 `UnitAttack`**，把每把武器的攻击类型分给对应的 `WeaponCard`。
- * 这样「主武器是谁」「单位面板 DPS 是多少」都由 core 决定，UI 不自己判断。
+ * 数据直接来自 `derived`（已解析好的武器 + 时序），**不再建 `UnitAttack` 现算**。
  */
 import { computed } from "vue";
 
-import { UnitAttack } from "@rivals/core/attack";
 import type { DatasetEntry } from "@rivals/core/derive";
 import type { Level } from "@rivals/core/levels";
 
@@ -19,25 +17,32 @@ const props = defineProps<{
   level: Level;
 }>();
 
-const weapons = computed(() => props.unit.config.combatantTuning?.weaponTunings ?? []);
-const attack = computed(() => UnitAttack.of(props.unit));
+const weapons = computed(() => props.unit.derived.weapons);
+const primaryIndex = computed(() => weapons.value.findIndex((w) => w.id === props.unit.derived.primary));
+/** 该武器自己的时序轨道（`sequence` 下每把武器各一条） */
+const tracksOf = (id: string) => props.unit.derived.attack.tracks.filter((t) => t.weapon === id);
+const comp = computed(() => props.unit.derived.attack.composition);
+const COMP_LABEL: Record<string, string> = {
+  single: "",
+  sequence: "· 按时间换武器",
+  conditional: "· 按目标类型择一",
+  parallel: "· 多武器并行",
+};
 </script>
 
 <template>
   <section v-if="weapons.length" class="panel">
     <h3>
       武器 <span class="at-level">{{ weapons.length }} 件</span>
-      <span v-if="weapons.length > 1" class="at-level">
-        · 面板 DPS 取<strong>主武器</strong>（不求和）
-      </span>
+      <span v-if="comp !== 'single'" class="at-level">{{ COMP_LABEL[comp] }}</span>
     </h3>
     <WeaponCard
       v-for="(w, i) in weapons"
-      :key="i"
+      :key="w.id"
       :weapon="w"
-      :attack="attack.weapons[i]"
+      :tracks="tracksOf(w.id)"
       :index="i"
-      :primary="i === attack.primaryIndex"
+      :primary="i === primaryIndex"
       :level="level"
     />
   </section>

@@ -21,22 +21,13 @@ import { useData } from "../useData.ts";
 const props = defineProps<{ id: string }>();
 
 const data = useData();
-const rec = ref<DatasetEntry | null>(null);
-const loading = ref(true);
-
-watch(
-  () => props.id,
-  async (id) => {
-    loading.value = true;
-    rec.value = await loadRecord(id);
-    loading.value = false;
-  },
-  { immediate: true },
+// 单文件数据集：按 id 查表即可，没有异步加载
+const rec = computed<DatasetEntry | null>(() =>
+  data.value ? (findEntryById(data.value, props.id) ?? null) : null,
 );
-
-const summary = computed(() => (data.value ? findSummary(data.value, props.id) : undefined));
+const loading = computed(() => !data.value);
 const isCommander = computed(() => props.id.startsWith("cmdr_"));
-const level = computed(() => displayLevel(summary.value));
+const level = computed(() => displayLevel(rec.value ?? undefined));
 const backTo = computed(() => (isCommander.value ? "/commander" : "/"));
 const backLabel = computed(() => (isCommander.value ? "指挥官" : "单位"));
 const title = computed(() => rec.value?.name_zh || rec.value?.name_en || props.id);

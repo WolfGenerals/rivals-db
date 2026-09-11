@@ -60,7 +60,8 @@ const has = (f: CardField) => props.fields.includes(f);
 const unitType = computed(() => {
   const tags = props.unit.derived.stats.tags ?? [];
   if (tags.includes("override_harvester")) return "Harvester";
-  return baseUnitType(props.unit) ?? "";
+  // 提取时已算好（`derived.stats.unit_type`），不再从 config 现推
+  return props.unit.derived.stats.unit_type ?? "";
 });
 
 const name = computed(

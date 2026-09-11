@@ -593,6 +593,9 @@
         },
         "primary": "cannon",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "cost": 90,
           "preferred_targets": [
             "Aircraft",
@@ -604,6 +607,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 400,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -674,6 +678,9 @@
         },
         "primary": "cannon",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
           "cost": 90,
           "preferred_targets": [
             "Structure"
@@ -684,6 +691,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 200,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -757,6 +765,9 @@
         },
         "primary": "cannon",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 2,
+          "avoidance_radius": 2.7,
           "cost": 120,
           "preferred_targets": [
             "Infantry",
@@ -768,6 +779,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 200,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -845,16 +857,21 @@
           "wave_size": 5
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
           "cost": 20,
           "preferred_targets": [
             "Infantry"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 300,
           "speed": 8,
           "tags": [
             "Aircraft",
             "override_aircraft"
           ],
+          "turn_speed": 1080,
           "unit_type": "Aircraft",
           "vision_tiles": 3
         },
@@ -928,16 +945,23 @@
           "wave_size": 3
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.6,
+          "can_be_crushed": true,
           "cost": 70,
           "preferred_targets": [
             "Vehicle"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 880,
           "speed": 6.9,
+          "stealth_detect_tiles": 1,
           "tags": [
             "Infantry",
             "override_infantry"
           ],
+          "turn_speed": 300,
           "unit_type": "Infantry",
           "vision_tiles": 2
         },
@@ -1010,6 +1034,9 @@
         },
         "primary": "rocketLauncher",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
           "cost": 90,
           "preferred_targets": [
             "Aircraft"
@@ -1020,6 +1047,7 @@
             "Aircraft",
             "override_aircraft"
           ],
+          "turn_speed": 300,
           "unit_type": "Aircraft",
           "vision_tiles": 2
         },
@@ -1078,13 +1106,16 @@
         },
         "primary": "",
         "stats": {
+          "avoidance_radius": 3,
           "cost": 60,
+          "kill_award_tiberium": 80,
           "speed": 3.958857,
           "tags": [
             "Vehicle",
             "override_harvester",
             "override_vehicle"
           ],
+          "turn_speed": 180,
           "unit_type": "Vehicle",
           "vision_tiles": 1
         },
@@ -1116,13 +1147,16 @@
         },
         "primary": "",
         "stats": {
+          "avoidance_radius": 3,
           "cost": 60,
+          "kill_award_tiberium": 80,
           "speed": 6.928,
           "tags": [
             "Vehicle",
             "override_harvester",
             "override_vehicle"
           ],
+          "turn_speed": 180,
           "unit_type": "Vehicle",
           "vision_tiles": 1
         },
@@ -1168,6 +1202,9 @@
         },
         "primary": "rockets",
         "stats": {
+          "aggro_radius_tiles": 3.5,
+          "attack_range_tiles": 3,
+          "avoidance_radius": 2.7,
           "cost": 120,
           "deploy_ms": 5000,
           "preferred_targets": [
@@ -1181,6 +1218,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 100,
           "undeploy_ms": 2000,
           "unit_type": "Vehicle",
           "vision_tiles": 2
@@ -1259,6 +1297,9 @@
         },
         "primary": "rockets",
         "stats": {
+          "aggro_radius_tiles": 3.5,
+          "attack_range_tiles": 3,
+          "avoidance_radius": 2.7,
           "cost": 120,
           "deploy_ms": 3000,
           "preferred_targets": [
@@ -1272,6 +1313,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 100,
           "undeploy_ms": 1500,
           "unit_type": "Vehicle",
           "vision_tiles": 2
@@ -1354,16 +1396,23 @@
           "wave_size": 4
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.6,
+          "can_be_crushed": true,
           "cost": 40,
           "preferred_targets": [
             "Vehicle"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 1250,
           "speed": 9.237333,
+          "stealth_detect_tiles": 1,
           "tags": [
             "Infantry",
             "override_infantry"
           ],
+          "turn_speed": 720,
           "unit_type": "Infantry",
           "vision_tiles": 2
         },
@@ -1438,6 +1487,9 @@
         },
         "primary": "rocketLauncher",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
           "cost": 130,
           "preferred_targets": [
             "Vehicle"
@@ -1448,6 +1500,7 @@
             "Aircraft",
             "override_aircraft"
           ],
+          "turn_speed": 100,
           "unit_type": "Aircraft",
           "vision_tiles": 2
         },
@@ -1545,6 +1598,9 @@
         ],
         "primary": "cannon0",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "cost": 230,
           "preferred_targets": [
             "Vehicle",
@@ -1556,6 +1612,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 200,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -1642,6 +1699,10 @@
         },
         "primary": "rockets",
         "stats": {
+          "aggro_radius_tiles": 3.5,
+          "attack_range_tiles": 2,
+          "avoidance_radius": 2.4,
+          "can_be_crushed": true,
           "cost": 30,
           "deploy_ms": 5000,
           "preferred_targets": [
@@ -1650,10 +1711,12 @@
           ],
           "range_tiles": 2.5,
           "speed": 5.5424,
+          "stealth_detect_tiles": 1,
           "tags": [
             "Infantry",
             "override_infantry"
           ],
+          "turn_speed": 200,
           "undeploy_ms": 2000,
           "unit_type": "Infantry",
           "vision_tiles": 2
@@ -1728,6 +1791,9 @@
         },
         "primary": "rockets",
         "stats": {
+          "aggro_radius_tiles": 3.5,
+          "attack_range_tiles": 2,
+          "avoidance_radius": 2.4,
           "cost": 70,
           "deploy_ms": 2000,
           "preferred_targets": [
@@ -1740,6 +1806,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 400,
           "undeploy_ms": 500,
           "unit_type": "Vehicle",
           "vision_tiles": 2
@@ -1814,6 +1881,9 @@
         },
         "primary": "rocketLauncher",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
           "cost": 50,
           "preferred_targets": [
             "Vehicle"
@@ -1824,6 +1894,7 @@
             "Aircraft",
             "override_aircraft"
           ],
+          "turn_speed": 350,
           "unit_type": "Aircraft",
           "vision_tiles": 2
         },
@@ -1897,6 +1968,9 @@
         },
         "primary": "rocketLauncher",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
           "cost": 50,
           "preferred_targets": [
             "Vehicle"
@@ -1907,6 +1981,7 @@
             "Aircraft",
             "override_aircraft"
           ],
+          "turn_speed": 350,
           "unit_type": "Aircraft",
           "vision_tiles": 2
         },
@@ -1984,6 +2059,9 @@
         ],
         "primary": "rockets",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
           "cost": 40,
           "deploy_ms": 3000,
           "range_tiles": 2.5,
@@ -1992,6 +2070,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 150,
           "undeploy_ms": 1100,
           "unit_type": "Vehicle",
           "vision_tiles": 2
@@ -2055,6 +2134,9 @@
         },
         "primary": "missile",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.098,
           "cost": 70,
           "preferred_targets": [
             "Vehicle"
@@ -2065,6 +2147,7 @@
             "Aircraft",
             "override_aircraft"
           ],
+          "turn_speed": 400,
           "unit_type": "Aircraft",
           "vision_tiles": 2
         },
@@ -2147,6 +2230,9 @@
         ],
         "primary": "bomb1",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
           "cost": 100,
           "preferred_targets": [
             "Vehicle"
@@ -2157,6 +2243,7 @@
             "Aircraft",
             "override_aircraft"
           ],
+          "turn_speed": 100,
           "unit_type": "Aircraft",
           "vision_tiles": 2
         },
@@ -2269,6 +2356,9 @@
         },
         "primary": "cannon",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "cost": 40,
           "preferred_targets": [
             "Vehicle",
@@ -2280,6 +2370,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 720,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -2350,6 +2441,9 @@
         },
         "primary": "cannon",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "cost": 70,
           "preferred_targets": [
             "Vehicle"
@@ -2360,6 +2454,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 400,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -2431,16 +2526,23 @@
           "wave_size": 3
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 2,
+          "avoidance_radius": 1.7,
+          "can_be_crushed": true,
           "cost": 50,
           "preferred_targets": [
             "Infantry"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 100,
           "speed": 6.928,
+          "stealth_detect_tiles": 1,
           "tags": [
             "Infantry",
             "override_infantry"
           ],
+          "turn_speed": 900,
           "unit_type": "Infantry",
           "vision_tiles": 2
         },
@@ -2514,6 +2616,9 @@
         },
         "primary": "machineGun",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
           "cost": 60,
           "preferred_targets": [
             "Infantry"
@@ -2524,6 +2629,7 @@
             "Aircraft",
             "override_aircraft"
           ],
+          "turn_speed": 300,
           "unit_type": "Aircraft",
           "vision_tiles": 2
         },
@@ -2604,12 +2710,16 @@
         ],
         "primary": "guns",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
           "range_tiles": 2.5,
           "speed": 3,
           "tags": [
             "Aircraft",
             "override_aircraft"
           ],
+          "turn_speed": 150,
           "unit_type": "Aircraft",
           "vision_tiles": 2
         },
@@ -2665,12 +2775,16 @@
         ],
         "primary": "guns",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
           "range_tiles": 2.5,
           "speed": 9.237333,
           "tags": [
             "Aircraft",
             "override_aircraft"
           ],
+          "turn_speed": 150,
           "unit_type": "Aircraft",
           "vision_tiles": 2
         },
@@ -2726,6 +2840,9 @@
         },
         "primary": "cannon",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "cost": 30,
           "preferred_targets": [
             "Infantry",
@@ -2737,6 +2854,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 400,
           "unit_type": "Vehicle",
           "vision_tiles": 3
         },
@@ -2815,16 +2933,23 @@
           "wave_size": 5
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
+          "can_be_crushed": true,
           "cost": 10,
           "preferred_targets": [
             "Infantry"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 344,
           "speed": 6.928,
+          "stealth_detect_tiles": 1,
           "tags": [
             "Infantry",
             "override_infantry"
           ],
+          "turn_speed": 300,
           "unit_type": "Infantry",
           "vision_tiles": 3
         },
@@ -2898,16 +3023,21 @@
           "wave_size": 4
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
           "cost": 10,
           "preferred_targets": [
             "Infantry"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 300,
           "speed": 8,
           "tags": [
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 400,
           "unit_type": "Vehicle",
           "vision_tiles": 3
         },
@@ -2981,17 +3111,24 @@
           "wave_size": 4
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.6,
+          "can_be_crushed": true,
           "cost": 20,
           "preferred_targets": [
             "Vehicle",
             "Aircraft"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 1250,
           "speed": 5.5424,
+          "stealth_detect_tiles": 1,
           "tags": [
             "Infantry",
             "override_infantry"
           ],
+          "turn_speed": 300,
           "unit_type": "Infantry",
           "vision_tiles": 2
         },
@@ -3066,17 +3203,24 @@
           "wave_size": 4
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.6,
+          "can_be_crushed": true,
           "cost": 20,
           "preferred_targets": [
             "Vehicle",
             "Aircraft"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 800,
           "speed": 5.5424,
+          "stealth_detect_tiles": 1,
           "tags": [
             "Infantry",
             "override_infantry"
           ],
+          "turn_speed": 300,
           "unit_type": "Infantry",
           "vision_tiles": 2
         },
@@ -3152,6 +3296,9 @@
         },
         "primary": "cannon",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "cost": 130,
           "preferred_targets": [
             "Vehicle",
@@ -3163,6 +3310,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 50,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -3242,6 +3390,9 @@
         },
         "primary": "cannon",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "cost": 130,
           "preferred_targets": [
             "Vehicle",
@@ -3253,6 +3404,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 50,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -3333,6 +3485,9 @@
         },
         "primary": "cannon",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "cost": 50,
           "preferred_targets": [
             "Infantry",
@@ -3344,6 +3499,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 300,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -3425,17 +3581,24 @@
           "wave_size": 3
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
+          "can_be_crushed": true,
           "cost": 40,
           "preferred_targets": [
             "Infantry",
             "Structure"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 666,
           "speed": 6.925,
+          "stealth_detect_tiles": 1,
           "tags": [
             "Infantry",
             "override_infantry"
           ],
+          "turn_speed": 900,
           "unit_type": "Infantry",
           "vision_tiles": 2
         },
@@ -3508,6 +3671,9 @@
         },
         "primary": "cannon",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 2,
+          "avoidance_radius": 2.7,
           "cost": 60,
           "preferred_targets": [
             "Aircraft"
@@ -3518,6 +3684,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 50,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -3614,6 +3781,9 @@
         ],
         "primary": "machineGun0",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
           "cost": 30,
           "preferred_targets": [
             "Infantry",
@@ -3625,6 +3795,7 @@
             "Aircraft",
             "override_aircraft"
           ],
+          "turn_speed": 450,
           "unit_type": "Aircraft",
           "vision_tiles": 2
         },
@@ -3709,6 +3880,9 @@
         },
         "primary": "laser",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "cost": 130,
           "preferred_targets": [
             "Vehicle"
@@ -3719,6 +3893,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 180,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -3791,6 +3966,9 @@
         },
         "primary": "guns",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "preferred_targets": [
             "Infantry",
             "Aircraft"
@@ -3800,6 +3978,7 @@
             "Structure",
             "override_structure"
           ],
+          "turn_speed": 180,
           "unit_type": "Structure",
           "vision_tiles": 1
         },
@@ -3859,6 +4038,9 @@
         },
         "primary": "guns",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 2,
+          "avoidance_radius": 2.7,
           "preferred_targets": [
             "Infantry",
             "Aircraft"
@@ -3868,6 +4050,7 @@
             "Structure",
             "override_structure"
           ],
+          "turn_speed": 180,
           "unit_type": "Structure",
           "vision_tiles": 2
         },
@@ -3944,6 +4127,9 @@
         },
         "primary": "guns",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "cost": 80,
           "preferred_targets": [
             "Infantry",
@@ -3955,6 +4141,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 180,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -4033,17 +4220,24 @@
           "wave_size": 2
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.6,
+          "can_be_crushed": true,
           "cost": 120,
           "preferred_targets": [
             "Vehicle",
             "Aircraft"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 1500,
           "speed": 5.5424,
+          "stealth_detect_tiles": 1,
           "tags": [
             "Infantry",
             "override_infantry"
           ],
+          "turn_speed": 300,
           "unit_type": "Infantry",
           "vision_tiles": 2
         },
@@ -4121,17 +4315,24 @@
           "wave_size": 2
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.6,
+          "can_be_crushed": true,
           "cost": 120,
           "preferred_targets": [
             "Vehicle",
             "Aircraft"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 1500,
           "speed": 5.5424,
+          "stealth_detect_tiles": 1,
           "tags": [
             "Infantry",
             "override_infantry"
           ],
+          "turn_speed": 300,
           "unit_type": "Infantry",
           "vision_tiles": 2
         },
@@ -4206,6 +4407,9 @@
         },
         "primary": "rockets",
         "stats": {
+          "aggro_radius_tiles": 3.5,
+          "attack_range_tiles": 3,
+          "avoidance_radius": 2.7,
           "cost": 110,
           "deploy_ms": 4000,
           "preferred_targets": [
@@ -4219,6 +4423,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 100,
           "undeploy_ms": 500,
           "unit_type": "Vehicle",
           "vision_tiles": 2
@@ -4297,17 +4502,22 @@
           "wave_size": 3
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.6,
           "cost": 30,
           "preferred_targets": [
             "Vehicle",
             "Aircraft"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 250,
           "speed": 9.237333,
           "tags": [
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 300,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -4403,6 +4613,9 @@
         ],
         "primary": "laser0",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "cost": 230,
           "preferred_targets": [
             "Vehicle",
@@ -4415,6 +4628,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 180,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -4516,6 +4730,9 @@
         },
         "primary": "rocketLauncher",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
           "cost": 30,
           "preferred_targets": [
             "Vehicle",
@@ -4527,6 +4744,7 @@
             "Aircraft",
             "override_aircraft"
           ],
+          "turn_speed": 450,
           "unit_type": "Aircraft",
           "vision_tiles": 2
         },
@@ -4587,7 +4805,7 @@
               "lasts_ms": 2000,
               "timing": {
                 "cycle_ms": 2000,
-                "hits": 1,
+                "hits": 8,
                 "interval_ms": 250,
                 "kind": "单发"
               },
@@ -4614,6 +4832,9 @@
         },
         "primary": "rocketLauncher0-stage2",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 2,
+          "avoidance_radius": 1.7,
           "cost": 120,
           "preferred_targets": [
             "Vehicle",
@@ -4625,6 +4846,7 @@
             "Aircraft",
             "override_aircraft"
           ],
+          "turn_speed": 125,
           "unit_type": "Aircraft",
           "vision_tiles": 2
         },
@@ -4709,7 +4931,7 @@
               "lasts_ms": 3000,
               "timing": {
                 "cycle_ms": 3000,
-                "hits": 1,
+                "hits": 12,
                 "interval_ms": 250,
                 "kind": "单发"
               },
@@ -4720,7 +4942,7 @@
               "lasts_ms": 6000,
               "timing": {
                 "cycle_ms": 6000,
-                "hits": 1,
+                "hits": 24,
                 "interval_ms": 250,
                 "kind": "单发"
               },
@@ -4747,6 +4969,9 @@
         },
         "primary": "cannon0-stage3",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 2,
+          "avoidance_radius": 2.7,
           "cost": 80,
           "preferred_targets": [
             "Vehicle",
@@ -4758,6 +4983,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 400,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -4880,6 +5106,9 @@
         },
         "primary": "cannon",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "cost": 30,
           "preferred_targets": [
             "Infantry",
@@ -4891,6 +5120,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 400,
           "unit_type": "Vehicle",
           "vision_tiles": 3
         },
@@ -4978,6 +5208,9 @@
         ],
         "primary": "gasWeapon0",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
           "cost": 60,
           "preferred_targets": [
             "Infantry"
@@ -4988,6 +5221,7 @@
             "Aircraft",
             "override_aircraft"
           ],
+          "turn_speed": 450,
           "unit_type": "Aircraft",
           "vision_tiles": 2
         },
@@ -5079,6 +5313,9 @@
         },
         "primary": "laser",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "cost": 100,
           "preferred_targets": [
             "Vehicle"
@@ -5089,6 +5326,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 180,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -5163,16 +5401,23 @@
           "wave_size": 3
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
+          "can_be_crushed": true,
           "cost": 60,
           "preferred_targets": [
             "Infantry"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 300,
           "speed": 5.5424,
+          "stealth_detect_tiles": 1,
           "tags": [
             "Infantry",
             "override_infantry"
           ],
+          "turn_speed": 900,
           "unit_type": "Infantry",
           "vision_tiles": 2
         },
@@ -5246,6 +5491,9 @@
         },
         "primary": "cannon",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "cost": 60,
           "preferred_targets": [
             "Infantry"
@@ -5256,6 +5504,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 720,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -5333,17 +5582,24 @@
           "wave_size": 3
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
+          "can_be_crushed": true,
           "cost": 100,
           "preferred_targets": [
             "Infantry",
             "Aircraft"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 1000,
           "speed": 5.5424,
+          "stealth_detect_tiles": 1,
           "tags": [
             "Infantry",
             "override_infantry"
           ],
+          "turn_speed": 900,
           "unit_type": "Infantry",
           "vision_tiles": 2
         },
@@ -5425,16 +5681,21 @@
           "wave_size": 4
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
           "cost": 10,
           "preferred_targets": [
             "Infantry"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 375,
           "speed": 8,
           "tags": [
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 400,
           "unit_type": "Vehicle",
           "vision_tiles": 3
         },
@@ -5506,17 +5767,24 @@
           "wave_size": 2
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.6,
+          "can_be_crushed": true,
           "cost": 130,
           "preferred_targets": [
             "Vehicle",
             "Aircraft"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 1000,
           "speed": 6.928,
+          "stealth_detect_tiles": 1,
           "tags": [
             "Infantry",
             "override_infantry"
           ],
+          "turn_speed": 720,
           "unit_type": "Infantry",
           "vision_tiles": 2
         },
@@ -5581,6 +5849,9 @@
         },
         "primary": "",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "cost": 70,
           "preferred_targets": [
             "Infantry"
@@ -5589,6 +5860,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 400,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -5620,6 +5892,9 @@
         },
         "primary": "",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "cost": 70,
           "preferred_targets": [
             "Infantry"
@@ -5628,6 +5903,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 400,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -5675,16 +5951,23 @@
           "wave_size": 3
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
+          "can_be_crushed": true,
           "cost": 30,
           "preferred_targets": [
             "Infantry"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 750,
           "speed": 6.928,
+          "stealth_detect_tiles": 1,
           "tags": [
             "Infantry",
             "override_infantry"
           ],
+          "turn_speed": 900,
           "unit_type": "Infantry",
           "vision_tiles": 2
         },
@@ -5758,6 +6041,9 @@
         },
         "primary": "missile",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.098,
           "cost": 100,
           "preferred_targets": [
             "Infantry",
@@ -5770,6 +6056,7 @@
             "Aircraft",
             "override_aircraft"
           ],
+          "turn_speed": 720,
           "unit_type": "Aircraft",
           "vision_tiles": 2
         },
@@ -5843,6 +6130,9 @@
         },
         "primary": "cannon",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "cost": 90,
           "preferred_targets": [
             "Infantry",
@@ -5854,6 +6144,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 200,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -5936,17 +6227,24 @@
           "wave_size": 3
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
+          "can_be_crushed": true,
           "cost": 40,
           "preferred_targets": [
             "Infantry",
             "Structure"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 666,
           "speed": 6.925,
+          "stealth_detect_tiles": 1,
           "tags": [
             "Infantry",
             "override_infantry"
           ],
+          "turn_speed": 900,
           "unit_type": "Infantry",
           "vision_tiles": 2
         },
@@ -6009,13 +6307,16 @@
         },
         "primary": "",
         "stats": {
+          "avoidance_radius": 3,
           "cost": 60,
+          "kill_award_tiberium": 80,
           "speed": 3.958857,
           "tags": [
             "Vehicle",
             "override_harvester",
             "override_vehicle"
           ],
+          "turn_speed": 180,
           "unit_type": "Vehicle",
           "vision_tiles": 1
         },
@@ -6045,13 +6346,16 @@
         },
         "primary": "",
         "stats": {
+          "avoidance_radius": 3,
           "cost": 60,
+          "kill_award_tiberium": 80,
           "speed": 6.928,
           "tags": [
             "Vehicle",
             "override_harvester",
             "override_vehicle"
           ],
+          "turn_speed": 180,
           "unit_type": "Vehicle",
           "vision_tiles": 1
         },
@@ -6097,16 +6401,21 @@
           "wave_size": 4
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
           "cost": 20,
           "preferred_targets": [
             "Vehicle"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 400,
           "speed": 8,
           "tags": [
             "Aircraft",
             "override_aircraft"
           ],
+          "turn_speed": 300,
           "unit_type": "Aircraft",
           "vision_tiles": 3
         },
@@ -6186,16 +6495,23 @@
           "wave_size": 5
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
+          "can_be_crushed": true,
           "cost": 10,
           "preferred_targets": [
             "Infantry"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 344,
           "speed": 6.928,
+          "stealth_detect_tiles": 1,
           "tags": [
             "Infantry",
             "override_infantry"
           ],
+          "turn_speed": 900,
           "unit_type": "Infantry",
           "vision_tiles": 3
         },
@@ -6269,16 +6585,23 @@
           "wave_size": 3
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
+          "can_be_crushed": true,
           "cost": 60,
           "preferred_targets": [
             "Vehicle"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 1000,
           "speed": 5.5424,
+          "stealth_detect_tiles": 1,
           "tags": [
             "Infantry",
             "override_infantry"
           ],
+          "turn_speed": 300,
           "unit_type": "Infantry",
           "vision_tiles": 2
         },
@@ -6349,6 +6672,9 @@
         },
         "primary": "guns",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 2,
+          "avoidance_radius": 2.7,
           "preferred_targets": [
             "Vehicle",
             "Infantry"
@@ -6358,6 +6684,7 @@
             "Structure",
             "override_structure"
           ],
+          "turn_speed": 180,
           "unit_type": "Structure",
           "vision_tiles": 2
         },
@@ -6421,6 +6748,9 @@
         },
         "primary": "guns",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 2,
+          "avoidance_radius": 2.7,
           "preferred_targets": [
             "Vehicle",
             "Infantry"
@@ -6430,6 +6760,7 @@
             "Structure",
             "override_structure"
           ],
+          "turn_speed": 180,
           "unit_type": "Structure",
           "vision_tiles": 2
         },
@@ -6497,6 +6828,9 @@
         },
         "primary": "rifle",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "cost": 120,
           "deploy_ms": 2000,
           "preferred_targets": [
@@ -6508,6 +6842,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 720,
           "undeploy_ms": 2000,
           "unit_type": "Vehicle",
           "vision_tiles": 2
@@ -6589,6 +6924,10 @@
           "wave_size": 2
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.6,
+          "can_be_crushed": true,
           "cost": 40,
           "deploy_ms": 2000,
           "preferred_targets": [
@@ -6597,11 +6936,13 @@
             "Aircraft"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 2000,
           "speed": 5.5424,
           "tags": [
             "Infantry",
             "override_infantry"
           ],
+          "turn_speed": 720,
           "unit_type": "Infantry",
           "vision_tiles": 2
         },
@@ -6679,17 +7020,24 @@
           "wave_size": 3
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
+          "can_be_crushed": true,
           "cost": 30,
           "preferred_targets": [
             "Vehicle",
             "Aircraft"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 1333,
           "speed": 5.4,
+          "stealth_detect_tiles": 1,
           "tags": [
             "Infantry",
             "override_infantry"
           ],
+          "turn_speed": 300,
           "unit_type": "Infantry",
           "vision_tiles": 2
         },
@@ -6764,6 +7112,9 @@
         },
         "primary": "cannon",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "cost": 70,
           "preferred_targets": [
             "Vehicle"
@@ -6774,6 +7125,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 400,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -6842,6 +7194,9 @@
         },
         "primary": "cannon",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "cost": 100,
           "preferred_targets": [
             "Vehicle",
@@ -6853,6 +7208,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 400,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -6934,17 +7290,24 @@
           "wave_size": 4
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
+          "can_be_crushed": true,
           "cost": 20,
           "preferred_targets": [
             "Vehicle",
             "Aircraft"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 1250,
           "speed": 5.5424,
+          "stealth_detect_tiles": 1,
           "tags": [
             "Infantry",
             "override_infantry"
           ],
+          "turn_speed": 300,
           "unit_type": "Infantry",
           "vision_tiles": 2
         },
@@ -7019,17 +7382,24 @@
           "wave_size": 4
         },
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
+          "can_be_crushed": true,
           "cost": 40,
           "preferred_targets": [
             "Vehicle",
             "Aircraft"
           ],
           "range_tiles": 2.5,
+          "separation_ms": 800,
           "speed": 5.5424,
+          "stealth_detect_tiles": 1,
           "tags": [
             "Infantry",
             "override_infantry"
           ],
+          "turn_speed": 300,
           "unit_type": "Infantry",
           "vision_tiles": 2
         },
@@ -7114,6 +7484,9 @@
         ],
         "primary": "cannon0",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "cost": 70,
           "deploy_ms": 2000,
           "preferred_targets": [
@@ -7125,6 +7498,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 400,
           "undeploy_ms": 500,
           "unit_type": "Vehicle",
           "vision_tiles": 2
@@ -7211,6 +7585,9 @@
         },
         "primary": "machineGun",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
           "cost": 30,
           "preferred_targets": [
             "Infantry"
@@ -7221,6 +7598,7 @@
             "Aircraft",
             "override_aircraft"
           ],
+          "turn_speed": 500,
           "unit_type": "Aircraft",
           "vision_tiles": 2
         },
@@ -7293,6 +7671,9 @@
         },
         "primary": "rocketLauncher",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
           "cost": 100,
           "preferred_targets": [
             "Aircraft"
@@ -7303,6 +7684,7 @@
             "Aircraft",
             "override_aircraft"
           ],
+          "turn_speed": 720,
           "unit_type": "Aircraft",
           "vision_tiles": 2
         },
@@ -7382,6 +7764,9 @@
         ],
         "primary": "flamethrower0",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 2.7,
           "cost": 80,
           "preferred_targets": [
             "Infantry",
@@ -7394,6 +7779,7 @@
             "Vehicle",
             "override_vehicle"
           ],
+          "turn_speed": 180,
           "unit_type": "Vehicle",
           "vision_tiles": 2
         },
@@ -7488,6 +7874,9 @@
         },
         "primary": "rocketLauncher",
         "stats": {
+          "aggro_radius_tiles": 2.5,
+          "attack_range_tiles": 1,
+          "avoidance_radius": 1.7,
           "cost": 70,
           "preferred_targets": [
             "Vehicle"
@@ -7498,6 +7887,7 @@
             "Aircraft",
             "override_aircraft"
           ],
+          "turn_speed": 400,
           "unit_type": "Aircraft",
           "vision_tiles": 2
         },

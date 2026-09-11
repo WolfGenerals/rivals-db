@@ -147,6 +147,25 @@ function statsOf(rec: EntityRecord): Record<string, unknown> {
   put("speed", cfg.combatantTuning?.speed);
   put("vision_tiles", cfg.squadTuning?.visionRangeInTiles);
   if (cfg.combatantTuning?.tags?.length) put("tags", cfg.combatantTuning.tags);
+  put("can_be_crushed", cfg.squadTuning?.canBeCrushed);
+  put("stealth_detect_tiles", cfg.squadTuning?.stealthDetectionRangeInTiles);
+  put("kill_award_tiberium", cfg.squadTuning?.killAwardTiberium);
+  put("separation_ms", cfg.squadTuning?.attackSeparationDurationMS);
+  /*
+   * 新增（原先被丢弃）：
+   *   attack_range_tiles —— squadTuning.maxAttackRangeInTiles，**与武器射程不是一回事**
+   *     （万钧巨炮 2 vs 2.5）。玩家问「能打多远」看的是它。
+   *   aggro_radius_tiles —— 主动索敌半径，决定会不会先手开打
+   *   turn_speed         —— 转向速度，影响绕后 / 风筝
+   *   avoidance_radius   —— 避免拥挤的半径，影响阵型
+   *
+   * **故意不加**：accelerationDistance / decelerationDistance / hexReservationRadius
+   * 语义未明，按 AGENTS.md 第 6 条不混进产物；combatStoreTuning 的三个布尔是商店内部机制。
+   */
+  put("attack_range_tiles", cfg.squadTuning?.maxAttackRangeInTiles);
+  put("aggro_radius_tiles", cfg.combatantTuning?.aggroRadiusInTiles);
+  put("turn_speed", cfg.combatantTuning?.angularSpeed);
+  put("avoidance_radius", cfg.combatantTuning?.avoidanceRadius);
   // 官方文案里的"强于 XXX" —— **AI 索敌意图，不是伤害克制**
   if (cfg.combatantTuning?.goodAgainstTags?.length) {
     put("preferred_targets", cfg.combatantTuning.goodAgainstTags);

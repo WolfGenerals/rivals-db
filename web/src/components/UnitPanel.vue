@@ -21,8 +21,7 @@
 import { computed, ref } from "vue";
 
 import { level as makeLevel, startingMajorOfRarity, type Level } from "@rivals/core/levels";
-import { UnitAttack } from "@rivals/core/attack";
-import { modifierIntroMs, modifierOutroMs, squadHealth, type DatasetEntry } from "@rivals/core/types";
+import type { DatasetEntry } from "@rivals/core/derive";
 
 import StatIcon from "./StatIcon.vue";
 import TypeIcon from "./TypeIcon.vue";
@@ -37,10 +36,7 @@ const props = defineProps<{
   level: Level;
 }>();
 
-const cfg = computed(() => props.unit.config);
-const combatant = computed(() => cfg.value.combatantTuning);
-const squad = computed(() => cfg.value.squadTuning);
-const waveSize = computed(() => squad.value?.waveSize ?? 1);
+const waveSize = computed(() => props.unit.derived.health?.wave_size ?? 1);
 
 /** 本面板的独立等级。默认关闭开关，跟随全局 */
 const independent = ref(false);
@@ -62,7 +58,7 @@ const name = computed(
 const nameEn = computed(() => props.unit.name_en ?? "");
 
 const unitType = computed(() => {
-  const tags = combatant.value?.tags ?? [];
+  const tags = props.unit.derived.stats.tags ?? [];
   if (tags.includes("override_harvester")) return "harvester";
   const first = tags.find((t) => !t.startsWith("override_"));
   return first ? first.toLowerCase() : "";
@@ -78,10 +74,8 @@ const STAT_TOKENS: Record<string, (r: DatasetEntry) => string | undefined> = {
     return v === undefined ? undefined : `${v} 格`;
   },
   ExtendedAttackRange: (r) => {
-    const ranges = (r.config.combatantTuning?.weaponTunings ?? [])
-      .map((w) => w.maxRangeInTiles)
-      .filter((v): v is number => v !== undefined);
-    return ranges.length ? `${Math.max(...ranges)} 格` : undefined;
+    const v = r.derived.stats.range_tiles;
+    return v === undefined ? undefined : `${v} 格`;
   },
 };
 
@@ -93,10 +87,9 @@ const desc = computed(() => {
 
 /** 总览里的关键值：随等级变 */
 const totalHealth = computed(() => {
-  const total = squadHealth(props.unit);
+  const total = props.unit.derived.health?.total;
   return total === undefined ? undefined : lv.value.hp(total);
 });
-const unitAttack = computed(() => UnitAttack.of(props.unit));
 /**
  * 单位 DPS = **主武器的 DPS**（不是各武器取最大），与游戏内面板一致。
  *
@@ -104,37 +97,35 @@ const unitAttack = computed(() => UnitAttack.of(props.unit));
  * 而火箭是 320 —— 取最大会算错。
  */
 const dps = computed(() => {
-  const base = unitAttack.value.dps();
-  return base > 0 ? lv.value.dps(base) : undefined;
+  const base = props.unit.derived.dps;
+  return base === null || base === 0 ? undefined : lv.value.dps(base);
 });
 
 /** 基本信息：不随等级变的单位固有属性。空值不收集 */
 const basics = computed(() => {
   const rows: Array<[string, string]> = [];
-  const cost = cfg.value.combatStoreTuning?.tiberiumCost;
-  if (cost !== undefined) rows.push(["造价", String(cost)]);
-  const speed = combatant.value?.speed;
-  if (speed !== undefined) rows.push(["移动速度", String(speed)]);
-  const vision = squad.value?.visionRangeInTiles;
-  if (vision !== undefined) rows.push(["视野", `${vision} 格`]);
-  if (squad.value?.canBeCrushed !== undefined) rows.push(["能否被碾压", squad.value.canBeCrushed ? "是" : "否"]);
-  const stealth = squad.value?.stealthDetectionRangeInTiles;
-  if (stealth !== undefined) rows.push(["反隐范围", `${stealth} 格`]);
-  const award = squad.value?.killAwardTiberium;
-  if (award !== undefined) rows.push(["被击杀给矿", String(award)]);
+  const st = props.unit.derived.stats;
+  if (st.cost !== undefined) rows.push(["造价", String(st.cost)]);
+  if (st.speed !== undefined) rows.push(["移动速度", String(st.speed)]);
+  if (st.turn_speed !== undefined) rows.push(["转向速度", String(st.turn_speed)]);
+  if (st.vision_tiles !== undefined) rows.push(["视野", `${st.vision_tiles} 格`]);
+  // ⚠️ 攻击距离（格，整数）与武器射程（实际距离）**不是一回事** —— 万钧巨炮 2 vs 2.5
+  if (st.attack_range_tiles !== undefined) rows.push(["攻击距离", `${st.attack_range_tiles} 格`]);
+  if (st.aggro_radius_tiles !== undefined) rows.push(["索敌半径", `${st.aggro_radius_tiles} 格`]);
+  if (st.avoidance_radius !== undefined) rows.push(["避让半径", `${st.avoidance_radius} 格`]);
+  if (st.can_be_crushed !== undefined) rows.push(["能否被碾压", st.can_be_crushed ? "是" : "否"]);
+  if (st.stealth_detect_tiles !== undefined) rows.push(["反隐范围", `${st.stealth_detect_tiles} 格`]);
+  if (st.kill_award_tiberium !== undefined) rows.push(["被击杀给矿", String(st.kill_award_tiberium)]);
 
   /*
    * 部署 / 解除时间。
    *
-   * 数据挂在武器的 `modifier_intro` / `modifier_outro` 上，但语义是**单位整体**的
-   * —— 多管火箭必须架起来才能打，这是这个单位最重要的特征之一，
-   * 埋在武器卡的次要参数里没人看得到。多武器单位取各武器的最大值。
+   * 语义是**单位整体**的 —— 多管火箭必须架起来才能打，这是这个单位最重要的特征之一，
+   * 埋在武器卡的次要参数里没人看得到。
    */
-  const intros = (combatant.value?.weaponTunings ?? []).map(modifierIntroMs).filter((v) => v > 0);
-  const outros = (combatant.value?.weaponTunings ?? []).map(modifierOutroMs).filter((v) => v > 0);
-  if (intros.length || outros.length) {
+  if (st.deploy_ms || st.undeploy_ms) {
     const sec = (ms: number) => `${(ms / 1000).toFixed(ms % 1000 === 0 ? 0 : 1)}s`;
-    rows.push(["部署 / 解除", `${sec(Math.max(0, ...intros))} / ${sec(Math.max(0, ...outros))}`]);
+    rows.push(["部署 / 解除", `${sec(st.deploy_ms ?? 0)} / ${sec(st.undeploy_ms ?? 0)}`]);
   }
   return rows;
 });
@@ -143,18 +134,17 @@ const basics = computed(() => {
 const squadRows = computed(() => {
   if (waveSize.value <= 1) return [] as Array<[string, string]>;
   const rows: Array<[string, string]> = [["小队人数", String(waveSize.value)]];
-  const per = combatant.value?.health;
+  const per = props.unit.derived.health?.per_member;
   if (per !== undefined) rows.push(["每员血量", String(lv.value.hp(per))]);
-  const sep = squad.value?.attackSeparationDurationMS;
+  const sep = props.unit.derived.stats.separation_ms;
   if (sep !== undefined) rows.push(["小队攻击间隔", `${sep} ms`]);
   return rows;
 });
 
-const abilityKeys = computed(() =>
-  Object.keys(cfg.value).filter(
-    (k) => k.endsWith("Tuning") && !["combatantTuning", "squadTuning", "combatStoreTuning"].includes(k),
-  ),
-);
+/*
+ * **不再转储原始 config** —— 那正是被淘汰的冗长部分。
+ * 要核对原始数据请直接看 Lua 源码，或重跑提取。
+ */
 </script>
 
 <template>
@@ -225,15 +215,6 @@ const abilityKeys = computed(() =>
 
     <!-- ④ 武器 -->
     <UnitWeapons :unit="unit" :level="lv" />
-
-    <!-- ⑤ 指挥官技能调参 -->
-    <section v-if="abilityKeys.length" class="panel">
-      <h3>能力调参</h3>
-      <div v-for="k in abilityKeys" :key="k" class="tuning">
-        <div class="tuning-head"><b>{{ k }}</b></div>
-        <pre>{{ JSON.stringify(cfg[k], null, 2) }}</pre>
-      </div>
-    </section>
 
     <!-- ⑥ 元信息 -->
     <p v-if="unit.warnings?.length" class="warn">⚠ 提取告警：{{ unit.warnings.join("；") }}</p>

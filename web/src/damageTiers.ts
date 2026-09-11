@@ -1,19 +1,18 @@
 /**
- * 伤害档位 —— 「敌人应对」和武器卡里的「逐目标伤害」共用同一套。
+ * 伤害分档 —— 逐目标伤害与「克制/敌人应对」共用。
  *
- * **倍率必须逐武器除以它自己的 `default`**，不能拿所有武器的最大 default
- * 当统一分母。反例（利爪直升机）：机枪 default 57、火箭 default 345，
- * 拿 345 当分母时机枪的 57 会算成 16% 判成"极低"，可 57 本来就是机枪的正常伤害
- * —— 整把机枪等于白算。见 docs/findings.md I51。
+ * ⚠️ **不再自己解析伤害**。早先这里要读 weapon.damageTuning、还要走
+ * effectiveDamage() 的四处回退链 —— 那正是反复出错的来源（weaponBaseline 曾漏改，
+ * 导致 7 把序列武器的百分比全显示 0%）。
+ *
+ * 现在吃 derived.weapons：damage 已是**解析好的单次命中伤害**，
+ * overrides 已是**归一后的补正**，can_attack 已是**算好的可攻击集**。
  */
-import {
-  canAttackTarget,
-  targetingUnknown,
-  damageAgainstTarget,
-  effectiveDamage,
-  type DamageOverrideTag,
-  type WeaponTuning,
-} from "@rivals/core/types";
+
+import type { Weapon } from "@rivals/core/derive";
+import type { DamageOverrideTag } from "@rivals/core/types";
+
+import { DAMAGE_CASCADE } from "@rivals/core/types";
 
 /** 档位：按「伤害 ÷ 该武器自己的 default」划。顺序即从冷到暖。 */
 export const TIERS = [
@@ -51,29 +50,9 @@ export function tierOf(ratio: number): (typeof TIERS)[number] {
   return TIERS.find((t) => ratio < t.max) ?? TIERS[TIERS.length - 1]!;
 }
 
-/**
- * 一把武器的「正常伤害」基准 = `damageTuning.default`。
- *
- * `default` 的含义是「**没写 override 时的全额伤害**」，override 绝大多数是**减伤**
- * （少数是增伤，如多管火箭对建筑 default 666 → Structure 1000）。所以它就是"正常"。
- *
- * ⚠️ **不能用「能打到的目标里伤害最大值」当基准。** 试过，会把反载具武器显示成反建筑：
- * 多管火箭 default 666 / Structure 1000，取最大值当分母后载具变成 67%、建筑 100%，
- * 而它的 `goodAgainst = [Vehicle, Structure]`。（用户发现）
- *
- * ⚠️ **也不能用「所有武器的最大 default」当统一分母。** 那是更早一版的错误：
- * 利爪机枪 default 57、火箭 default 345，统一分母会让机枪整把武器白算成"极低"。
- * 见 docs/findings.md I51。
- *
- * 所以基准是**逐武器取它自己的 `default`**。
- *
- * ⚠️ **必须走 `effectiveDamage()`，不能直接读 `damageTuning`** ——
- * **7 把武器的伤害只在 `modifier_sequence` 里**（神像机甲、蛇怪、黑寡妇…），
- * 它们的 `damageTuning` 是空的。直接读会让基准变成 0，于是**每一类目标的百分比都是 0%**，
- * 看着就像"伤害有值但补正是 0"（用户发现）。见 findings I107。
- */
-function weaponBaseline(w: WeaponTuning): number {
-  return effectiveDamage(w)?.default ?? 0;
+/** 一把武器的「正常伤害」基准 —— derived.weapons 里已解析好的 damage */
+function weaponBaseline(w: Weapon): number {
+  return w.damage;
 }
 
 /**
@@ -83,9 +62,18 @@ function weaponBaseline(w: WeaponTuning): number {
  * 打不打得到由 core 的 `canAttackTarget` 判定（武器 descriptors 位掩码），
  * **不是**"有没有写 override" —— 弹弓有 `Vehicle: 25` 却打不到载具。
  */
-export function targetDamage(weapons: WeaponTuning[], type: DamageOverrideTag): TargetDamage {
+/** 按 DAMAGE_CASCADE 回退链算这把武器对某类目标的伤害。补正值已在 overrides 里 */
+function damageOf(w: Weapon, target: DamageOverrideTag): number {
+  for (const tag of DAMAGE_CASCADE[target]) {
+    const hit = w.overrides.find((e) => e[0] === tag);
+    if (hit) return hit[1];
+  }
+  return w.damage;
+}
+
+export function targetDamage(weapons: Weapon[], type: DamageOverrideTag): TargetDamage {
   // 索敌方式未知：如实返回"未知"，不猜能打还是不能打（见 findings I71）
-  if (weapons.length > 0 && weapons.every(targetingUnknown)) {
+  if (weapons.length > 0 && weapons.every((w) => w.targeting_unknown)) {
     return {
       type,
       tier: "unknown",
@@ -97,7 +85,7 @@ export function targetDamage(weapons: WeaponTuning[], type: DamageOverrideTag): 
       unknown: true,
     };
   }
-  const usable = weapons.filter((w) => canAttackTarget(w, type));
+  const usable = weapons.filter((w) => w.can_attack.includes(type));
   if (!usable.length) {
     return { type, tier: "dead", color: DEAD_COLOR, damage: 0, ratio: 0, from: "", reachable: false, unknown: false };
   }
@@ -105,13 +93,13 @@ export function targetDamage(weapons: WeaponTuning[], type: DamageOverrideTag): 
   let ratio = 0;
   let from = "";
   for (const w of usable) {
-    const dmg = damageAgainstTarget(w, type);
+    const dmg = damageOf(w, type);
     const base = weaponBaseline(w);
     const r = base > 0 ? dmg / base : 0;
     if (r > ratio || (r === ratio && dmg > damage)) {
       damage = dmg;
       ratio = r;
-      from = w.name ?? "";
+      from = w.name;
     }
   }
   const t = tierOf(ratio);

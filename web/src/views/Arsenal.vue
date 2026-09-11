@@ -10,7 +10,7 @@
  */
 import { computed, ref, watch } from "vue";
 
-import { squadHealth, unitBaseDps, type DatasetEntry } from "@rivals/core/types";
+import type { DatasetEntry } from "@rivals/core/derive";
 
 import UnitCard from "../components/UnitCard.vue";
 import { loadDataset } from "../data.ts";
@@ -20,18 +20,9 @@ import { useData } from "../useData.ts";
 const props = defineProps<{ commandersOnly?: boolean }>();
 const data = useData();
 
-const records = ref<DatasetEntry[]>([]);
-const loading = ref(true);
-
-watch(
-  data,
-  async (d) => {
-    if (!d) return;
-    records.value = await loadDataset(d);
-    loading.value = false;
-  },
-  { immediate: true },
-);
+// 数据集是单文件，加载完就全在内存里 —— 同步取即可
+const records = computed<DatasetEntry[]>(() => data.value?.all ?? []);
+const loading = computed(() => !data.value);
 
 const q = ref("");
 const faction = ref("");
@@ -42,15 +33,15 @@ const RARITY_ORDER: Record<string, number> = { Common: 1, Rare: 2, Epic: 3 };
 
 /** 该条目在当前等级设置下应显示的等级（「相对起始」模式下每个单位不同）。 */
 function levelOf(rec: DatasetEntry) {
-  return displayLevel({ rarity: rec.pb?.rarity });
+  return displayLevel(rec);
 }
 
 function sortKey(rec: DatasetEntry): number {
   switch (sort.value) {
     case "hp":
-      return squadHealth(rec) ?? -1;
+      return rec.derived.health?.total ?? -1;
     case "dps":
-      return unitBaseDps(rec);
+      return rec.derived.dps ?? 0;
     case "name":
       return 0;
     default:

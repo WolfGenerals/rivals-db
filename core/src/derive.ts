@@ -278,8 +278,16 @@ export function deriveAttack(unit: EntityRecord): DerivedAttack {
         const lasts = count ? count * interval : null;
         tracks.push({
           weapon: id,
-          // 每一段本身就是"一轮"：周期 = 段时长（末段无 attackCount → 用它的间隔当一个周期）
-          timing: { kind: "单发", hits: 1, cycle_ms: lasts ?? interval, interval_ms: interval },
+          /*
+           * 每一段本身就是"一轮"：**hits 是这一段的发数 ttackCount**（万钧巨炮 12/24），
+           * 周期 = 段时长。末段没有 ttackCount（无限持续）→ 用它的间隔当一个周期。
+           */
+          timing: {
+            kind: "单发",
+            hits: count ?? 1,
+            cycle_ms: lasts ?? interval,
+            interval_ms: interval,
+          },
           after_ms: after,
           lasts_ms: lasts,
           charge_ms: first ? num(t["initialChargeUpMs"]) : undefined,
@@ -451,6 +459,19 @@ export interface DerivedStats {
   deploy_ms?: number;
   undeploy_ms?: number;
   range_tiles?: number;
+  can_be_crushed?: boolean;
+  stealth_detect_tiles?: number;
+  kill_award_tiberium?: number;
+  /** 小队成员开火错开（毫秒） */
+  separation_ms?: number;
+  /** **攻击距离**（格）—— 与 range_tiles（射程）不是一回事 */
+  attack_range_tiles?: number;
+  /** 主动索敌半径（格）—— 决定会不会先手开打 */
+  aggro_radius_tiles?: number;
+  /** 转向速度 */
+  turn_speed?: number;
+  /** 避免拥挤的半径（格），影响阵型 */
+  avoidance_radius?: number;
 }
 
 export interface DerivedHealth {
