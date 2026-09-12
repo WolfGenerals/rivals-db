@@ -640,3 +640,65 @@ export class UnitAttack {
     return [...new Set(this.weapons.map((w) => w.label))];
   }
 }
+
+/**
+ * **官方面板口径**的 1-0 基准 DPS —— `CombatTuningInfo.TryGetBaseDps` 的移植
+ * （`gameplay/tuning/CombatTuningInfo.lua:654-718`）。
+ *
+ * 产物里的 `derived.dps` 就是这个数：**与游戏内面板逐字对齐**，用于核对数据。
+ * 「实际输出」不在这个函数里 —— 那是 `derive.ts` 的时序模型（`attack.tracks`），
+ * 两者在本单位上会差一倍（烈焰之手：面板 112.5 / 实际 225，见 findings I195）。
+ *
+ * 官方结构（逐条对照）：
+ *
+ *   ① 面板**只看第 1 把武器**（`CombatTuningInfo.lua:193,201` 写死 `weaponIndex = 1`），
+ *      唯一例外是单位自己重写了 `GetStatInfo` 的虎鲸轰炸机（改用武器 2 并自定公式，
+ *      `unit_gdi_orcabomber.lua:186-190,211-223`）—— `UnitAttack` 的「主武器」选法
+ *      正好落到那把炸弹上，所以这里不特判。
+ *   ② 有 `modifier_sequence` → 各实现的 `TranslateToken("dps")`；取不到就
+ *      `damage / TranslateToken("burstCooldownMs") × 1000`；再 `× waveSize`，**就返回**。
+ *      ⚠️ 「武器级 `muzzleStrategy == All` 时 × muzzleCount」那两行在这个分支**之后**
+ *      （:712-714），序列武器**永远走不到** → 烈焰之手的面板漏掉第二个枪口。
+ *   ③ 无序列 → 弹夹式（`reloadTuning`）/ 爆发式（`burstTiming`）。
+ */
+export function panelDps(unit: EntityRecord, resolveUnit?: (id: string) => EntityRecord | undefined): number {
+  const cfg = unit.config;
+  const ws = (cfg.combatantTuning?.weaponTunings ?? []) as WeaponTuning[];
+  const wave = cfg.squadTuning?.waveSize ?? 1;
+  const first = ws[0];
+
+  /*
+   * ⚠️ **变体的面板值 = 本体的值** —— 因为实现的 `TranslateToken` 硬编码读本体：
+   * `ability_sandstorm_weapon_sequence:TranslateToken` 里写的是
+   * `nTuningUtil.GetWeaponSequenceTuning(unit_gdi_sandstorm, 1)`，压根不看自己属于谁。
+   * 于是钢爪沙暴按**本体**的 `burstCooldown`(4000)/`missileCount`(12) 算得 **450**（自己写的是
+   * 3000ms → 我们时序模型算 600），钢爪神像按本体 2.5s 算得 **480**（自己的
+   * `durationBetweenVolley` 是 0 → 时序模型给不出值）。
+   * 真跑游戏 Lua 逐单位核对（86 个单位、每单位一个进程）时扫出来的：**73 个有 DPS 的单位里
+   * 2 个对不上，全是变体**（钢爪沙暴 450 vs 我们的 600、钢爪神像 480 vs 我们算不出值）；
+   * 修完 `readsUnit` 后 **73/73 一致、零差异**。见 findings I196。
+   */
+  const readsUnit = ws
+    .map((w) => (w.modifier_sequence as { readsUnit?: string } | undefined)?.readsUnit)
+    .find((x): x is string => Boolean(x));
+  if (readsUnit && resolveUnit) {
+    const base = resolveUnit(readsUnit);
+    if (base) return panelDps(base, resolveUnit);
+  }
+
+  /*
+   * ③ 弹夹式的官方分支（:705-706）：`clipSize × waveSize ÷ reloadTimeMs × 1000 × damage`。
+   *
+   * ⚠️ 只有**第 1 把武器自己就是弹夹武器**时才走这里 —— 虎鲸轰炸机的弹夹在武器 2 上，
+   * 而它的面板走单位自己的 override（`damage ÷ shotCooldownMs`），交给 ② 下面的选法。
+   */
+  const reload = first?.reloadTuning;
+  if (first && !first.modifier_sequence && reload?.clipSize && reload.reloadTimeMs) {
+    const dt = effectiveDamage(first);
+    const damage = dt?.default ?? 0;
+    return (damage * reload.clipSize * wave * 1000) / reload.reloadTimeMs;
+  }
+
+  // ② 序列武器 / 常规武器：`UnitAttack` 就是那 15 个 `TranslateToken("dps")` 的移植
+  return UnitAttack.of(unit).dps();
+}

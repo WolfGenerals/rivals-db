@@ -65,8 +65,15 @@ weapon.projectile.modifier.tuning.damage.default
 ### A 族 · 持续射击（`burstCooldown`）
 
 ```
-DPS = damage × waveSize ÷ burstCooldown_s        （muzzleStrategy = All 时再 × muzzleCount）
+DPS = damage × waveSize ÷ burstCooldown_s
 ```
+
+⚠️ **`muzzleStrategy = All` 时是否再 × `muzzleCount`，取决于实现在哪读这个字段**（见 §9.1 与 findings I195）：
+`ability_simple_weapon_sequence` 读的是 **`self.tuning.muzzleStrategy`**（写在序列 tuning 里），
+`All` 时 `for i=0,GetMuzzleCount()-1` 逐枪口各打一发 ⇒ 击打数 = `muzzleCount`（烈焰之手 2×75）；
+同实现的 `RoundRobin`（弹弓/狼獾）每轮只打一发。而**面板公式读的是武器级** `weaponTuning.muzzleStrategy`
+（`CombatTuningInfo.lua:712`），且序列武器在 `:680` 就 return 了 —— 所以烈焰之手的**面板**漏乘，
+只有 **112.5**（真跑游戏 Lua 实测，findings I195/I196）。
 
 | 单位 | 观测等级 | 面板 | 反推基准 | 公式代入 | |
 | --- | --- | --- | --- | --- | --- |
@@ -89,7 +96,7 @@ DPS = damage × waveSize ÷ burstCooldown_s        （muzzleStrategy = All 时�
 | 生化战士 | 500 | 1 · `All` | 0 | `spawnGasTimeMs: 750`（毒雾，**不计入 DPS**） |
 | 生化越野车 | 500 | · `All` | 0 | `spawnGasTimeMs: 2100` |
 | 火焰坦克 | 500 | | 0 | `damageMain` 380 + `damageSide` 380（**只用 main**） |
-| 烈焰之手 | 2000 | · `All` | 500 | |
+| 烈焰之手 | 2000 | 2 · `All`（同时出膛） | 500 | 一轮**两发**（每枪口一发），与音波突击队 1×150 等价 |
 | 深岩巨虫 | 3750 | · `All` | 233 | 单发 2000 |
 
 ### B 族 · 分段光束（`stage` + `tickPeriodMs`）
@@ -344,7 +351,18 @@ IM_ASSERT(self.tuning.durationBetweenVolley >=
 DPS   = （伤害是每下值 ? 伤害 × 击打数 : 伤害） × waveSize ÷ 周期
 ```
 
-**`muzzleCount` / `muzzleStrategy` 一概不参与 DPS 计算**，它们只决定这几下怎么分配到枪口。
+**`muzzleCount` 是「物理枪口数」，参不参与 DPS 由实现决定**（不是通则，两头都踩过）：
+
+| 情况 | 击打数 | 例 |
+| --- | --- | --- |
+| `ability_simple_weapon_sequence` + `tuning.muzzleStrategy = All` | `muzzleCount`（每口一发） | 烈焰之手 2×75 = 150/轮 |
+| 同实现 + `RoundRobin` | 1 | 弹弓 4 口 / 狼獾 2 口，每轮只打一发 |
+| 其它实现写了 `All` 也不看它 | 1 | 火焰坦克 / 寡妇制造者走 `DamageSquadListOverride` |
+| 神像机甲 | 3（来自 `MUZZLE_INFO`，与 `muzzleCount=1` 无关） | 三下都从同一枪口出 |
+
+⚠️ 面板公式（`CombatTuningInfo.lua:712`）只在**没有 `modifier_sequence`** 的常规武器上乘
+`weaponTuning.muzzleStrategy`/`muzzleCount`；序列武器在 `:680` 就返回了，所以烈焰之手的**面板值**
+（112.5）比实际（225）少一半 —— 这是**游戏的显示 bug**，真跑游戏 Lua 已确认（findings I195/I196）。
 
 ### 9.2 另一处未提取的实现：`unit_*.GetStatInfo()`
 

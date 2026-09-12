@@ -1355,7 +1355,7 @@
             }
           ]
         },
-        "dps": null,
+        "dps": 480,
         "health": {
           "per_member": 2400,
           "total": 2400,
@@ -2309,7 +2309,7 @@
             }
           ]
         },
-        "dps": 400,
+        "dps": 1600,
         "health": {
           "per_member": 1715,
           "total": 1715,
@@ -3502,7 +3502,7 @@
             }
           ]
         },
-        "dps": 600,
+        "dps": 450,
         "health": {
           "per_member": 3550,
           "total": 3550,
@@ -5372,7 +5372,7 @@
           "索敌方式未知（descriptors 空表）",
           "多武器并行（同时开火）"
         ],
-        "primary": "gasWeapon0",
+        "primary": "catalystWeapon1",
         "stats": {
           "aggro_radius_tiles": 2.5,
           "attack_range_tiles": 1,
@@ -6422,16 +6422,17 @@
       "derived": {
         "attack": {
           "composition": "single",
-          "cycle_ms": null,
+          "cycle_ms": 2000,
           "member_offset_ms": 666,
           "tracks": [
             {
-              "chargeInCycle": false,
-              "charge_ms": 0,
+              "chargeInCycle": true,
+              "charge_ms": 500,
               "timing": {
                 "cycle_ms": 2000,
-                "hits": 1,
-                "interval_ms": 2000,
+                "gap_ms": 2000,
+                "hits": 2,
+                "interval_ms": 0,
                 "kind": "单发"
               },
               "weapon": "rifle"

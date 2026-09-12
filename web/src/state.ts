@@ -58,21 +58,20 @@ function withCapped(lv: Level, capped: boolean): LevelDisplay {
 }
 
 /**
- * DPS 统计口径。
+ * DPS 统计口径 —— **两个，都是时间轴算的实际值**。
  *
- * 三个口径各有用处，**不是随便选一个**：
- *   `game`  —— 与游戏面板一致，用来**核对**我们的数据对不对
- *   `burst` —— 射击**期间**的速率（`damage ÷ interval`），看"打起来多猛"
- *   `avg`   —— 含蓄力/装填/空档的长期平均，看"实际能打出多少"
+ *   `burst` —— 射击**期间**的速率，看"打起来多猛"
+ *   `avg`   —— 含蓄力/装填/空档的长期平均，看"实际能打出多少"（默认）
  *
- * 音波坦克最能说明差别：游戏/爆发 = 650，平均 = **137**（3 秒蓄力摊进去）。
- * 见 findings I164。
+ * ⚠️ **没有「游戏面板」这一项**（用户要求去掉）：面板值 `derived.dps` 只在单位页的
+ * DPS 格显示，不进这个切换 —— 官方面板没有"逐目标"版本，选它时逐目标只能退回平均，
+ * 同一张表里混两种口径；而音波坦克面板 650 / 实际平均 137 差 4.75 倍（findings I164），
+ * 混着看极易读错。
  */
-export const dpsMode: Ref<"game" | "burst" | "avg"> = ref("game");
-export const DPS_MODES: Array<{ key: "game" | "burst" | "avg"; label: string; title: string }> = [
-  { key: "game", label: "游戏", title: "与游戏内面板一致，用于核对数据" },
+export const dpsMode: Ref<"burst" | "avg"> = ref("avg");
+export const DPS_MODES: Array<{ key: "burst" | "avg"; label: string; title: string }> = [
   { key: "burst", label: "爆发", title: "射击期间的速率 = 伤害 ÷ 两下之间的间隔" },
-  { key: "avg", label: "平均", title: "含蓄力/装填/空档的长期平均" },
+  { key: "avg", label: "平均", title: "含蓄力/装填/空档的长期平均 = 实际输出" },
 ];
 
 /**

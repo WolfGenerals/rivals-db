@@ -68,6 +68,7 @@ function sortKey(rec: DatasetEntry): number {
     case "hp":
       return rec.derived.health?.total ?? -1;
     case "dps":
+      // 与表格同一口径：**游戏面板值**（`derived.dps`），不是时间轴的实际值
       return rec.derived.dps ?? 0;
     case "name":
       return 0;

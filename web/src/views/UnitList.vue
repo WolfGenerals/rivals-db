@@ -14,11 +14,11 @@ import { computed, ref } from "vue";
 import { RouterLink } from "vue-router";
 
 import type { DatasetEntry, Weapon } from "@rivals/core/derive";
-import { DAMAGE_CASCADE, type DamageOverrideTag } from "@rivals/core/types";
 import { startingMajorOfRarity, type Level } from "@rivals/core/levels";
 
+import { targetDamage } from "../damageTiers.ts";
 import { detailPath } from "../router.ts";
-import { unitBaseDps } from "../dps.ts";
+import { unitDpsVs } from "../dps.ts";
 import { displayLevel, dpsMode } from "../state.ts";
 // 排序状态放 `state.ts` 的模块级单例 —— 组件内的 ref 会在路由切换时被重置
 import { useData } from "../useData.ts";
@@ -104,6 +104,7 @@ function primaryWeapon(e: DatasetEntry): Weapon | undefined {
  *
  * 取主武器的轨道：单发看 `hits`/`interval_ms`，装填看 `clip`/`interval_ms`。
  * 一轮只有 1 下、或没有间隔数据的，显示 `—`（没有"连击"可言）。
+ * `interval_ms === 0` = **同时出膛的齐射**（烈焰之手两管），写成「同时 N 发」。
  */
 function burstText(e: DatasetEntry): string {
   const w = primaryWeapon(e);
@@ -113,19 +114,13 @@ function burstText(e: DatasetEntry): string {
   const tm = t.timing;
   if (tm.kind === "一次") return "—"; // 一次性（自爆），没有"连击"可言
   const hits = tm.kind === "装填" ? tm.clip : tm.hits;
-  const iv = tm.interval_ms;
   if (!hits || hits <= 1) return "—";
+  const iv = tm.interval_ms;
+  if (iv === 0) return `同时 ${hits} 发`;
   return iv ? `${hits} 发 · ${iv}ms` : `${hits} 发`;
 }
 
-/** 按 `DAMAGE_CASCADE` 回退链算对某类目标的伤害（补正值已在 `overrides` 里） */
-function dmgVs(w: Weapon, t: T): number {
-  for (const tag of DAMAGE_CASCADE[t] as DamageOverrideTag[]) {
-    const hit = w.overrides.find((e) => e[0] === tag);
-    if (hit) return hit[1];
-  }
-  return w.damage;
-}
+/** 按 `DAMAGE_CASCADE` 回退链算对某类目标的伤害、逐目标 DPS 都在 `damageTiers.ts` / `dps.ts` */
 
 interface Cell {
   /** 能打得到吗（看 `can_attack`，不是"有没有写补正"） */
@@ -184,21 +179,26 @@ const rows = computed<Row[]>(() => {
   const out = entries.value.map((u) => {
     const lv = displayLevel();
     const h = u.derived.health;
-    const w = primaryWeapon(u);
-    // 按顶栏选的 DPS 口径（原先写死 `derived.dps`，切口径时表格不动）
-    const base = unitBaseDps(u, dpsMode.value);
+    /*
+     * **DPS 列 = 游戏面板值**（`derived.dps`，官方面板公式的移植，已用真跑游戏 Lua
+     * 逐单位核过 73/73）。**不跟顶栏的爆发/平均走** —— 它要能和游戏内面板对号；
+     * "实际能打出多少"看右边那几列逐目标 DPS（那个跟顶栏口径）。
+     */
+    const base = u.derived.dps;
 
     const cells = TYPES.map<Cell>((t) => {
-      if (!w) return { reach: false, text: "—", ratio: 0 };
-      const reach = w.can_attack.includes(t);
-      const d = dmgVs(w, t);
-      const ratio = w.damage > 0 ? d / w.damage : 0;
-      if (!reach) return { reach: false, text: "—", ratio: 0 };
+      /*
+       * 逐目标 DPS = **能打该目标的每把武器相加**（`unitDpsVs`）——
+       * 利爪（机枪 + 火箭）打建筑时两把同时开火，只看主武器会漏掉一半。
+       * 「补正」仍取倍率最高的那把（`targetDamage`，与「敌人应对」那排同一约定）。
+       */
+      const td = targetDamage(u.derived.weapons, t);
+      const sum = unitDpsVs(u, t, dpsMode.value);
+      if (!td.reachable || !sum) return { reach: false, text: "—", ratio: 0 };
       if (cellMode.value === "ratio") {
-        return { reach, text: `${Math.round(ratio * 100)}%`, ratio };
+        return { reach: true, text: `${Math.round(td.ratio * 100)}%`, ratio: td.ratio };
       }
-      const dps = base === null ? null : lv.dps(base) * ratio;
-      return { reach, text: dps === null ? "—" : dps.toFixed(0), ratio };
+      return { reach: true, text: lv.dps(sum.total).toFixed(0), ratio: td.ratio };
     });
 
     return {
@@ -269,7 +269,7 @@ void startingMajorOfRarity;
   </div>
 
   <p class="muted" style="margin: 8px 0">
-    {{ rows.length }} 个条目　·　等级由顶栏控制（{{ cellMode === "dps" ? "已按当前等级换算" : "补正与等级无关" }}）
+    {{ rows.length }} 个条目　·　等级由顶栏控制（{{ cellMode === "dps" ? "已按当前等级换算" : "补正与等级无关" }}）　·　<span class="dim">DPS 列 = 游戏面板值，逐目标列 = 实际值（跟顶栏口径）</span>
   </p>
 
   <!--
@@ -296,14 +296,24 @@ void startingMajorOfRarity;
           <th class="num sortable" @click="toggleSort('totalHP')">
             总血<i class="arrow">{{ sortKey === "totalHP" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
           </th>
-          <th class="num sortable" @click="toggleSort('dps')">
+          <th
+            class="num sortable"
+            title="游戏面板值（官方面板公式，主武器口径），与游戏内面板逐字一致；右边逐目标那几列才是按时序算的实际值"
+            @click="toggleSort('dps')"
+          >
             DPS<i class="arrow">{{ sortKey === "dps" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
           </th>
           <th class="num sortable" @click="toggleSort('range')">
             射程<i class="arrow">{{ sortKey === "range" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
           </th>
           <th title="一轮打几下 · 两下之间的间隔。用来区分持续与爆发">连击</th>
-          <th v-for="t in TYPES" :key="t" class="num target sortable" @click="toggleSort(t)">
+          <th
+            v-for="t in TYPES"
+            :key="t"
+            class="num target sortable"
+            title="对目标的实际 DPS：能打该目标的每把武器相加（跟顶栏的爆发/平均口径）"
+            @click="toggleSort(t)"
+          >
             {{ SHORT[t] }}<i class="arrow">{{ sortKey === t ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
           </th>
         </tr>

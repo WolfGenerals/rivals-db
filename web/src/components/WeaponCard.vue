@@ -27,14 +27,12 @@ const props = defineProps<{
   /** 指向这把武器的时序轨道（`sequence` 下每把武器各一条） */
   tracks: Track[];
   index: number;
-  /** 是否是单位的主武器 —— 面板 DPS 显示的是它 */
+  /** 是否是单位的主武器 */
   primary?: boolean;
   level: Level;
   /** 小队人数与成员错开 —— 时序条要按它们画每条队员的轴 */
   waveSize?: number;
   separationMs?: number;
-  /** 单位的面板 DPS（`derived.dps`）—— `game` 口径直接用它 */
-  primaryDps?: number | null;
 }>();
 
 /**
@@ -46,25 +44,21 @@ const props = defineProps<{
  */
 
 /**
- * 一把武器的三个 DPS 口径 + 单轮总伤害。
+ * 一把武器的两个 DPS 口径 + 单轮总伤害（**都是时间轴算的实际值**）。
  *
  * ```
  * 单轮总伤害 = damage × hits
  * burst（爆发） = damage × hits ÷ (hits × interval) = damage ÷ interval
  * avg（平均）   = damage × hits ÷ 完整周期      ← 蓄力/装填/空档都摊进去
- * game（游戏）  = 面板的口径（`derived.dps`，随等级缩放）
  * ```
  *
- * 音波坦克最能说明差别：`game`/`burst` = 650，`avg` = **137**（3 秒蓄力摊进去）。
- * 见 findings I164。
+ * 音波坦克最能说明差别：`burst` = 650，`avg` = **137**（3 秒蓄力摊进去）。见 findings I164。
+ * 游戏面板值（650 那个）不在这里 —— 它是面板口径，只在单位页显示。
  */
 const dpsSet = computed(() => weaponDps(props.weapon, props.tracks, props.waveSize ?? 1));
 
-/** 按顶栏选的 DPS 口径取 1-0 基准值（`game` 用面板值） */
-const baseDps = computed(() => {
-  if (props.primaryDps != null && dpsMode.value === "game") return props.primaryDps;
-  return dpsMode.value === "avg" ? dpsSet.value.avg : dpsSet.value.burst;
-});
+/** 按顶栏选的 DPS 口径取 1-0 基准值 */
+const baseDps = computed(() => (dpsMode.value === "avg" ? dpsSet.value.avg : dpsSet.value.burst));
 
 const levelDps = computed(() => (baseDps.value > 0 ? props.level.dps(baseDps.value) : undefined));
 
@@ -113,8 +107,17 @@ function describeTiming(tm: Track["timing"]): string {
   if (tm.hits <= 1) {
     return `每 ${fmtSec(tm.cycle_ms)} 一发`;
   }
-  const span = tm.hits * (tm.interval_ms ?? tm.cycle_ms);
-  const head = `连打 ${tm.hits} 发（每 ${fmtMs(tm.interval_ms ?? tm.cycle_ms)} 一发，共 ${fmtSec(span)}）`;
+  /*
+   * `interval_ms === 0` = **同轮各发同时出膛**（遍历枪口的齐射，烈焰之手两管）。
+   * 不能读成"每 0ms 一发" —— 它不是连打，是齐射。
+   */
+  if ((tm.interval_ms ?? -1) <= 0) {
+    // 前摇由 `describeWhen` 负责（它拿得到 Track 上的 charge_ms），这里只说齐射本身
+    return `同时 ${tm.hits} 发（一轮 ${fmtSec(tm.cycle_ms)}）`;
+  }
+  const iv = tm.interval_ms ?? tm.cycle_ms;
+  const span = tm.hits * iv;
+  const head = `连打 ${tm.hits} 发（每 ${fmtMs(iv)} 一发，共 ${fmtSec(span)}）`;
   return tm.gap_ms ? `${head}，然后停 ${fmtSec(tm.gap_ms)}（周期 ${fmtSec(tm.cycle_ms)}）` : head;
 }
 
@@ -247,7 +250,7 @@ const minor = computed(() => {
     <p v-if="areaText" class="area"><span class="dim">范围</span>{{ areaText }}</p>
 
     <!-- ④ 逐目标伤害 -->
-    <DamageMatrix :weapon="weapon" :level="level" />
+    <DamageMatrix :weapon="weapon" :level="level" :tracks="tracks" :wave-size="waveSize ?? 1" />
 
     <p v-if="minor.length" class="minor">
       <span v-for="[k, v] in minor" :key="k"><i>{{ k }}</i>{{ v }}</span>

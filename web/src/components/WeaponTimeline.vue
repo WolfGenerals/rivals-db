@@ -87,6 +87,15 @@ const baseSegs = computed<Seg[]>(() => {
     // 单发
     const iv = tm.interval_ms ?? tm.cycle_ms;
     /*
+     * **同轮各发同时出膛**（`interval_ms === 0`，遍历枪口的齐射 —— 烈焰之手两管）。
+     *
+     * ⚠️ 它**不是"连打"**：几发落在同一毫秒，没有"打完再等"的两段结构 ——
+     * 和 `hits === 1` 一样，**整轮就是攻击节奏**，条子应当满条都是攻击段。
+     * 早先按 `hits × interval` 画，`hits × 0 = 0` 让段宽塌成 0，只好硬塞一个
+     * 2% 宽的窄条，于是同样节奏的音波突击队是满条蓝、烈焰之手只剩一根细线（用户报"蓝条不正常"）。
+     */
+    const simultaneous = tm.hits > 1 && iv <= 0;
+    /*
      * **条子表达「阶段结构」，不是「占空比」。**
      *
      * `hits === 1` 的武器（弹弓、狼獾…）只有**攻击一个阶段** —— 那 180ms 本身就是
@@ -94,21 +103,22 @@ const baseSegs = computed<Seg[]>(() => {
      * 不存在的阶段**（用户指出："弹弓只有攻击一个行为，应该满条都是攻击"）。
      * 速率由文字说（"每 0.18s 一发"），条子只管阶段。
      *
-     * `hits > 1` 才是真有结构：一轮 `hits × interval` 打完，剩下的空档是**另一个阶段**
-     * （沙暴"打 12 发然后停 1.6s"），那时才该分段。
+     * `hits > 1` 且**有每发间隔**时才是真有结构：一轮 `hits × interval` 打完，
+     * 剩下的空档是**另一个阶段**（沙暴"打 12 发然后停 1.6s"），那时才该分段。
      */
-    const fireMs = tm.hits > 1 ? tm.hits * iv : tm.cycle_ms;
+    const fireMs = simultaneous || tm.hits <= 1 ? tm.cycle_ms : tm.hits * iv;
     const ticks = Array.from(
       { length: Math.max(1, tm.hits) },
-      (_, i) => start + charge + (tm.hits > 1 ? i * iv : 0),
+      (_, i) => start + charge + (tm.hits > 1 && !simultaneous ? i * iv : 0),
     );
     out.push({
       kind: "fire",
       at: start + charge,
       ms: fireMs,
       ticks,
-      title:
-        tm.hits > 1
+      title: simultaneous
+        ? `同时 ${tm.hits} 发（一轮 ${fmt(tm.cycle_ms)}）`
+        : tm.hits > 1
           ? `连打 ${tm.hits} 发（每 ${fmt(iv)} 一发，共 ${fmt(tm.hits * iv)}）`
           : `攻击（每 ${fmt(tm.cycle_ms)} 一发）`,
     });

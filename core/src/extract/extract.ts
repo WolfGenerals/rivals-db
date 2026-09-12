@@ -337,6 +337,8 @@ export async function extractAll(opts: ExtractOptions): Promise<ExtractResult> {
      * 文件名前缀不统一（`bldg_*` / `gdi_mcv` / `nod_protopad`），故不按前缀筛。
      */
     const bldgSources = await readSources(join(root, "gameplay", "buildings"), root, /\.lua$/);
+    // 能力实现（`TranslateToken` 里硬编码读本体）—— 给 `attachReadsUnit` 用
+    const abilitySources = await readSources(join(root, "gameplay", "abilities"), root, /\.lua$/);
 
     const failures = await evalTwoPass(lua, [...unitSources, ...cmdrSources, ...bldgSources], onError);
 
@@ -415,10 +417,42 @@ export async function extractAll(opts: ExtractOptions): Promise<ExtractResult> {
       const ct = rec.config["combatantTuning"] as { weaponTunings?: unknown[] } | undefined;
       if (!Array.isArray(ct?.weaponTunings)) return;
       for (const w of ct.weaponTunings) {
-        const ms = (w as { modifier_sequence?: { name?: string; behaviourName?: string } }).modifier_sequence;
+        const ms = (w as { modifier_sequence?: { name?: string; behaviourName?: string; readsUnit?: string } })
+          .modifier_sequence;
         const b = ms?.name ? map.get(ms.name) : undefined;
         // 只认开火序列，别把 `modifier_*` 之类的表也写进来
         if (b && b.includes("weapon_sequence")) ms!.behaviourName = b;
+      }
+    };
+
+    /**
+     * **各实现的 `TranslateToken` 是硬编码读「本体」的 tuning 的** —— 记下来。
+     *
+     * 例：`ability_sandstorm_weapon_sequence:TranslateToken` 里写的是
+     * `nTuningUtil.GetWeaponSequenceTuning(unit_gdi_sandstorm, 1)`（不是 self 的所有者），
+     * `ability_juggernaut_weapon_sequence` 同理读 `unit_gdi_juggernaut`。
+     *
+     * 于是**变体（`_ST`）的面板值等于本体**：钢爪沙暴按本体 4000ms 算得 450（自己写的是 3000），
+     * 钢爪神像按本体 2.5s 算得 480（自己的 `durationBetweenVolley` 是 0）。
+     * 真跑游戏 Lua 逐单位核对时发现的（71 个一致 / 2 个差异，差异全是这个原因）。
+     */
+    const abilityCache = new Map<string, string | null>();
+    const attachReadsUnit = (rec: EntityRecord): void => {
+      const ct = rec.config["combatantTuning"] as { weaponTunings?: unknown[] } | undefined;
+      if (!Array.isArray(ct?.weaponTunings)) return;
+      for (const w of ct.weaponTunings) {
+        const ms = (w as { modifier_sequence?: { behaviourName?: string; readsUnit?: string } }).modifier_sequence;
+        const beh = ms?.behaviourName;
+        if (!beh) continue;
+        const rel = `gameplay/abilities/${beh.replace(/_behaviour$/, "")}.lua`;
+        let body = abilityCache.get(rel);
+        if (body === undefined) {
+          body = abilitySources.find((s) => s.rel === rel)?.text ?? null;
+          abilityCache.set(rel, body);
+        }
+        if (!body) continue;
+        const m = /Get\w*Tuning\(\s*(unit_\w+|cmdr_\w+)\s*,/.exec(body);
+        if (m && m[1] !== rec.id) ms!.readsUnit = m[1];
       }
     };
 
@@ -443,6 +477,7 @@ export async function extractAll(opts: ExtractOptions): Promise<ExtractResult> {
         try {
           const rec = buildRecord(src, lua.get(src.stem), pbByLuaName, []);
           attachBehaviour(rec, src.text);
+          attachReadsUnit(rec);
           attachMultiHex(rec, src.text);
           const visual = visualOf(src.stem);
           if (visual) rec.visual = visual;

@@ -75,7 +75,7 @@ export type Timing =
       hits: number;
       /** 一轮多长（毫秒） */
       cycle_ms: number;
-      /** 一轮内的每发间隔（毫秒）；未知则不出现 */
+      /** 一轮内的每发间隔（毫秒）；未知则不出现，**0 = 同轮各发同时出膛**（遍历枪口齐射） */
       interval_ms?: number;
       /** 一轮内的空档（毫秒）＝ cycle − hits×interval；用于画"停顿" */
       gap_ms?: number;
@@ -121,7 +121,13 @@ export interface DerivedAttack {
   attack: Attack;
   /** 主武器 id —— 面板 DPS 取它 */
   primary: string;
-  /** 时序隐含的每秒伤害（1-0 级）；仅供排序与**校验**，不是重点 */
+  /**
+   * **时序隐含的每秒伤害**（1-0 级）= 实际输出，按 `tracks` 算。
+   *
+   * ⚠️ 产物里的 `derived.dps` **不是它** —— 那是官方面板口径（`panelDps`）。
+   * 两者在「遍历枪口齐射」的单位上会差一倍（烈焰之手：实际 225 / 面板 112.5，
+   * findings I195）。这里这个值给排序与**校验**用。
+   */
   dps: number;
   notes: string[];
 }
@@ -156,6 +162,19 @@ function resolveInterval(w: WeaponTuning, stage?: string): { interval: number; f
   return undefined;
 }
 
+/**
+ * 这次攻击是不是「**遍历枪口各打一发**」。
+ *
+ * 只有 `ability_simple_weapon_sequence` 的 Timeline 会读这个字段，**而且读的是
+ * `self.tuning.muzzleStrategy`**（`ability_simple_weapon_sequence.lua:63`）——
+ * 字段写在**序列的 tuning 里**，不是武器级。别的实现即便写了 `All` 也不看它
+ * （火焰坦克 / 寡妇制造者用 `DamageSquadListOverride`，与枪口无关）。
+ */
+function muzzleVolley(w: WeaponTuning): boolean {
+  if (w.modifier_sequence?.behaviourName !== "ability_simple_weapon_sequence") return false;
+  return seqTuning(w)["muzzleStrategy"] === "All";
+}
+
 /** 一次攻击打几下 —— 见 findings I101：由**伤害的粒度**决定 */
 function resolveHits(w: WeaponTuning, muzzles: number): number {
   const t = seqTuning(w);
@@ -170,6 +189,17 @@ function resolveHits(w: WeaponTuning, muzzles: number): number {
     const nb = num(w.burstTiming?.numToBurst) ?? 1;
     return nb * (w.muzzleStrategy === "All" ? (w.muzzleCount ?? 1) : 1);
   }
+  /*
+   * `MuzzleStrategy.All`：「遍历枪口各打一发」。伤害写的是**每发**值，
+   * 所以击打数 = `muzzleCount`（物理枪口数，不是发数 —— 神像 `muzzleCount=1`
+   * 却有三下，靠的是 MUZZLE_INFO）。
+   *
+   * 真跑 `Timeline()` 的实测（`_trace_fire.ts`）：烈焰之手
+   * `[500ms#0, 500ms#1, 2500ms#0, 2500ms#1, …]` —— 每轮**同一瞬间**两发 75，
+   * 与音波突击队一枪 150 完全等价（findings I195）。
+   * 弹弓 / 狼獾是 `RoundRobin`（每轮只打一发），故只认 `All`。
+   */
+  if (muzzleVolley(w)) return num(w.muzzleCount) ?? 1;
   // 序列没显式说 → 用击打序列长度；但若伤害来自武器级（已是整轮总和）则不乘
   const dm = effectiveDamage(w);
   const isVolleyTotal = dm !== undefined && dm === w.damageTuning;
@@ -376,8 +406,12 @@ export function deriveAttack(unit: EntityRecord): DerivedAttack {
     /*
      * **蓄力时间要进时序。**
      *
-     * 两种字段**单位与语义都不同**：
+     * 三种字段的**单位与语义都不同**：
      *   · 序列武器 `tuning.initialChargeUpMs`（**毫秒**）—— 前摇在连打**之前**，时间相加
+     *   · `ability_simple_weapon_sequence` 的 `tuning.chargeUpDuration`（**毫秒**）——
+     *     每轮的**周期之内**（`thread:WaitForAge(waitForAge + chargeUpDuration)`，
+     *     `ability_simple_weapon_sequence.lua:54`）。⚠️ 早先 `types.ts` 把它注成"秒"，是错的：
+     *     弹弓/狼獾/忏悔者 0、深岩巨虫 233、烈焰之手 500 —— 按秒读是几百秒。
      *   · 普通武器 `burstTiming.chargeUpDuration`（**秒**）—— 前摇在周期**之内**
      *     （`docs/data-semantics.md` §5：`cooldown` 是开火周期，`chargeUpDuration` 是该周期
      *     末尾的前摇，**两者不相加**）
@@ -385,11 +419,21 @@ export function deriveAttack(unit: EntityRecord): DerivedAttack {
      * 早先只有**分段**那条分支设了 `charge_ms`，另两种都漏了 —— 于是音波坦克（findings I164）
      * 和掠食者坦克的前摇完全不可见。`WeaponCard` 靠 `chargeInCycle` 区分这两种关系。
      */
+    const inCycleCharge = muzzleVolley(w) ? num(t["chargeUpDuration"]) : undefined;
     const chargeMs = isSeq
-      ? num(t["initialChargeUpMs"])
+      ? (inCycleCharge ?? num(t["initialChargeUpMs"]))
       : num(w.burstTiming?.chargeUpDuration) !== undefined
         ? num(w.burstTiming?.chargeUpDuration)! * 1000 // 秒 → 毫秒
         : undefined;
+    // 普通武器与简单序列的前摇在周期**之内**；其余序列的 `initialChargeUpMs` 在**之前**
+    const chargeInCycle = inCycleCharge !== undefined ? true : chargeMs !== undefined ? !isSeq : undefined;
+    /*
+     * **同轮各发同时出膛**（遍历枪口）：`interval_ms = 0`。
+     *
+     * 烈焰之手一轮两发都落在同一毫秒，没有"每发间隔"可言；写成 0 让消费方
+     * （`web/src/dps.ts` 的爆发口径、时序条）能区分"连打"与"齐射"。
+     */
+    const simult = muzzleVolley(w) && hits > 1;
     if (isSeq && hits > 1 && explicitPeriod) {
       cycle_ms = explicitPeriod;
       tracks.push({
@@ -398,19 +442,23 @@ export function deriveAttack(unit: EntityRecord): DerivedAttack {
           kind: "单发",
           hits,
           cycle_ms: explicitPeriod,
-          interval_ms: iv.interval,
-          gap_ms: Math.max(0, explicitPeriod - hits * iv.interval),
+          interval_ms: simult ? 0 : iv.interval,
+          gap_ms: Math.max(0, explicitPeriod - (simult ? 0 : hits * iv.interval)),
         },
         charge_ms: chargeMs,
-        // 普通武器的前摇在周期**之内**（`cooldown` 不因它变长），序列武器的在**之前**
-        chargeInCycle: chargeMs !== undefined ? !isSeq : undefined,
+        chargeInCycle,
       });
     } else {
       tracks.push({
         weapon: id,
-        timing: { kind: "单发", hits, cycle_ms: cycle, interval_ms: isSeq ? iv.interval : undefined },
+        timing: {
+          kind: "单发",
+          hits,
+          cycle_ms: cycle,
+          interval_ms: simult ? 0 : isSeq ? iv.interval : undefined,
+        },
         charge_ms: chargeMs,
-        chargeInCycle: chargeMs !== undefined ? !isSeq : undefined,
+        chargeInCycle,
       });
     }
   });
@@ -456,7 +504,8 @@ export function deriveAttack(unit: EntityRecord): DerivedAttack {
   // 其余取第一把**有伤害**的武器（跳过 `orcabomber.targetSelector` 那种无伤害占位桩）。
   const lastStage = weapons.filter((w) => w.damage > 0).at(-1);
   const primaryW = (composition === "sequence" && lastStage) || weapons.find((w) => w.damage > 0) || weapons[0];
-  const primary = primaryW?.id ?? "";
+  // 催化剂的单位级行为会把它改写成"被引爆那把"（下面 `catalystCd` 分支），故用 let
+  let primary = primaryW?.id ?? "";
 
   // ── DPS：时序隐含值（主武器那条轨）──
   // `sequence` 的稳态是**末段**（面板显示的就是它）；其余取主武器那条轨
@@ -480,6 +529,12 @@ export function deriveAttack(unit: EntityRecord): DerivedAttack {
     dps = (victim.damage * wave * 1000) / catalystCd;
     const tr = tracks.find((t) => t.weapon === victim.id);
     if (tr) tr.timing = { kind: "单发", hits: 1, cycle_ms: catalystCd };
+    /*
+     * ⚠️ **主武器也要跟着改成被引爆那把** —— 否则 `primary` 会停在武器[0]（`gasWeapon`，
+     * 25 伤害、节奏取自 `gasBurst`，我们的解析里拿不到 → 0），于是 web 端的「实际 DPS」
+     * 会读到那把 0 而把 DPS 整个吞掉。面板数值本来就由被引爆那把决定（findings I82/I103）。
+     */
+    primary = victim.id;
     notes.push("周期取自另一把武器的 catalystBurst；面板数值由伤害最高的那把决定");
   }
 
@@ -543,7 +598,11 @@ export interface DerivedHealth {
 
 export interface Derived {
   health: DerivedHealth | null;
-  /** 1-0 级；主武器的；与游戏内面板一致 */
+  /**
+   * 1-0 级 **官方面板口径**的 DPS（= `gameplay/tuning/CombatTuningInfo.lua` 的
+   * `TryGetBaseDps` 的移植，见 `attack.ts` 的 `panelDps`）。与游戏内面板逐字对齐，
+   * 用于核对；**实际输出**由 `attack.tracks` 现算（`web/src/dps.ts`）。
+   */
   dps: number | null;
   stats: DerivedStats;
   weapons: Weapon[];

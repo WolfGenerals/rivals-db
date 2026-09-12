@@ -47,7 +47,6 @@ const COMP_LABEL: Record<string, string> = {
       :level="level"
       :wave-size="unit.derived.squad?.wave_size ?? 1"
       :separation-ms="unit.derived.squad?.member_offset_ms ?? 0"
-      :primary-dps="i === primaryIndex ? unit.derived.dps : null"
     />
   </section>
 </template>

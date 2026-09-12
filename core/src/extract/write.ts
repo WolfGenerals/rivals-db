@@ -13,6 +13,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
+import { panelDps } from "../attack.ts";
 import { deriveAttack } from "../derive.ts";
 import { baseUnitType, modifierIntroMs, modifierOutroMs } from "../types.ts";
 import type { EntityRecord } from "./extract.ts";
@@ -95,7 +96,7 @@ function summarize(rec: EntityRecord): Record<string, unknown> {
 }
 
 /** 单个实体的输出载荷（**不含 `config`** —— 单文件数据集用这个）。 */
-export function payloadFor(rec: EntityRecord): Record<string, unknown> {
+export function payloadFor(rec: EntityRecord, resolveUnit?: (id: string) => EntityRecord | undefined): Record<string, unknown> {
   const out: Record<string, unknown> = {
     _schema: 3,
     id: rec.id,
@@ -114,7 +115,15 @@ export function payloadFor(rec: EntityRecord): Record<string, unknown> {
   if (rec.desc_en) out.desc_en = rec.desc_en;
 
   // ── 迁移结果：官方结构 → 我们的规范格式（武器 + 时序）──
-  const { weapons, attack, primary, dps, notes } = deriveAttack(rec);
+  const { weapons, attack, primary, notes } = deriveAttack(rec);
+  /*
+   * `derived.dps` = **官方面板口径**（`panelDps` = `TryGetBaseDps` 的移植），
+   * **不是**时序隐含值 —— 两者在烈焰之手这类「遍历枪口齐射」的单位上会差一倍
+   * （面板漏乘枪口数，findings I195）。**实际值**由 web 端按 `attack.tracks` 现算
+   * （`web/src/dps.ts`），落在：表格的「对目标 DPS」列、武器卡、单位页的「对目标 DPS」
+   * 那一排 —— 表格的 DPS 列与单位页的 DPS 格用的都是**这个面板值**（口径定稿见 findings I197）。
+   */
+  const dps = panelDps(rec, resolveUnit);
   const cfg = rec.config;
   const wave = cfg.squadTuning?.waveSize ?? 1;
   const per = cfg.combatantTuning?.health;
@@ -332,13 +341,21 @@ export async function writeAll(
     written.push(path);
   };
 
+  /*
+   * 变体的面板值要沿到本体（实现的 `TranslateToken` 硬编码读本体）—— 先建一张
+   * 「lua 名 → 记录」的表给 `panelDps` 用。见 `attack.ts` 的 `panelDps` 与 findings I196。
+   */
+  const byId = new Map<string, EntityRecord>();
+  for (const rec of [...result.units, ...result.commanders]) byId.set(rec.id, rec);
+  const resolveUnit = (id: string) => byId.get(id);
+
   const payload = {
     _schema: 3,
     _note: DATASET_NOTE,
     unit_count: result.units.length,
     commander_count: result.commanders.length,
-    units: result.units.map(payloadFor),
-    commanders: result.commanders.map(payloadFor),
+    units: result.units.map((r) => payloadFor(r, resolveUnit)),
+    commanders: result.commanders.map((r) => payloadFor(r, resolveUnit)),
   };
   await write(join(opts.outDir, "units.json"), stableJson(payload));
   return written;

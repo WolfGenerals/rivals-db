@@ -95,7 +95,13 @@ export interface SequenceTuning {
   burstCooldown?: number;
   /** 毫秒 */
   initialChargeUpMs?: number;
-  /** 秒（这个字段是全表唯一的秒值） */
+  /**
+   * 毫秒。**周期之内**的每轮前摇，只有 `ability_simple_weapon_sequence` 读它
+   * （`thread:WaitForAge(waitForAge + chargeUpDuration)`，L54）。
+   *
+   * ⚠️ 早先这里注成"秒（全表唯一的秒值）"是**错的**：弹弓/狼獾/忏悔者 0、
+   * 深岩巨虫 233、烈焰之手 500 —— 按秒读就是几百秒（findings I195）。
+   */
   chargeUpDuration?: number;
   /** 毫秒 */
   tickPeriodMs?: number;
@@ -204,15 +210,29 @@ export interface WeaponTuning {
   /** 射程（格） */
   maxRangeInTiles?: number;
   /**
-   * **一次攻击动作打几下。** 它和 `muzzleStrategy` **一概不参与 DPS 计算**，
-   * 只决定「这几下怎么分配到枪口」（`All` = 每口各一下，否则轮转）。
+   * **物理枪口数**（不是"一次攻击打几下" —— 神像机甲 `muzzleCount = 1` 却有三下，
+   * 那三下靠 `MUZZLE_INFO`）。
    *
-   * ⚠️ 早先写的「只有 `muzzleStrategy === "All"` 时才计入 DPS」是**错的**：
-   * 火焰坦克 `All` + `muzzleCount=2`，实测面板 380/0.5 = 760（×1），乘 2 会得 1520。
-   * 见 docs/attack-mechanics.md 9.1 与 findings I80。
+   * 它对 DPS 的影响**取决于实现**，不能一刀切：
+   *   · `ability_simple_weapon_sequence` + `MuzzleStrategy.All` → **遍历枪口各打一发**，
+   *     伤害是每发值 ⇒ 击打数 = `muzzleCount`。烈焰之手 2 × 75 = 150/轮，
+   *     与音波突击队 1 × 150 相等（真跑 Timeline 实测，findings I195）
+   *   · 同实现的 `RoundRobin`（弹弓 4 口 / 狼獾 2 口）每轮只打一发 ⇒ 不乘
+   *   · 火焰坦克 / 寡妇制造者的 `All` 写在**武器级**，而它们的实现用
+   *     `DamageSquadListOverride`、根本不读枪口 ⇒ 不乘（I80 的实测仍成立）
+   *
+   * ⚠️ 两个坑都踩过：①「`All` 就 × muzzleCount」被当成通则（I80/I88 反推自火焰坦克）；
+   * ②「一概不参与」又被当成通则（于是烈焰之手少算一半，I195）。
+   * 关键是**字段的作用域 + 实现读不读它**。
    */
   muzzleCount?: number;
-  /** 仅 15/83 个武器有，取值 `All` */
+  /**
+   * 仅 15/83 个武器有，取值 `All` / `RoundRobin`。
+   *
+   * ⚠️ **作用域不统一**：火焰坦克写在**武器级**，烈焰之手/弹弓/狼獾写在
+   * `modifier_sequence.tuning` 里。面板公式读武器级、实现读 tuning —— 两边各看一个，
+   * 烈焰之手的面板因此漏乘枪口数（findings I195）。
+   */
   muzzleStrategy?: string;
   /**
    * ⚠ 全部 83 个武器都是同一个值 `unit_antiInfantry`，**不是有效判别字段**。
@@ -233,6 +253,16 @@ export interface WeaponTuning {
   modifier_sequence?: {
     name?: string;
     behaviourName?: string;
+    /**
+     * **这个实现硬编码读的是哪个单位的 tuning**（提取时从能力源码里抓的）。
+     *
+     * 15 个实现的 `TranslateToken` 全都写死了本体的单位名，例：
+     * `ability_sandstorm_weapon_sequence:TranslateToken` →
+     * `nTuningUtil.GetWeaponSequenceTuning(unit_gdi_sandstorm, 1)`。
+     * 于是**变体的面板值等于本体**（钢爪沙暴 450 而不是按自己 3000ms 算的 600）。
+     * 只有变体（`_ST`/`_CR`）与本体不同名时才会出现这个字段。见 findings I196。
+     */
+    readsUnit?: string;
     tuning?: SequenceTuning;
     [k: string]: unknown;
   };

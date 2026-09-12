@@ -63,7 +63,7 @@ function weaponBaseline(w: Weapon): number {
  * **不是**"有没有写 override" —— 弹弓有 `Vehicle: 25` 却打不到载具。
  */
 /** 按 DAMAGE_CASCADE 回退链算这把武器对某类目标的伤害。补正值已在 overrides 里 */
-function damageOf(w: Weapon, target: DamageOverrideTag): number {
+export function damageOf(w: Weapon, target: DamageOverrideTag): number {
   for (const tag of DAMAGE_CASCADE[target]) {
     const hit = w.overrides.find((e) => e[0] === tag);
     if (hit) return hit[1];

@@ -22,7 +22,8 @@ import { computed, ref } from "vue";
 
 import { level as makeLevel, startingMajorOfRarity, type Level } from "@rivals/core/levels";
 import type { DatasetEntry } from "@rivals/core/derive";
-import { unitBaseDps } from "../dps.ts";
+import { TARGET_LABELS, TARGET_TYPES } from "../damageTiers.ts";
+import { unitDpsVs } from "../dps.ts";
 import { dpsMode } from "../state.ts";
 
 import StatIcon from "./StatIcon.vue";
@@ -116,15 +117,39 @@ const totalHealth = computed(() => {
   return total === undefined ? undefined : lv.value.hp(total);
 });
 /**
- * 单位 DPS = **主武器的 DPS**（不是各武器取最大），与游戏内面板一致。
+ * 面板的 DPS = **游戏面板值**（`derived.dps`）—— 与游戏内面板逐字一致，别自己另算一个。
  *
- * 见 `findings.md` I103：面板显示的是主武器。寡妇制造者面板是 280（喷火器）
- * 而火箭是 320 —— 取最大会算错。
+ * 官方那套口径不是"长期平均"：`TryGetBaseDps` 对持续光束取 `damage ÷ tickPeriod`
+ * （音波坦克 26/0.04 = **650**，把 3 秒蓄力完全忽略 —— findings I164），
+ * 对「遍历枪口齐射」的单位还会漏乘（烈焰之手 112.5）。**这些就是游戏显示的，照搬。**
+ *
+ * 想看真实输出看下面那排「对目标 DPS」（那个跟着顶栏的爆发/平均口径）。
+ * 固定值 = 不跟顶栏切换走（用户要求：同一个数不该随显示口径漂）。
  */
 const dps = computed(() => {
   const base = props.unit.derived.dps;
   return base === null || base === 0 ? undefined : lv.value.dps(base);
 });
+
+/**
+ * **对五种目标的实际 DPS** —— 能打该目标的每把武器**相加**（利爪两把武器同时打建筑）。
+ * **跟着顶栏的爆发/平均口径**（用户要求）：那里是"打起来多猛 / 长期能打出多少"的对比。
+ * 逐武器明细放进悬停提示；打不到的显示 `—`。
+ */
+const vsTargets = computed(() =>
+  TARGET_TYPES.map((t) => ({
+    type: t,
+    label: TARGET_LABELS[t],
+    set: unitDpsVs(props.unit, t, dpsMode.value),
+  })),
+);
+
+/** 悬停：把"每把武器各打多少 → 合计"写清楚 */
+function vsTip(v: (typeof vsTargets.value)[number]): string {
+  if (!v.set) return `${v.label}：打不到`;
+  const parts = v.set.per.map((p) => `${p.label} ${lv.value.dps(p.dps).toFixed(0)}`);
+  return `${v.label}：${parts.join(" + ")} = ${lv.value.dps(v.set.total).toFixed(0)}`;
+}
 
 /** 基本信息：不随等级变的单位固有属性。空值不收集 */
 const basics = computed(() => {
@@ -229,6 +254,22 @@ const squadRows = computed(() => {
           </div>
         </div>
 
+        <!-- 对五种目标的实际 DPS：**能打该目标的每把武器相加**，悬停看逐武器明细 -->
+        <div v-if="vsTargets.some((v) => v.set)" class="vs">
+          <span class="cap">对目标 DPS</span>
+          <span
+            v-for="v in vsTargets"
+            :key="v.type"
+            class="cell"
+            :class="{ off: !v.set }"
+            data-float
+            :data-tip="vsTip(v)"
+          >
+            <TypeIcon :type="v.type.toLowerCase()" />
+            <b>{{ v.set ? lv.dps(v.set.total).toFixed(0) : "—" }}</b>
+          </span>
+        </div>
+
         <p v-if="desc" class="desc">{{ desc }}</p>
       </div>
     </section>
@@ -324,6 +365,40 @@ const squadRows = computed(() => {
 .fact.big b {
   font-size: 22px;
   line-height: 1.1;
+}
+/* 口径小字（"游戏面板" / "按时间轴"）—— 说明这个数是哪个口径 */
+.fact .sub {
+  margin-left: 3px;
+  font-size: 10px;
+  color: #6f7c99;
+}
+/* 对五种目标的实际 DPS —— 图标 + 数字，打不到的压暗 */
+.vs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 0 0 10px;
+}
+.vs .cap {
+  color: #9aa6c2;
+  font-size: 12px;
+}
+.vs .cell {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.vs .cell :deep(.icon),
+.vs .cell svg {
+  width: 18px;
+}
+.vs .cell b {
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+}
+.vs .cell.off {
+  opacity: 0.35;
 }
 .divider {
   width: 1px;
