@@ -1,11 +1,14 @@
 <script setup lang="ts">
 /**
- * 敌人应对 —— 左右两栏一行：**左「克制」右「索敌偏好」**。
+ * 敌人应对 —— 左右两栏一行：**左「伤害补正」右「索敌偏好」**。
  *
  * 两栏语义完全不同，不能混（`docs/data-semantics.md`）：
- *   · 克制     = 逐类型算实际伤害，**打谁最疼**（真实数值）
+ *   · 伤害补正 = 逐类型算实际伤害，**打谁最疼**（真实数值）
  *   · 索敌偏好 = `goodAgainstTags`，**AI 优先打谁**，不产生伤害加成
  * 80 把武器里两者一致数为 **0**。
+ *
+ * ⚠️ 这个名字是**全站统一**的（用户定）：表格的切换按钮、武器卡那一列都叫「伤害补正」，
+ * 短标签用「补正」—— 早先同一件事有三個名字（克制 / 伤害补正 / 修正比），已统一。
  *
  * **不打文字说明，一律用颜色分档**（档位定义与逐目标伤害共用 `damageTiers.ts`）：
  * 打不到 / 极低 / 中等 / 偏低 / 正常 / 偏高。悬停显示具体伤害与倍率。
@@ -30,9 +33,9 @@ const hasAny = computed(() => intent.value.size > 0 || cells.value.some((c) => c
 
 <template>
   <div v-if="hasAny" class="affinity">
-    <!-- 左：克制（真实伤害，颜色分档） -->
+    <!-- 左：伤害补正（真实伤害，颜色分档） -->
     <div class="col">
-      <span class="head">克制</span>
+      <span class="head">伤害补正</span>
       <span class="icons">
         <span
           v-for="c in cells"

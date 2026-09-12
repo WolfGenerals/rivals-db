@@ -3,7 +3,7 @@
  * 开火时序条 —— 一把武器（含小队各成员）什么时候造成伤害。
  *
  * **为什么要有它**：时序是一条时间线，用文字描述必然产生歧义 ——
- * "前摇 3s + 每 40ms 一发"读不出前摇是在周期**内**还是**外**；
+ * "前摇 3s + 每 0.04s 一发"读不出前摇是在周期**内**还是**外**；
  * 画成条子，段与段的**位置关系**自己就说明了。
  *
  * ## 模型：直接把 `derived.attack.tracks` 画出来
@@ -22,6 +22,8 @@
 import { computed } from "vue";
 
 import type { Track } from "@rivals/core/derive";
+
+import { fmtSec } from "../format.ts";
 
 const props = defineProps<{
   /** 该武器的全部轨道（`sequence` 下每把武器各一条，`sequence` 本身是多条） */
@@ -42,7 +44,8 @@ interface Seg {
   title: string;
 }
 
-const fmt = (ms: number) => (ms >= 1000 ? `${(ms / 1000).toFixed(2)}s` : `${Math.round(ms)}ms`);
+// 时间一律用秒 —— 格式化只有一处实现（`web/src/format.ts`，用户要求统一单位）
+
 
 /** 一名队员在一个周期内的段 */
 const baseSegs = computed<Seg[]>(() => {
@@ -54,7 +57,7 @@ const baseSegs = computed<Seg[]>(() => {
         kind: "charge",
         at: 0,
         ms: tm.charge_ms,
-        title: `蓄力 ${fmt(tm.charge_ms)} 后一次性`,
+        title: `蓄力 ${fmtSec(tm.charge_ms)} 后一次性`,
       });
       continue;
     }
@@ -79,13 +82,13 @@ const baseSegs = computed<Seg[]>(() => {
         at: fireAt,
         ms: fireMs,
         ticks,
-        title: `连打 ${tm.clip} 发（每 ${fmt(iv)} 一发，共 ${fmt(fireMs)}）`,
+        title: `连打 ${tm.clip} 发（每 ${fmtSec(iv)} 一发，共 ${fmtSec(fireMs)}）`,
       });
       out.push({
         kind: "reload",
         at: fireAt + fireMs,
         ms: reloadRest,
-        title: `装填 ${fmt(reloadRest)}（首发即开始，一轮 ${fmt(tm.reload_ms)}）`,
+        title: `剩余装填 ${fmtSec(reloadRest)}（一轮 ${fmtSec(tm.reload_ms)}）`,
       });
       continue;
     }
@@ -123,15 +126,15 @@ const baseSegs = computed<Seg[]>(() => {
       ms: fireMs,
       ticks,
       title: simultaneous
-        ? `同时 ${tm.hits} 发（一轮 ${fmt(tm.cycle_ms)}）`
+        ? `同时 ${tm.hits} 发（一轮 ${fmtSec(tm.cycle_ms)}）`
         : tm.hits > 1
-          ? `连打 ${tm.hits} 发（每 ${fmt(iv)} 一发，共 ${fmt(tm.hits * iv)}）`
-          : `攻击（每 ${fmt(tm.cycle_ms)} 一发）`,
+          ? `连打 ${tm.hits} 发（每 ${fmtSec(iv)} 一发，共 ${fmtSec(tm.hits * iv)}）`
+          : `攻击（每 ${fmtSec(tm.cycle_ms)} 一发）`,
     });
     if (t.chargeInCycle && charge > 0) {
-      out.push({ kind: "charge", at: start, ms: charge, title: `前摇 ${fmt(charge)}` });
+      out.push({ kind: "charge", at: start, ms: charge, title: `前摇 ${fmtSec(charge)}` });
     } else if (!t.chargeInCycle && charge > 0) {
-      out.push({ kind: "charge", at: start, ms: charge, title: `前摇 ${fmt(charge)}（在连打之前）` });
+      out.push({ kind: "charge", at: start, ms: charge, title: `前摇 ${fmtSec(charge)}（在连打之前）` });
     }
   }
   return out;
@@ -244,7 +247,7 @@ function segsOf(i: number): Array<Seg & { left: string; width: string; tickPct: 
       <span><i class="sw charge" />前摇</span>
       <span><i class="sw fire" />伤害</span>
       <span><i class="sw reload" />装填</span>
-      <span class="dim">横轴 = {{ fmt(spanMs) }}<template v-if="waveSize > 1">（{{ waveSize }} 人 × 错开 {{ separationMs }}ms）</template></span>
+      <span class="dim">横轴 = {{ fmtSec(spanMs) }}<template v-if="waveSize > 1">（{{ waveSize }} 人 × 错开 {{ fmtSec(separationMs) }}）</template></span>
     </p>
   </div>
 </template>

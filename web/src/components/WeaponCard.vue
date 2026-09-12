@@ -15,6 +15,7 @@ import { computed } from "vue";
 
 import type { Track, Weapon } from "@rivals/core/derive";
 import { weaponDps } from "../dps.ts";
+import { fmtSec } from "../format.ts";
 import { DPS_MODES, dpsMode } from "../state.ts";
 import type { Level } from "@rivals/core/levels";
 
@@ -83,8 +84,7 @@ const levelDamage = computed(() => {
   return d > 0 ? Math.round(props.level.dps(d)) : d;
 });
 
-const fmtMs = (ms: number) => (ms >= 1000 ? `${(ms / 1000).toFixed(2)}s` : `${Math.round(ms)}ms`);
-const fmtSec = (ms: number) => `${(ms / 1000).toFixed(ms % 1000 === 0 ? 1 : 2)}s`;
+// 时间一律用秒 —— 格式化只有一处实现（`web/src/format.ts`，用户要求统一单位）
 
 /**
  * 把一条时序**按顺序读成一句话**。
@@ -95,10 +95,10 @@ const fmtSec = (ms: number) => `${(ms / 1000).toFixed(ms % 1000 === 0 ? 1 : 2)}s
  *   · **`含`** —— 前摇**在周期之内**（普通武器的 `chargeUpDuration`，周期不因它变长）
  *     `每 3.44s 一发（含前摇 0.60s）`
  *   · **`→`** —— 前摇在连打**之前**，时间**相加**（序列武器的 `initialChargeUpMs`）
- *     `前摇 3.00s → 连打 20 发（每 40ms 一发，共 0.80s）`
+ *     `前摇 3.00s → 连打 20 发（每 0.04s 一发，共 0.80s）`
  */
 function describeTiming(tm: Track["timing"]): string {
-  if (tm.kind === "一次") return `蓄力 ${fmtMs(tm.charge_ms)} 后一次性`;
+  if (tm.kind === "一次") return `蓄力 ${fmtSec(tm.charge_ms)} 后一次性`;
   if (tm.kind === "装填") {
     /*
      * 装填型：**装填窗口从首发那一刻开始**（面板公式 = `clip ÷ reloadTimeMs`，findings I201），
@@ -106,8 +106,8 @@ function describeTiming(tm: Track["timing"]): string {
      * 那会让周期看起来比实际长一截。
      */
     const iv = tm.interval_ms;
-    const fire = iv ? `每 ${fmtMs(iv)} 一发，` : "";
-    return `弹夹 ${tm.clip} 发（${fire}${fmtSec(tm.clip * (iv ?? 0))} 打完），一轮 ${fmtSec(tm.reload_ms)} —— 首发即开始装填`;
+    const fire = iv ? `每 ${fmtSec(iv)} 一发，` : "";
+    return `弹夹 ${tm.clip} 发（${fire}${fmtSec(tm.clip * (iv ?? 0))} 打完），装填 ${fmtSec(tm.reload_ms)}（从第一发计时）`;
   }
   // 单发
   if (tm.hits <= 1) {
@@ -123,14 +123,14 @@ function describeTiming(tm: Track["timing"]): string {
   }
   const iv = tm.interval_ms ?? tm.cycle_ms;
   const span = tm.hits * iv;
-  const head = `连打 ${tm.hits} 发（每 ${fmtMs(iv)} 一发，共 ${fmtSec(span)}）`;
+  const head = `连打 ${tm.hits} 发（每 ${fmtSec(iv)} 一发，共 ${fmtSec(span)}）`;
   return tm.gap_ms ? `${head}，然后停 ${fmtSec(tm.gap_ms)}（周期 ${fmtSec(tm.cycle_ms)}）` : head;
 }
 
 /** 这条轨在整轮里的位置（`sequence` 才是按时间接替） */
 function describeWhen(t: Track): string {
   const parts: string[] = [];
-  if (t.charge_ms) parts.push(`前摇 ${fmtMs(t.charge_ms)}`);
+  if (t.charge_ms) parts.push(`前摇 ${fmtSec(t.charge_ms)}`);
   /*
    * 前摇用 `含` 还是 `→` 由 `chargeInCycle` 决定：
    *   · 含 —— 在周期内，周期不因它变长（普通武器的 `chargeUpDuration`）
@@ -142,7 +142,7 @@ function describeWhen(t: Track): string {
    */
   const hasAfter = t.after_ms !== undefined && t.after_ms > 0;
   if (t.charge_ms && !hasAfter) {
-    parts.push(t.chargeInCycle ? `（含前摇 ${fmtMs(t.charge_ms)}）` : `前摇 ${fmtMs(t.charge_ms)} →`);
+    parts.push(t.chargeInCycle ? `（含前摇 ${fmtSec(t.charge_ms)}）` : `前摇 ${fmtSec(t.charge_ms)} →`);
   }
   if (hasAfter) parts.push(`${fmtSec(t.after_ms!)} 起`);
   if (t.lasts_ms === null) parts.push("之后持续");
@@ -200,7 +200,6 @@ const minor = computed(() => {
     <div class="head">
       <b>{{ weapon.name }}</b>
       <span class="dim">{{ weapon.type }}</span>
-      <span v-if="primary" class="tag primary" title="面板 DPS 显示的是这把武器">主武器</span>
       <span v-if="weapon.targeting_unknown" class="tag warn">索敌未知</span>
       <span class="idx">武器 {{ index + 1 }}</span>
     </div>

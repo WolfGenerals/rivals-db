@@ -19,6 +19,7 @@ import { startingMajorOfRarity, type Level } from "@rivals/core/levels";
 import { targetDamage } from "../damageTiers.ts";
 import { detailPath } from "../router.ts";
 import { unitDpsVs } from "../dps.ts";
+import { fmtSec } from "../format.ts";
 import { displayLevel, dpsMode } from "../state.ts";
 // 排序状态放 `state.ts` 的模块级单例 —— 组件内的 ref 会在路由切换时被重置
 import { useData } from "../useData.ts";
@@ -117,7 +118,7 @@ function burstText(e: DatasetEntry): string {
   if (!hits || hits <= 1) return "—";
   const iv = tm.interval_ms;
   if (iv === 0) return `同时 ${hits} 发`;
-  return iv ? `${hits} 发 · ${iv}ms` : `${hits} 发`;
+  return iv ? `${hits} 发 · 每 ${fmtSec(iv)}` : `${hits} 发`;
 }
 
 /** 按 `DAMAGE_CASCADE` 回退链算对某类目标的伤害、逐目标 DPS 都在 `damageTiers.ts` / `dps.ts` */
@@ -175,8 +176,10 @@ function sortVal(r: Row, key: string): number | string {
   }
 }
 
-const rows = computed<Row[]>(() => {
-  const out = entries.value.map((u) => {
+/** 表下方那句「等级 x-x」—— 表里的数字都按它换算（用户要求：这一行只留等级） */
+const lvLabel = computed(() => displayLevel().format());
+
+const rows = computed<Row[]>(() => {  const out = entries.value.map((u) => {
     const lv = displayLevel();
     const h = u.derived.health;
     /*
@@ -261,16 +264,14 @@ void startingMajorOfRarity;
       <option value="only">只显示隐藏单位</option>
       <option value="all">全部单位</option>
     </select>
-    <!-- 五类目标列的表达方式：DPS 看输出、补正看克制 -->
+    <!-- 五类目标列的表达方式：DPS 看输出、补正看伤害倍率（名字全站统一，见 UnitAffinity 顶部注释） -->
     <div class="modes">
-      <button type="button" :class="{ on: cellMode === 'dps' }" @click="cellMode = 'dps'">对目标 DPS</button>
+      <button type="button" :class="{ on: cellMode === 'dps' }" @click="cellMode = 'dps'">对目标实际 DPS</button>
       <button type="button" :class="{ on: cellMode === 'ratio' }" @click="cellMode = 'ratio'">伤害补正</button>
     </div>
   </div>
 
-  <p class="muted" style="margin: 8px 0">
-    {{ rows.length }} 个条目　·　等级由顶栏控制（{{ cellMode === "dps" ? "已按当前等级换算" : "补正与等级无关" }}）　·　<span class="dim">DPS 列 = 游戏面板值，逐目标列 = 实际值（跟顶栏口径）</span>
-  </p>
+  <p class="muted" style="margin: 8px 0">等级 {{ lvLabel }}</p>
 
   <!--
     13 列全 `nowrap` 的宽表，最小宽度实测 781px —— 手机上必然放不下。
@@ -298,7 +299,7 @@ void startingMajorOfRarity;
           </th>
           <th
             class="num sortable"
-            title="游戏面板值（官方面板公式，主武器口径），与游戏内面板逐字一致；右边逐目标那几列才是按时序算的实际值"
+            title="游戏面板（主武器口径，与该面板逐字一致）· 右边逐目标那几列是实际输出"
             @click="toggleSort('dps')"
           >
             DPS<i class="arrow">{{ sortKey === "dps" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
@@ -311,7 +312,7 @@ void startingMajorOfRarity;
             v-for="t in TYPES"
             :key="t"
             class="num target sortable"
-            title="对目标的实际 DPS：能打该目标的每把武器相加（跟顶栏的爆发/平均口径）"
+            title="对目标实际 DPS：能打该目标的每把武器相加 · 随顶栏的爆发/平均切换"
             @click="toggleSort(t)"
           >
             {{ SHORT[t] }}<i class="arrow">{{ sortKey === t ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>

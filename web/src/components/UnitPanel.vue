@@ -8,7 +8,7 @@
  * 卡片按**数据是关于什么的**分组，而不是按「是不是数字」：
  *   ① 单位总览   大卡 + 名称 + 标签 + **本单位的等级选择** + 随等级变的关键值 + 描述
  *   ② 基本信息   不随等级变的单位固有属性 + 敌人应对（索敌偏好 / 克制）
- *   ③ 小队       仅多成员单位：人数 / 每员血量 / 小队攻击间隔
+ *   ③ 小队       仅多成员单位：人数 / 每员血量 / 队员开火错开
  *   ④ 武器       数量不定，有武器才出现（拆到 `UnitWeapons.vue`）
  *   ⑤ 能力调参   指挥官专属
  *   ⑥ 元信息     source / warnings
@@ -24,6 +24,7 @@ import { level as makeLevel, startingMajorOfRarity, type Level } from "@rivals/c
 import type { DatasetEntry } from "@rivals/core/derive";
 import { TARGET_LABELS, TARGET_TYPES } from "../damageTiers.ts";
 import { unitDpsVs } from "../dps.ts";
+import { fmtSec } from "../format.ts";
 import { dpsMode } from "../state.ts";
 
 import StatIcon from "./StatIcon.vue";
@@ -181,8 +182,7 @@ const basics = computed(() => {
    * 埋在武器卡的次要参数里没人看得到。
    */
   if (st.deploy_ms || st.undeploy_ms) {
-    const sec = (ms: number) => `${(ms / 1000).toFixed(ms % 1000 === 0 ? 0 : 1)}s`;
-    rows.push(["部署 / 解除", `${sec(st.deploy_ms ?? 0)} / ${sec(st.undeploy_ms ?? 0)}`]);
+    rows.push(["部署 / 解除", `${fmtSec(st.deploy_ms ?? 0)} / ${fmtSec(st.undeploy_ms ?? 0)}`]);
   }
   return rows;
 });
@@ -194,7 +194,7 @@ const squadRows = computed(() => {
   const per = props.unit.derived.health?.per_member;
   if (per !== undefined) rows.push(["每员血量", String(lv.value.hp(per))]);
   const sep = props.unit.derived.stats.separation_ms;
-  if (sep !== undefined) rows.push(["小队攻击间隔", `${sep} ms`]);
+  if (sep !== undefined) rows.push(["队员开火错开", fmtSec(sep)]);
   return rows;
 });
 
@@ -242,7 +242,7 @@ const squadRows = computed(() => {
           </div>
           <div v-if="dps !== undefined" class="fact big">
             <StatIcon name="dps" />
-            <span>DPS</span>
+            <span>面板 DPS</span>
             <b>{{ dps.toFixed(1) }}</b>
           </div>
 
@@ -254,9 +254,9 @@ const squadRows = computed(() => {
           </div>
         </div>
 
-        <!-- 对五种目标的实际 DPS：**能打该目标的每把武器相加**，悬停看逐武器明细 -->
+        <!-- 对五种目标的**实际** DPS：能打该目标的每把武器相加，悬停看逐武器明细 -->
         <div v-if="vsTargets.some((v) => v.set)" class="vs">
-          <span class="cap">对目标 DPS</span>
+          <span class="cap">对目标实际 DPS</span>
           <span
             v-for="v in vsTargets"
             :key="v.type"
@@ -366,9 +366,9 @@ const squadRows = computed(() => {
   font-size: 22px;
   line-height: 1.1;
 }
-/* 口径小字（"游戏面板" / "按时间轴"）—— 说明这个数是哪个口径 */
+/* 口径小字（"游戏面板"）—— 一个词说明这个数是哪个口径 */
 .fact .sub {
-  margin-left: 3px;
+  margin-left: 4px;
   font-size: 10px;
   color: #6f7c99;
 }
