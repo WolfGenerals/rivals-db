@@ -47,6 +47,7 @@ _*.mjs
 _*.js
 _*.ps1
 _*.ts
+_*.md
 
 # 网页构建时从 data/ 同步进来的副本（唯一真相是仓库根的 data/）
 /web/public/data/
