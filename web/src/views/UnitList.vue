@@ -299,7 +299,7 @@ void startingMajorOfRarity;
           </th>
           <th
             class="num sortable"
-            title="游戏面板（主武器口径，与该面板逐字一致）· 右边逐目标那几列是实际输出"
+            title="游戏内面板显示的 DPS（取自主武器）· 右边那几列是对各类目标的实际输出"
             @click="toggleSort('dps')"
           >
             DPS<i class="arrow">{{ sortKey === "dps" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
@@ -307,12 +307,12 @@ void startingMajorOfRarity;
           <th class="num sortable" @click="toggleSort('range')">
             射程<i class="arrow">{{ sortKey === "range" ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>
           </th>
-          <th title="一轮打几下 · 两下之间的间隔。用来区分持续与爆发">连击</th>
+          <th title="一次攻击打几发 · 发与发之间的间隔（用来区分持续与爆发）">连击</th>
           <th
             v-for="t in TYPES"
             :key="t"
             class="num target sortable"
-            title="对目标实际 DPS：能打该目标的每把武器相加 · 随顶栏的爆发/平均切换"
+            title="对各类目标的实际输出：能打该目标的武器相加 · 随顶栏的爆发/平均切换"
             @click="toggleSort(t)"
           >
             {{ SHORT[t] }}<i class="arrow">{{ sortKey === t ? (sortDir === "asc" ? "▲" : "▼") : "" }}</i>

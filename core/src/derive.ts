@@ -378,13 +378,27 @@ export function deriveAttack(unit: EntityRecord): DerivedAttack {
     // 每发间隔：`delayAfterShot`（神像的 3 发）与 `perTargetCount[].timePerMissile`（沙暴）
     // 比"周期"更具体 —— 周期是**一轮**，这些是**一轮内每发之间**。
     const hits = resolveHits(w, muzzlesOf(w));
-    // ⚠️ **每发间隔只在一轮多发时才有意义**。hits === 1 时间隔就是周期本身
-    // （科迪亚克：`delayAfterShot` 1000ms 是主炮→侧炮，不该当成"每隔 1s 打一发"）。
+    /*
+     * ⚠️ **每发间隔只在一轮多发时才有意义**。hits === 1 时间隔就是周期本身
+     * （科迪亚克：`delayAfterShot` 1000ms 是主炮→侧炮，不该当成"每隔 1s 打一发"）。
+     *
+     * 第三个来源是**常规武器的 `burstTiming.fireRate`**（单位是**秒/发**，不是"每秒发数"）——
+     * 全库只有 2 把写它：猛犸主炮 `0.5`、寡妇制造者火箭 `0.095`。
+     * 语义可由数据自证：寡妇 `chargeUpDuration 0.93 + numToBurst 6 × 0.095 = 1.50`
+     * **正好等于它的 `cooldown 1.5`**；按"每秒发数"读会得 10.5s，不成立。
+     * 引擎侧也只认这 4 个时间字段（`CombatUnitTuning.lua:206-217` 的 `SetupBurstTimingTuning`：
+     * `cooldown` / `chargeUpDuration` / `chargeUpLockOnTime` / `fireRate`）—— 所以**没写 fireRate
+     * 的（网际光轮等）数据里就真的没有每发间隔**，别自己编（见 findings I203）。
+     */
+    const fireRateSec = num(w.burstTiming?.fireRate);
     const perShot =
       hits > 1
         ? (num((t["perTargetCount"] as unknown as Array<{ timePerMissile?: number }> | undefined)?.[0]
-            ?.timePerMissile) ?? num(t["delayAfterShot"]))
+            ?.timePerMissile) ??
+          num(t["delayAfterShot"]) ??
+          (fireRateSec !== undefined ? fireRateSec * 1000 : undefined))
         : undefined;
+    const fromFireRate = hits > 1 && fireRateSec !== undefined && perShot === fireRateSec * 1000;
     const iv = perShot ? { interval: perShot, from: "per-shot" } : resolveInterval(w);
     if (!iv) {
       notes.push(`武器 ${w.name} 找不到攻击间隔，时序留空`);
@@ -400,9 +414,14 @@ export function deriveAttack(unit: EntityRecord): DerivedAttack {
      */
     const isSeq = Boolean(w.modifier_sequence);
     const explicitPeriod = num(t["burstCooldown"]) ?? num(t["durationBetweenVolley"]);
+    /*
+     * 常规武器的周期**必须**取 `burstTiming.cooldown`（秒→毫秒），不能用刚算出来的每发间隔 ——
+     * 猛犸的 `fireRate 0.5` 是**两发之间**，周期仍是 `cooldown 4s`（否则 DPS 会从 532.5 变成 4260）。
+     */
+    const normalPeriod = num(w.burstTiming?.cooldown) !== undefined ? num(w.burstTiming!.cooldown)! * 1000 : undefined;
     const cycle = isSeq
       ? (explicitPeriod ?? (hits > 1 ? hits * iv.interval : iv.interval))
-      : iv.interval;
+      : (normalPeriod ?? iv.interval);
     /*
      * **蓄力时间要进时序。**
      *
@@ -449,13 +468,31 @@ export function deriveAttack(unit: EntityRecord): DerivedAttack {
         chargeInCycle,
       });
     } else {
+      /*
+       * 常规武器（非序列）的 `interval_ms`：
+       *   · `fireRate` 有 ⇒ 用真实每发间隔（猛犸 500 / 寡妇火箭 95）
+       *   · **都没有且 hits > 1 ⇒ 写 0 = 同时出膛**（用户决定："没写当作 0，和火人一样"）——
+       *     网际光轮 `numToBurst=2` 却没写 `fireRate`，动画上也是"一次攻击动作打两下"，
+       *     与烈焰之手（`MuzzleStrategy.All` 两枪口齐射）同处理。
+       *   · **hits === 1 ⇒ 不写**（单发武器的"每发间隔"就是周期本身）
+       *
+       * ⚠️ **序列武器不适用上面这条**：它们的 `interval_ms` = `burstCooldown` 等节奏
+       * （弹弓 180、忏悔者 400），与 hits 是不是 1 无关，一律照写（早先那版漏了这点，
+       * 差点把十来个序列武器的间隔抹掉）。
+       * ⚠️ 这个字段**只影响时序条的画法与文案**，不进 DPS（平均用 `伤害 × 发数 ÷ 周期`）。
+       */
+      const knownInterval = isSeq
+        ? iv.interval
+        : hits > 1
+          ? (fromFireRate ? iv.interval : 0)
+          : undefined;
       tracks.push({
         weapon: id,
         timing: {
           kind: "单发",
           hits,
           cycle_ms: cycle,
-          interval_ms: simult ? 0 : isSeq ? iv.interval : undefined,
+          interval_ms: simult ? 0 : knownInterval,
         },
         charge_ms: chargeMs,
         chargeInCycle,

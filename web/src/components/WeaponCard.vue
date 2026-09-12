@@ -98,68 +98,87 @@ const levelDamage = computed(() => {
  *     `前摇 3.00s → 连打 20 发（每 0.04s 一发，共 0.80s）`
  */
 function describeTiming(tm: Track["timing"]): string {
-  if (tm.kind === "一次") return `蓄力 ${fmtSec(tm.charge_ms)} 后一次性`;
+  const dmg = levelDamage.value;
+  /** `75×2` / 单发就 `150` —— 读者能自己验算 DPS = A×B÷X */
+  const amount = (hits: number) => (hits > 1 ? `${dmg}×${hits}` : `${dmg}`);
+
+  if (tm.kind === "一次") return `蓄力 ${fmtSec(tm.charge_ms)} 后一次性造成 ${dmg} 伤害`;
   if (tm.kind === "装填") {
     /*
      * 装填型：**装填窗口从首发那一刻开始**（面板公式 = `clip ÷ reloadTimeMs`，findings I201），
-     * 所以「一轮」就是 `reload_ms`，连打是在这一轮**之内**完成的 —— 不能写成"打空后再装填 X"，
-     * 那会让周期看起来比实际长一截。
+     * 所以这一段就是 `reload_ms`，连打是在它**之内**完成的。
      */
     const iv = tm.interval_ms;
-    const fire = iv ? `每 ${fmtSec(iv)} 一发，` : "";
-    return `弹夹 ${tm.clip} 发（${fire}${fmtSec(tm.clip * (iv ?? 0))} 打完），装填 ${fmtSec(tm.reload_ms)}（从第一发计时）`;
-  }
-  // 单发
-  if (tm.hits <= 1) {
-    return `每 ${fmtSec(tm.cycle_ms)} 一发`;
+    const cadence = iv ? `，每 ${fmtSec(iv)} 一发` : "";
+    return `每 ${fmtSec(tm.reload_ms)} 造成 ${amount(tm.clip)} 伤害（弹夹 ${tm.clip} 发${cadence}，从第一发计时）`;
   }
   /*
-   * `interval_ms === 0` = **同轮各发同时出膛**（遍历枪口的齐射，烈焰之手两管）。
-   * 不能读成"每 0ms 一发" —— 它不是连打，是齐射。
+   * 单发 —— 核心是「每 X 秒造成 A[×B] 伤害」（用户要求；DPS = A×B÷X 一眼可验）：
+   *   · `hits === 1`（只打一次）⇒ 不写「每 X 一发」
+   *   · `interval_ms === 0`（一次性全打出去：烈焰之手两枪口齐射 / 网际光轮"没写当 0"）
+   *     ⇒ 也不写「每 X 一发」，改说"同时出膛"
+   *   · 有每发间隔 ⇒ 括号里补连打细节
    */
-  if ((tm.interval_ms ?? -1) <= 0) {
-    // 前摇由 `describeWhen` 负责（它拿得到 Track 上的 charge_ms），这里只说齐射本身
-    return `同时 ${tm.hits} 发（一轮 ${fmtSec(tm.cycle_ms)}）`;
-  }
-  const iv = tm.interval_ms ?? tm.cycle_ms;
-  const span = tm.hits * iv;
-  const head = `连打 ${tm.hits} 发（每 ${fmtSec(iv)} 一发，共 ${fmtSec(span)}）`;
-  return tm.gap_ms ? `${head}，然后停 ${fmtSec(tm.gap_ms)}（周期 ${fmtSec(tm.cycle_ms)}）` : head;
+  const head = `每 ${fmtSec(tm.cycle_ms)} 造成 ${amount(tm.hits)} 伤害`;
+  if (tm.hits <= 1) return head;
+  if ((tm.interval_ms ?? 0) <= 0) return `${head}（${tm.hits} 发同时出膛）`;
+  const iv = tm.interval_ms!;
+  return `${head}（连打，每 ${fmtSec(iv)} 一发，共 ${fmtSec(tm.hits * iv)}）`;
 }
-
-/** 这条轨在整轮里的位置（`sequence` 才是按时间接替） */
+/** 这条轨在整轮里的位置（`sequence` 才是按时间接替）：起始 / 持续 / 目标 */
 function describeWhen(t: Track): string {
   const parts: string[] = [];
-  if (t.charge_ms) parts.push(`前摇 ${fmtSec(t.charge_ms)}`);
-  /*
-   * 前摇用 `含` 还是 `→` 由 `chargeInCycle` 决定：
-   *   · 含 —— 在周期内，周期不因它变长（普通武器的 `chargeUpDuration`）
-   *   · →  —— 在连打之前，与连打时间相加（序列武器的 `initialChargeUpMs`）
-   *
-   * ⚠️ **分段轨的 `charge_ms` 与 `after_ms` 是同一个数**（第一段的 `after_ms` 就是它自己的
-   * 前摇），两个都说会变成「前摇 500ms、前摇 500ms →、0.50s 起」。有 `after_ms` 时
-   * 由它表达位置，不再单独说前摇。
-   */
   const hasAfter = t.after_ms !== undefined && t.after_ms > 0;
-  if (t.charge_ms && !hasAfter) {
-    parts.push(t.chargeInCycle ? `（含前摇 ${fmtSec(t.charge_ms)}）` : `前摇 ${fmtSec(t.charge_ms)} →`);
-  }
   if (hasAfter) parts.push(`${fmtSec(t.after_ms!)} 起`);
+  /*
+   * `持续` 只在它**不等于连打的自身跨度**时才说 —— 分段轨的 `lasts_ms` 就是
+   * `attackCount × tickPeriodMs`，与 `连打 N 发（共 …）` 是同一个数，说两遍是噪声。
+   */
+  const tm = t.timing;
+  const span = tm.kind === "单发" ? (tm.interval_ms ?? 0) * tm.hits : 0;
   if (t.lasts_ms === null) parts.push("之后持续");
-  else if (t.lasts_ms !== undefined) parts.push(`持续 ${fmtSec(t.lasts_ms)}`);
+  else if (t.lasts_ms !== undefined && Math.abs(t.lasts_ms - span) > 1) parts.push(`持续 ${fmtSec(t.lasts_ms)}`);
   if (t.when?.target?.length) parts.push(`目标 ${t.when.target.join("/")}`);
   return parts.join("、");
 }
 
-/** 一条轨的完整句子 */
+/**
+ * 把一条时序读成一句话 —— **核心是「每 X 秒造成 A[×B] 伤害」**（用户要求）。
+ *
+ * 这样读者能自己验算：`A × B ÷ X` 就是上面那个 DPS（`A` = 已按等级缩放的单发伤害，
+ * `B` = 一轮发数）。⚠️ `A×B` 是**每个队员**的量；结论行的「单轮总伤害」是**全队**的
+ * （已乘人数，见 I172）。
+ *
+ * 前缀/后缀规则（**互斥，不重复说**）：
+ *   · **分段轨**（有 `after_ms`）：位置由 `X 起` 表达，不再单说前摇（它的 `charge_ms` 与
+ *     `after_ms` 本就是同一个数）
+ *   · **`chargeInCycle === true`**（常规武器的 `chargeUpDuration`）：前摇在冷却**之内**
+ *     ⇒ 句尾 `，其中前摇 0.30s`
+ *   · **`chargeInCycle === false`**（序列武器的 `initialChargeUpMs`）：前摇在连打**之前**、
+ *     时间相加 ⇒ 前缀 `前摇 3.00s →`
+ *
+ * 早先这段拼出过「前摇 0.30s、（含前摇 0.30s）」这种莫名其妙的话（同一件事说了两三遍，
+ * 且与前面的句之间没有分隔符），是用户报的 bug —— 见 findings I204。
+ */
 function describeTrack(t: Track): string {
-  const when = describeWhen(t);
+  const hasAfter = t.after_ms !== undefined && t.after_ms > 0;
+  const charge = t.charge_ms ?? 0;
+  const wave = props.waveSize ?? 1;
+
   const what = describeTiming(t.timing);
-  if (!when) return what;
-  // 前摇在周期**内**时，`（含…）` 要贴在周期后面才读得通，所以放句尾
-  if (t.chargeInCycle) return `${what}${when}`;
-  // 前摇在连打**之前**：`前摇 3.00s → 连打 …`
-  return `${when} ${what}`;
+  const head =
+    charge > 0 && !hasAfter && t.chargeInCycle === true
+      ? `${what}，其中前摇 ${fmtSec(charge)}`
+      : charge > 0 && !hasAfter
+        ? `前摇 ${fmtSec(charge)} → ${what}`
+        : what;
+  const rest = describeWhen(t);
+  const parts = [head];
+  if (rest) parts.push(rest);
+  // 全队倍率：句子里的 `A×B` 是**每个队员**的量（与结论行的「单发伤害」同一口径），
+  // 而 DPS 是**全队**的 —— 补一句 `全队 ×N` 才能验算：`A×B×N ÷ X = DPS`
+  if (wave > 1) parts.push(`全队 ×${wave}`);
+  return parts.join(" · ");
 }
 
 /** 范围伤害机制 */

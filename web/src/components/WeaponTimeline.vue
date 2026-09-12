@@ -88,7 +88,7 @@ const baseSegs = computed<Seg[]>(() => {
         kind: "reload",
         at: fireAt + fireMs,
         ms: reloadRest,
-        title: `剩余装填 ${fmtSec(reloadRest)}（一轮 ${fmtSec(tm.reload_ms)}）`,
+        title: `剩余装填 ${fmtSec(reloadRest)}（共 ${fmtSec(tm.reload_ms)}）`,
       });
       continue;
     }
@@ -96,45 +96,83 @@ const baseSegs = computed<Seg[]>(() => {
     // 单发
     const iv = tm.interval_ms ?? tm.cycle_ms;
     /*
-     * **同轮各发同时出膛**（`interval_ms === 0`，遍历枪口的齐射 —— 烈焰之手两管）。
+     * **同轮各发同时出膛**（`interval_ms === 0`）—— 两种情况都归到这里：
+     *   · 数据写明齐射的（烈焰之手 `MuzzleStrategy.All`，两枪口同时）
+     *   · 数据**没写**每发间隔的（网际光轮 `numToBurst=2` 无 `fireRate`）—— 用户决定
+     *     "没写当作 0"，与齐射同处理（`derive.ts` 里已写成 0，见 findings I203）
      *
      * ⚠️ 它**不是"连打"**：几发落在同一毫秒，没有"打完再等"的两段结构 ——
-     * 和 `hits === 1` 一样，**整轮就是攻击节奏**，条子应当满条都是攻击段。
+     * 和 `hits === 1` 一样，开火是**一瞬间**（只有金刻度，没有开火条）。
      * 早先按 `hits × interval` 画，`hits × 0 = 0` 让段宽塌成 0，只好硬塞一个
-     * 2% 宽的窄条，于是同样节奏的音波突击队是满条蓝、烈焰之手只剩一根细线（用户报"蓝条不正常"）。
+     * 2% 宽的窄条，于是同样节奏的音波突击队是满条蓝、烈焰之手只剩一根细线（用户报"蓝条不正常"）；
+     * 而 `interval_ms` **缺失**时又退回"用周期当每发间隔"，开火段变成 `hits × 周期`
+     * —— **比周期还长**（网际光轮 3000>1500、猛犸 8000>4000、寡妇火箭 9000>1500）。
      */
     const simultaneous = tm.hits > 1 && iv <= 0;
+    const inCycleCharge = t.chargeInCycle === true && charge > 0;
     /*
      * **条子表达「阶段结构」，不是「占空比」。**
      *
-     * `hits === 1` 的武器（弹弓、狼獾…）只有**攻击一个阶段** —— 那 180ms 本身就是
-     * 攻击节奏，不存在"等待"阶段。按占空比画成「8% 蓝 + 92% 空」是**凭空造了一个
-     * 不存在的阶段**（用户指出："弹弓只有攻击一个行为，应该满条都是攻击"）。
-     * 速率由文字说（"每 0.18s 一发"），条子只管阶段。
+     * 只有 `hits > 1` 且**有每发间隔**时才有"开火跨度"这个阶段：一轮 `hits × interval`
+     * 打完（沙暴 12 发 × 200ms = 2.40s），剩下的空档是**另一个阶段**（冷却 1.60s）。
+     * 一击（弹弓）或同轮齐射（烈焰之手 / 网际光轮）时开火是**一瞬间**，没有跨度，
+     * 自然也不该有开火条 —— 只画金刻度，其余时间全是冷却（用户："开火就一瞬间的怎么还有条"）。
      *
-     * `hits > 1` 且**有每发间隔**时才是真有结构：一轮 `hits × interval` 打完，
-     * 剩下的空档是**另一个阶段**（沙暴"打 12 发然后停 1.6s"），那时才该分段。
+     * 早先给"`hits === 1` 且无前摇"开了特例：把 `hits × iv` 里 `iv` 缺失退回周期、
+     * 于是开火条 = 整轮，还美其名曰"弹弓只有攻击一个行为"（I169）。结果就是
+     * 同一个语义（这一轮里不开火的那段）在弹弓身上是实心蓝、在掠食者身上是蓝色斜纹 ——
+     * 用户："有前摇的单位蓝条和没有的长得不一样，他们是同一个语义啊"。现在特例已删。
      */
-    const fireMs = simultaneous || tm.hits <= 1 ? tm.cycle_ms : tm.hits * iv;
+    const cadenced = !simultaneous && tm.hits > 1;
+    const fireSpan = cadenced ? tm.hits * iv : 0;
+    /*
+     * **冷却段 = 一轮里"既不在前摇、也不在开火跨度里"的剩余时间**，一律同一种长相（蓝色斜纹）。
+     * 统一算式：`周期 − 周期内的前摇 − 开火跨度`，**不给任何单位开特例**。
+     *
+     * ⚠️ 减的必须是**周期内**的前摇：`chargeInCycle` 为假时（音波坦克 3s 蓄力、序列武器的
+     * `initialChargeUpMs`）蓄力是连打**之前**的独立阶段、时间相加，不属于这一轮，不能减。
+     * 台账 B7 的实测（捕食者「开火间隔约 3 秒多，开火前约 1 秒激光瞄准」）对应的就是这条：
+     * 3.44s 的轮里，前 1.00s 抬枪、然后一瞬间开火、其余 2.44s 冷却。
+     */
+    const coolMs = Math.max(0, tm.cycle_ms - (inCycleCharge ? charge : 0) - fireSpan);
+    const chargeAt = start; // 周期内/外的前摇都在开头（周期内的："开火前抬枪"；周期外的："连打之前"）
+    const fireAt = start + charge;
     const ticks = Array.from(
       { length: Math.max(1, tm.hits) },
-      (_, i) => start + charge + (tm.hits > 1 && !simultaneous ? i * iv : 0),
+      (_, i) => fireAt + (simultaneous ? 0 : i * iv),
     );
+
+    // 冷却段（蓝色斜纹）—— 先推，它在开火段下面
+    if (coolMs > 0) {
+      out.push({
+        kind: "gap",
+        at: fireAt + fireSpan,
+        ms: coolMs,
+        // 悬停文案是**给用户看的**（不是给开发的注释）：只说这一格是什么、多长
+        title: `冷却 ${fmtSec(coolMs)}（一轮 ${fmtSec(tm.cycle_ms)}）`,
+      });
+    }
+    /*
+     * 开火段：**只有真有跨度时才画**（连打）；一击 / 同轮齐射是一瞬间，只留刻度（`ms: 0`）。
+     */
     out.push({
       kind: "fire",
-      at: start + charge,
-      ms: fireMs,
+      at: fireAt,
+      ms: fireSpan,
       ticks,
-      title: simultaneous
-        ? `同时 ${tm.hits} 发（一轮 ${fmtSec(tm.cycle_ms)}）`
-        : tm.hits > 1
-          ? `连打 ${tm.hits} 发（每 ${fmtSec(iv)} 一发，共 ${fmtSec(tm.hits * iv)}）`
-          : `攻击（每 ${fmtSec(tm.cycle_ms)} 一发）`,
+      title: fireSpan > 0
+        ? `连打 ${tm.hits} 发（每 ${fmtSec(iv)} 一发）`
+        : simultaneous
+          ? `开火：${tm.hits} 发同时出膛`
+          : "开火：一击",
     });
-    if (t.chargeInCycle && charge > 0) {
-      out.push({ kind: "charge", at: start, ms: charge, title: `前摇 ${fmtSec(charge)}` });
-    } else if (!t.chargeInCycle && charge > 0) {
-      out.push({ kind: "charge", at: start, ms: charge, title: `前摇 ${fmtSec(charge)}（在连打之前）` });
+    if (charge > 0) {
+      out.push({
+        kind: "charge",
+        at: chargeAt,
+        ms: charge,
+        title: `前摇 ${fmtSec(charge)}（开火前）`,
+      });
     }
   }
   return out;
@@ -187,7 +225,13 @@ function segsOf(i: number): Array<Seg & { left: string; width: string; tickPct: 
   for (let k = 0; k < reps; k++) {
     const off = shift + k * cyc;
     for (const s of baseSegs.value) {
-      if (s.ms <= 0) continue;
+      /*
+       * 宽度 0 的段本来要丢掉（早先画成 0 宽的段会连刻度一起消失，见 I168）。
+       * 但现在**开火是一瞬间**的那种段（`ms: 0`）**必须保留它的刻度** ——
+       * 它不画条、只出刻度（用户："开火就一瞬间的怎么还有条"）。
+       * 所以：宽度 0 且**没有刻度**才丢。
+       */
+      if (s.ms <= 0 && !(s.ticks?.length)) continue;
       /*
        * ⚠️ **刻度要按横轴过滤掉超出的**，不能只靠 CSS 裁 ——
        * 第 2 轮之后的刻度 `left` 会大于 100%，绝对定位元素会**把页面撑出横向滚动条**
@@ -245,7 +289,8 @@ function segsOf(i: number): Array<Seg & { left: string; width: string; tickPct: 
 
     <p class="legend">
       <span><i class="sw charge" />前摇</span>
-      <span><i class="sw fire" />伤害</span>
+      <span><i class="sw fire" />开火</span>
+      <span><i class="sw gap" />冷却</span>
       <span><i class="sw reload" />装填</span>
       <span class="dim">横轴 = {{ fmtSec(spanMs) }}<template v-if="waveSize > 1">（{{ waveSize }} 人 × 错开 {{ fmtSec(separationMs) }}）</template></span>
     </p>
@@ -300,17 +345,27 @@ function segsOf(i: number): Array<Seg & { left: string; width: string; tickPct: 
   height: 100%;
   border-radius: 3px;
 }
+/*
+ * 段色（用户定的语义）：
+ *   · `fire`  实心蓝 —— **开火**：只在"有发与发之间的间隔"时才有条
+ *     （连打跨度 = 发数 × 间隔）；一击 / 同轮齐射是一瞬间，没有条，只有金色刻度
+ *   · `gap`   **蓝色斜纹 —— 冷却**（"冷却蓝条"）：这一轮里剩下的等待时间，
+ *     `周期 − 周期内前摇 − 开火跨度`。**所有单位同一种长相**（弹弓这种"一发 + 无前摇"
+ *     的整条就是冷却，不再另用实心样式）
+ *   · `charge` 黄褐斜纹 —— 前摇
+ *   · `reload` 暗红斜纹 —— 装填
+ */
 .seg.fire {
   background: linear-gradient(#4da8ff, #2f7fd0);
+}
+.seg.gap {
+  background: repeating-linear-gradient(45deg, #1d3a5c, #1d3a5c 4px, #2f6fa8 4px, #2f6fa8 8px);
 }
 .seg.charge {
   background: repeating-linear-gradient(45deg, #6b5a2a, #6b5a2a 4px, #8a7434 4px, #8a7434 8px);
 }
 .seg.reload {
   background: repeating-linear-gradient(45deg, #3a2a2a, #3a2a2a 4px, #5a3a3a 4px, #5a3a3a 8px);
-}
-.seg.gap {
-  background: #232a36;
 }
 /*
  * 开火标记 —— **矩形，且比条子高**，让它在蓝条上跳出来。
@@ -348,6 +403,9 @@ function segsOf(i: number): Array<Seg & { left: string; width: string; tickPct: 
 }
 .sw.fire {
   background: #4da8ff;
+}
+.sw.gap {
+  background: repeating-linear-gradient(45deg, #1d3a5c, #1d3a5c 3px, #2f6fa8 3px, #2f6fa8 6px);
 }
 .sw.charge {
   background: #8a7434;
