@@ -24,7 +24,7 @@ import { level as makeLevel, startingMajorOfRarity, type Level } from "@rivals/c
 import type { DatasetEntry } from "@rivals/core/derive";
 import { TARGET_LABELS, TARGET_TYPES } from "../damageTiers.ts";
 import { unitDpsVs } from "../dps.ts";
-import { fmtSec } from "../format.ts";
+import { fmtSec, fmtTiles, fmtTilesPerSec } from "../format.ts";
 import { dpsMode } from "../state.ts";
 
 import StatIcon from "./StatIcon.vue";
@@ -152,25 +152,41 @@ function vsTip(v: (typeof vsTargets.value)[number]): string {
   return `${v.label}：${parts.join(" + ")} = ${lv.value.dps(v.set.total).toFixed(0)}`;
 }
 
-/** 基本信息：不随等级变的单位固有属性。空值不收集 */
+/**
+ * 基本信息：不随等级变的单位固有属性。空值不收集。行 = `[标签, 值, 悬停提示?]`。
+ *
+ * ⚠️ 两件事别搞错：
+ * ① **单位逐字段核对**（台账 I205）：带 `InTiles` 的是**格**，其余裸数字是**世界单位（1 格 = 8）**
+ *    —— 早先把 `avoidance_radius = 1.7` 写成「1.7 格」是错的（实为 0.21 格）。
+ * ② **悬停提示是给用户看的文案**，不是注释：最多一句"这个数是什么"，
+ *    不写字段名、不写台账编号、不用 markdown（`attr()` 是纯文本，`**` 不加粗）。
+ */
 const basics = computed(() => {
-  const rows: Array<[string, string]> = [];
+  const rows: Array<[string, string, string?]> = [];
   const st = props.unit.derived.stats;
   if (st.cost !== undefined) rows.push(["造价", String(st.cost)]);
-  if (st.speed !== undefined) rows.push(["移动速度", String(st.speed)]);
-  if (st.turn_speed !== undefined) rows.push(["转向速度", String(st.turn_speed)]);
+  if (st.speed !== undefined) rows.push(["移动速度", fmtTilesPerSec(st.speed)]);
+  if (st.turn_speed !== undefined) rows.push(["转向速度", `${st.turn_speed}°/秒`]);
   if (st.vision_tiles !== undefined) rows.push(["视野", `${st.vision_tiles} 格`]);
   // ⚠️ 攻击距离（格，整数）与武器射程（实际距离）**不是一回事** —— 万钧巨炮 2 vs 2.5
   /*
    * 攻击距离：**1 格是基线**（78 个单位里 65 个是 1，只 13 个是 2/3）。
    * 游戏面板 `<= 1` 时整行不显示（`CombatTuningInfo.lua:440`），所以那 13 个才是
-   * 游戏里看得见射程的单位。这里仍然列出来，但把基线标出来 —— 否则一页全是「攻击距离 1 格」。
+   * 游戏里看得见射程的单位。这里仍然列出来 —— 否则一页全是「攻击距离 1 格」。
    */
   if (st.attack_range_tiles !== undefined) {
-    rows.push(["攻击距离", `${st.attack_range_tiles} 格`]);
+    rows.push([
+      "攻击距离",
+      `${st.attack_range_tiles} 格`,
+      st.attack_range_tiles <= 1 ? "只打相邻格" : undefined,
+    ]);
   }
-  if (st.aggro_radius_tiles !== undefined) rows.push(["索敌半径", `${st.aggro_radius_tiles} 格`]);
-  if (st.avoidance_radius !== undefined) rows.push(["避让半径", `${st.avoidance_radius} 格`]);
+  if (st.aggro_radius_tiles !== undefined) {
+    rows.push(["索敌半径", `${st.aggro_radius_tiles} 格`, "自动攻击走进这个范围的敌人"]);
+  }
+  if (st.avoidance_radius !== undefined) {
+    rows.push(["避让半径", fmtTiles(st.avoidance_radius), "与其他单位互相让开的间距"]);
+  }
   if (st.can_be_crushed !== undefined) rows.push(["能否被碾压", st.can_be_crushed ? "是" : "否"]);
   if (st.stealth_detect_tiles !== undefined) rows.push(["反隐范围", `${st.stealth_detect_tiles} 格`]);
   if (st.kill_award_tiberium !== undefined) rows.push(["被击杀给矿", String(st.kill_award_tiberium)]);
@@ -248,9 +264,15 @@ const squadRows = computed(() => {
 
           <span v-if="basics.length && (totalHealth !== undefined || dps !== undefined)" class="divider" />
 
-          <div v-for="[k, v] in basics" :key="k" class="fact">
-            <span>{{ k }}</span>
-            <b>{{ v }}</b>
+          <div
+            v-for="row in basics"
+            :key="row[0]"
+            class="fact"
+            :data-float="row[2] ? '' : undefined"
+            :data-tip="row[2]"
+          >
+            <span>{{ row[0] }}</span>
+            <b>{{ row[1] }}</b>
           </div>
         </div>
 

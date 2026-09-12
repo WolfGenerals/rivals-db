@@ -194,10 +194,11 @@ DPS = 每轮总伤害 ÷ durationBetweenVolley_s
 initialChargeUpMs = 1750, shotCooldownMs = 500
 ```
 
-用户描述："**向下扔一串炸弹然后装填**"。另有 **`damageFalloff`**：
+用户描述："**向下扔一串炸弹然后装填**"。另有 **`damageFalloff`**（⚠️ 单位是**世界单位**，不是格 —— 见 `docs/unit-dimensions.md`）：
 
 ```
-0 格 100%  →  6 格 65%  →  12 格 45%  →  18 格 25%      半径 18
+0 世界单位 100%  →  6 → 65%  →  12 → 45%  →  18 → 25%      damageRadius = 18
+= 0 格 100%      →  0.75  65%  →  1.5  45%  →  2.25  25%   （÷8，与"游戏里约 2 格"吻合）
 ```
 
 ---

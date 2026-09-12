@@ -679,16 +679,24 @@ DPS(该等级)        386.4      30.7     386.4     386.4      386.4      386.4
 
 ### ⑧ 战场感知范围
 
-| 字段 | 含义 | 覆盖 |
-| --- | --- | --- |
-| `visionRangeInTiles` | 视野（格） | 82/82 |
-| `aggroRadiusInTiles` | 主动开火半径 | 78/82 |
-| `avoidanceRadius` / `hexReservationRadius` | 避让/占位半径 | 82/82 · 60/82 |
-| `attackSeparationDurationMS` | 攻击间隔保护 | 25/82 |
-| `minAttackRangeInTiles` | 最小射程（打不到贴脸目标） | 3/82 |
+> **量纲**：带 `InTiles` 的字段单位是**格**；其余裸数字字段单位是**世界单位**（**1 格 = 8 世界单位**）。
+> 完整推导、逐字段换算表、外部交叉验证见 **`docs/unit-dimensions.md`**（台账 I205~I211）。
+
+| 字段 | 含义 | 单位 | 覆盖 |
+| --- | --- | --- | --- |
+| `visionRangeInTiles` | 视野 | 格 | 82/82 |
+| `aggroRadiusInTiles` | 主动开火/索敌半径 | 格 | 78/82 |
+| `avoidanceRadius` | 单位间避让半径（步兵 1.7 → 0.21 格、建筑 6 → 0.75 格） | 世界单位 | 82/82 |
+| `hexReservationRadius` | 行进占位半径（3~5 → 0.375~0.625 格，≈ 一个六边形） | 世界单位 | 60/82 |
+| `attackSeparationDurationMS` | 攻击间隔保护 | 毫秒 | 25/82 |
+| `minAttackRangeInTiles` | 最小射程（打不到贴脸目标） | 格 | 3/82 |
 
 `minAttackRangeInTiles` 只有 3 个单位有，但它是「贴脸就废」的关键机制
 （Artillery 类）。
+
+⚠️ **面板上的 "Range / Attack Range" 与武器的 `maxRangeInTiles` 不是同一个东西**：
+面板 / wiki / 单位描述里的 Range 一律等于 `squadTuning.maxAttackRangeInTiles`；
+武器的 `maxRangeInTiles`（90% 是 2.5）作用未定（I206 / I211）。
 
 ---
 
