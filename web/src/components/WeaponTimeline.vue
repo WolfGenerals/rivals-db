@@ -65,21 +65,27 @@ const baseSegs = computed<Seg[]>(() => {
     if (tm.kind === "装填") {
       const iv = tm.interval_ms ?? 0;
       const fireMs = tm.clip * iv;
+      /*
+       * ⚠️ **装填窗口从首发就开始**（面板公式 `clip ÷ reloadTimeMs` 即整轮周期，findings I201），
+       * 所以这一轮的总长就是 `reload_ms`：连打段之后画的是**剩余**的装填段，
+       * 而不是「连打 + 完整装填」叠起来（那会把周期画长 3~15%）。
+       */
+      const reloadRest = Math.max(0, tm.reload_ms - fireMs);
       // `chargeInCycle` 为假时前摇在连打之前，为真时并入周期末尾（这里按"之前"画更直观）
       const fireAt = start + charge;
       const ticks = Array.from({ length: tm.clip }, (_, i) => fireAt + i * iv);
       out.push({
         kind: "fire",
         at: fireAt,
-        ms: fireMs || tm.reload_ms * 0.1,
+        ms: fireMs,
         ticks,
         title: `连打 ${tm.clip} 发（每 ${fmt(iv)} 一发，共 ${fmt(fireMs)}）`,
       });
       out.push({
         kind: "reload",
         at: fireAt + fireMs,
-        ms: tm.reload_ms,
-        title: `装填 ${fmt(tm.reload_ms)}`,
+        ms: reloadRest,
+        title: `装填 ${fmt(reloadRest)}（首发即开始，一轮 ${fmt(tm.reload_ms)}）`,
       });
       continue;
     }
@@ -144,7 +150,8 @@ const cycleMs = computed(() => {
   for (const t of props.tracks) {
     const tm = t.timing;
     if (tm.kind === "单发") spans.push(tm.cycle_ms);
-    else if (tm.kind === "装填") spans.push(tm.clip * (tm.interval_ms ?? 0) + tm.reload_ms);
+    // 装填型的一轮总长 = `reload_ms`（装填窗口从首发开始，连打在窗口内，见 findings I201）
+    else if (tm.kind === "装填") spans.push(tm.reload_ms);
     else spans.push(tm.charge_ms);
   }
   return Math.max(1, ...spans);

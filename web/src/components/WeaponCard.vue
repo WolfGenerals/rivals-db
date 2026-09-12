@@ -100,8 +100,14 @@ const fmtSec = (ms: number) => `${(ms / 1000).toFixed(ms % 1000 === 0 ? 1 : 2)}s
 function describeTiming(tm: Track["timing"]): string {
   if (tm.kind === "一次") return `蓄力 ${fmtMs(tm.charge_ms)} 后一次性`;
   if (tm.kind === "装填") {
-    const fire = tm.interval_ms ? `每 ${fmtMs(tm.interval_ms)} 一发，` : "";
-    return `${fire}弹夹 ${tm.clip} 发，打空后装填 ${fmtSec(tm.reload_ms)}`;
+    /*
+     * 装填型：**装填窗口从首发那一刻开始**（面板公式 = `clip ÷ reloadTimeMs`，findings I201），
+     * 所以「一轮」就是 `reload_ms`，连打是在这一轮**之内**完成的 —— 不能写成"打空后再装填 X"，
+     * 那会让周期看起来比实际长一截。
+     */
+    const iv = tm.interval_ms;
+    const fire = iv ? `每 ${fmtMs(iv)} 一发，` : "";
+    return `弹夹 ${tm.clip} 发（${fire}${fmtSec(tm.clip * (iv ?? 0))} 打完），一轮 ${fmtSec(tm.reload_ms)} —— 首发即开始装填`;
   }
   // 单发
   if (tm.hits <= 1) {

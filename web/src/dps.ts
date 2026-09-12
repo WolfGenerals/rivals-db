@@ -46,7 +46,19 @@ export function weaponDps(weapon: Weapon, tracks: Track[], waveSize: number): Dp
     if (tm.kind === "一次") continue; // 一次性不计持续输出
     const h = tm.kind === "装填" ? tm.clip : tm.hits;
     const iv = tm.interval_ms ?? (tm.kind === "单发" ? tm.cycle_ms : 0);
-    const cycle = tm.kind === "装填" ? tm.clip * iv + tm.reload_ms : tm.cycle_ms;
+    /*
+     * **装填型的周期就是 `reload_ms`** —— 装填窗口**从首发那一刻开始**，连打是**在窗口内**完成的。
+     *
+     * 依据：官方面板公式对弹夹武器就是 `damage × clipSize × waveSize ÷ reloadTimeMs`
+     * （`CombatTuningInfo.lua:705-706`），即它把 `reloadTimeMs` 当成整轮周期。实测 6/6 吻合
+     * （MLRS 399.6、奥卡 226.67、火焰轰炸机 156.92、隐形坦克 138.91、幻影 189、飞影 192 ——
+     * 见 findings I201）。
+     *
+     * ⚠️ 早先这里写成 `clip × 间隔 + reload_ms`（把连打时间又加了一遍），于是**平均口径
+     * 系统性偏低 3~15%**、且与 `core/src/derive.ts` 的 `trackDps()`（一直是对的）不一致 ——
+     * 同一模型两处实现的老毛病。
+     */
+    const cycle = tm.kind === "装填" ? tm.reload_ms : tm.cycle_ms;
     const dmg = weapon.damage;
     // 单轮总伤害要**乘人数** —— 小队每人各打各的
     volley += dmg * h * waveSize;
