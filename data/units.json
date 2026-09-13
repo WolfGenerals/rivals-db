@@ -1,6 +1,30 @@
 {
   "_note": "已解析好的单位数据。每条含 derived.weapons（打出去的**是什么**：伤害/补正/范围/可打目标）与 derived.attack（**什么时候**打**哪一把**：composition + tracks）。不含原始 config 树。",
   "_schema": 3,
+  "auras": {
+    "modifier_chem_warrior_gas_cloud": {
+      "ground_only": true,
+      "immune": [
+        "Unit_Nod_ChemQuad",
+        "Unit_Nod_ChemicalWarrior"
+      ],
+      "persist_ms": 10000,
+      "tick_damage": 6,
+      "tick_ms": 200,
+      "vs": {
+        "Vehicle": 0
+      }
+    },
+    "modifier_fire_bomber_fire": {
+      "ground_only": true,
+      "persist_ms": 10000,
+      "tick_damage": 25,
+      "tick_ms": 250,
+      "vs": {
+        "Vehicle": 25
+      }
+    }
+  },
   "commander_count": 19,
   "commanders": [
     {
@@ -25,6 +49,16 @@
       "name_en": "Col. Jackson",
       "name_zh": "杰克逊上校",
       "source": "gameplay/commanders/cmdr_gdi_jackson.lua",
+      "stat_mods": [
+        {
+          "duration_ms": 8000,
+          "name": "coordinatedAssaultTuning",
+          "stats": {
+            "attack_speed_pct": 60,
+            "reload_speed_pct": 30
+          }
+        }
+      ],
       "variant": "jackson",
       "warnings": [
         "缺少 combatantTuning.health（可能是占位/测试单位）",
@@ -54,6 +88,16 @@
       "name_en": "Col. Jackson",
       "name_zh": "杰克逊上校",
       "source": "gameplay/commanders/cmdr_gdi_jackson_CR.lua",
+      "stat_mods": [
+        {
+          "duration_ms": 5000,
+          "name": "coordinatedAssaultTuning",
+          "stats": {
+            "attack_speed_pct": 80,
+            "reload_speed_pct": 60
+          }
+        }
+      ],
       "suffixes": [
         "CR"
       ],
@@ -151,6 +195,16 @@
       "name_en": "Cdr. McNeil",
       "name_zh": "麦克尼尔中校",
       "source": "gameplay/commanders/cmdr_gdi_mcneil.lua",
+      "stat_mods": [
+        {
+          "duration_ms": -1,
+          "name": "emp",
+          "stats": {
+            "attack_speed_pct": -55,
+            "reload_speed_pct": -70
+          }
+        }
+      ],
       "variant": "mcneil",
       "warnings": [
         "缺少 combatantTuning.health（可能是占位/测试单位）",
@@ -294,7 +348,8 @@
         "health": null,
         "primary": "",
         "stats": {
-          "cost": 80
+          "cost": 80,
+          "leaves_gas": "modifier_chem_warrior_gas_cloud"
         },
         "weapons": []
       },
@@ -323,7 +378,8 @@
         "primary": "",
         "stats": {
           "cost": 30,
-          "hidden": true
+          "hidden": true,
+          "leaves_gas": "modifier_chem_warrior_gas_cloud"
         },
         "weapons": []
       },
@@ -451,6 +507,17 @@
       "name_en": "Oxanna",
       "name_zh": "奥克桑娜",
       "source": "gameplay/commanders/cmdr_nod_oxanna.lua",
+      "stat_mods": [
+        {
+          "duration_ms": 8000,
+          "name": "fanaticismTuning",
+          "stats": {
+            "attack_speed_pct": 75,
+            "incoming_damage_pct": 25,
+            "reload_speed_pct": 38
+          }
+        }
+      ],
       "variant": "oxanna",
       "warnings": [
         "缺少 combatantTuning.health（可能是占位/测试单位）",
@@ -480,6 +547,17 @@
       "name_en": "Oxanna",
       "name_zh": "奥克桑娜",
       "source": "gameplay/commanders/cmdr_nod_oxanna_CR.lua",
+      "stat_mods": [
+        {
+          "duration_ms": 5000,
+          "name": "fanaticismTuning",
+          "stats": {
+            "attack_speed_pct": 100,
+            "incoming_damage_pct": 50,
+            "reload_speed_pct": 50
+          }
+        }
+      ],
       "suffixes": [
         "CR"
       ],
@@ -609,6 +687,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 2.7,
           "cost": 90,
+          "ground": true,
           "preferred_targets": [
             "Aircraft",
             "Infantry"
@@ -696,6 +775,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 1.7,
           "cost": 90,
+          "ground": true,
           "preferred_targets": [
             "Structure"
           ],
@@ -772,6 +852,7 @@
           "aggro_radius_tiles": 2.5,
           "attack_range_tiles": 1,
           "avoidance_radius": 6,
+          "ground": true,
           "tags": [
             "override_structure"
           ],
@@ -821,6 +902,7 @@
           "attack_range_tiles": 2,
           "avoidance_radius": 2.7,
           "cost": 120,
+          "ground": true,
           "preferred_targets": [
             "Infantry",
             "Structure"
@@ -1006,6 +1088,17 @@
           "avoidance_radius": 1.6,
           "can_be_crushed": true,
           "cost": 70,
+          "emp": {
+            "attack_speed_pct": 25,
+            "duration_ms": 700,
+            "move_speed_pct": 30,
+            "reload_speed_pct": 25,
+            "targets": [
+              "Vehicle"
+            ],
+            "turn_speed_pct": 30
+          },
+          "ground": true,
           "preferred_targets": [
             "Vehicle"
           ],
@@ -1059,6 +1152,16 @@
         "start_major": 1
       },
       "source": "gameplay/units/unit_gdi_grenadier.lua",
+      "stat_mods": [
+        {
+          "duration_ms": 700,
+          "name": "emp",
+          "stats": {
+            "attack_speed_pct": -25,
+            "reload_speed_pct": -25
+          }
+        }
+      ],
       "variant": "grenadier",
       "warnings": [
         "已丢弃占位/未解析字段：SetStatOverrides=<function>, oldTuning.SetStatOverrides=<function>"
@@ -1166,6 +1269,7 @@
         "stats": {
           "avoidance_radius": 3,
           "cost": 60,
+          "ground": true,
           "kill_award_tiberium": 80,
           "speed": 3.958857,
           "tags": [
@@ -1207,6 +1311,7 @@
         "stats": {
           "avoidance_radius": 3,
           "cost": 60,
+          "ground": true,
           "hidden": true,
           "kill_award_tiberium": 80,
           "speed": 6.928,
@@ -1268,7 +1373,9 @@
           "avoidance_radius": 2.7,
           "cost": 120,
           "deploy_ms": 5000,
+          "ground": true,
           "min_attack_range_tiles": 2,
+          "must_deploy_to_fire": true,
           "preferred_targets": [
             "Infantry",
             "Vehicle",
@@ -1313,6 +1420,7 @@
               ]
             ],
             "range_tiles": 3.5,
+            "squad_damage": true,
             "targeting_unknown": false,
             "type": "炸弹"
           }
@@ -1368,8 +1476,10 @@
           "avoidance_radius": 2.7,
           "cost": 120,
           "deploy_ms": 3000,
+          "ground": true,
           "hidden": true,
           "min_attack_range_tiles": 2,
+          "must_deploy_to_fire": true,
           "preferred_targets": [
             "Infantry",
             "Vehicle",
@@ -1414,6 +1524,7 @@
               ]
             ],
             "range_tiles": 3.5,
+            "squad_damage": true,
             "targeting_unknown": false,
             "type": "炸弹"
           }
@@ -1473,6 +1584,7 @@
           "avoidance_radius": 1.6,
           "can_be_crushed": true,
           "cost": 40,
+          "ground": true,
           "preferred_targets": [
             "Vehicle"
           ],
@@ -1683,6 +1795,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 2.7,
           "cost": 230,
+          "ground": true,
           "preferred_targets": [
             "Vehicle",
             "Infantry"
@@ -1789,6 +1902,8 @@
           "cost": 30,
           "damage_reduction_pct": 50,
           "deploy_ms": 5000,
+          "ground": true,
+          "must_deploy_to_fire": true,
           "preferred_targets": [
             "Vehicle",
             "Infantry"
@@ -1880,6 +1995,8 @@
           "avoidance_radius": 2.4,
           "cost": 70,
           "deploy_ms": 2000,
+          "ground": true,
+          "must_deploy_to_fire": true,
           "preferred_targets": [
             "Vehicle",
             "Structure"
@@ -2155,6 +2272,8 @@
           "avoidance_radius": 1.7,
           "cost": 40,
           "deploy_ms": 3000,
+          "ground": true,
+          "must_deploy_to_fire": true,
           "range_tiles": 2.5,
           "speed": 5.5424,
           "tags": [
@@ -2193,6 +2312,17 @@
         "start_major": 5
       },
       "source": "gameplay/units/unit_gdi_msv.lua",
+      "stat_mods": [
+        {
+          "duration_ms": 6000,
+          "name": "boostTuning",
+          "stats": {
+            "attack_speed_pct": 5,
+            "outgoing_damage_pct": 0,
+            "reload_speed_pct": 5
+          }
+        }
+      ],
       "variant": "msv",
       "warnings": [
         "已丢弃占位/未解析字段：SetStatOverrides=<function>, oldTuning.SetStatOverrides=<function>"
@@ -2316,9 +2446,6 @@
           "total": 1715,
           "wave_size": 1
         },
-        "notes": [
-          "索敌方式未知（descriptors 空表）"
-        ],
         "primary": "bomb1",
         "stats": {
           "aggro_radius_tiles": 2.5,
@@ -2365,22 +2492,27 @@
                   "percent": 100
                 },
                 {
-                  "distance": 0.75,
+                  "distance": 6,
                   "percent": 65
                 },
                 {
-                  "distance": 1.5,
+                  "distance": 12,
                   "percent": 45
                 },
                 {
-                  "distance": 2.25,
+                  "distance": 18,
                   "percent": 25
                 }
               ],
               "kind": "radius",
-              "radius_tiles": 2.25
+              "radius": 18
             },
-            "can_attack": [],
+            "can_attack": [
+              "Infantry",
+              "Vehicle",
+              "Structure",
+              "Harvester"
+            ],
             "damage": 800,
             "homing": true,
             "id": "bomb1",
@@ -2400,7 +2532,7 @@
               ]
             ],
             "range_tiles": 2.5,
-            "targeting_unknown": true,
+            "targeting_unknown": false,
             "type": "炸弹"
           }
         ]
@@ -2453,6 +2585,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 2.7,
           "cost": 40,
+          "ground": true,
           "preferred_targets": [
             "Vehicle",
             "Aircraft"
@@ -2540,6 +2673,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 2.7,
           "cost": 70,
+          "ground": true,
           "preferred_targets": [
             "Vehicle"
           ],
@@ -2628,6 +2762,7 @@
           "avoidance_radius": 1.7,
           "can_be_crushed": true,
           "cost": 50,
+          "ground": true,
           "preferred_targets": [
             "Infantry"
           ],
@@ -2950,6 +3085,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 2.7,
           "cost": 30,
+          "ground": true,
           "preferred_targets": [
             "Infantry",
             "Aircraft"
@@ -3046,6 +3182,7 @@
           "avoidance_radius": 1.7,
           "can_be_crushed": true,
           "cost": 10,
+          "ground": true,
           "preferred_targets": [
             "Infantry"
           ],
@@ -3137,6 +3274,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 1.7,
           "cost": 10,
+          "ground": true,
           "preferred_targets": [
             "Infantry"
           ],
@@ -3228,6 +3366,7 @@
           "avoidance_radius": 1.6,
           "can_be_crushed": true,
           "cost": 20,
+          "ground": true,
           "preferred_targets": [
             "Vehicle",
             "Aircraft"
@@ -3322,6 +3461,7 @@
           "avoidance_radius": 1.6,
           "can_be_crushed": true,
           "cost": 20,
+          "ground": true,
           "hidden": true,
           "preferred_targets": [
             "Vehicle",
@@ -3417,6 +3557,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 2.7,
           "cost": 130,
+          "ground": true,
           "preferred_targets": [
             "Vehicle",
             "Aircraft"
@@ -3515,6 +3656,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 2.7,
           "cost": 130,
+          "ground": true,
           "hidden": true,
           "preferred_targets": [
             "Vehicle",
@@ -3615,6 +3757,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 2.7,
           "cost": 50,
+          "ground": true,
           "preferred_targets": [
             "Infantry",
             "Structure"
@@ -3675,6 +3818,15 @@
         "start_major": 3
       },
       "source": "gameplay/units/unit_gdi_shatterer.lua",
+      "stat_mods": [
+        {
+          "duration_ms": 200,
+          "name": "stun",
+          "stats": {
+            "attack_speed_pct": -35
+          }
+        }
+      ],
       "variant": "shatterer"
     },
     {
@@ -3714,6 +3866,7 @@
           "avoidance_radius": 1.7,
           "can_be_crushed": true,
           "cost": 40,
+          "ground": true,
           "preferred_targets": [
             "Infantry",
             "Structure"
@@ -3805,6 +3958,7 @@
           "attack_range_tiles": 2,
           "avoidance_radius": 2.7,
           "cost": 60,
+          "ground": true,
           "preferred_targets": [
             "Aircraft"
           ],
@@ -4020,6 +4174,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 2.7,
           "cost": 130,
+          "ground": true,
           "preferred_targets": [
             "Vehicle"
           ],
@@ -4109,6 +4264,7 @@
           "aggro_radius_tiles": 2.5,
           "attack_range_tiles": 1,
           "avoidance_radius": 2.7,
+          "ground": true,
           "preferred_targets": [
             "Infantry",
             "Aircraft"
@@ -4183,6 +4339,7 @@
           "aggro_radius_tiles": 2.5,
           "attack_range_tiles": 2,
           "avoidance_radius": 2.7,
+          "ground": true,
           "hidden": true,
           "preferred_targets": [
             "Infantry",
@@ -4276,6 +4433,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 2.7,
           "cost": 80,
+          "ground": true,
           "preferred_targets": [
             "Infantry",
             "Aircraft"
@@ -4372,6 +4530,7 @@
           "avoidance_radius": 1.6,
           "can_be_crushed": true,
           "cost": 120,
+          "ground": true,
           "preferred_targets": [
             "Vehicle",
             "Aircraft"
@@ -4469,6 +4628,17 @@
           "avoidance_radius": 1.6,
           "can_be_crushed": true,
           "cost": 120,
+          "emp": {
+            "attack_speed_pct": 15,
+            "duration_ms": 5000,
+            "move_speed_pct": 40,
+            "reload_speed_pct": 15,
+            "targets": [
+              "Vehicle"
+            ],
+            "turn_speed_pct": 90
+          },
+          "ground": true,
           "hidden": true,
           "preferred_targets": [
             "Vehicle",
@@ -4523,6 +4693,16 @@
         "start_major": 5
       },
       "source": "gameplay/units/unit_gdi_zonetrooper_ST.lua",
+      "stat_mods": [
+        {
+          "duration_ms": 5000,
+          "name": "emp",
+          "stats": {
+            "attack_speed_pct": -15,
+            "reload_speed_pct": -15
+          }
+        }
+      ],
       "suffixes": [
         "ST"
       ],
@@ -4564,7 +4744,9 @@
           "avoidance_radius": 2.7,
           "cost": 110,
           "deploy_ms": 4000,
+          "ground": true,
           "min_attack_range_tiles": 1,
+          "must_deploy_to_fire": true,
           "preferred_targets": [
             "Infantry",
             "Vehicle",
@@ -4584,7 +4766,9 @@
         "weapons": [
           {
             "area": {
-              "kind": "none"
+              "falloff": [],
+              "kind": "radius",
+              "radius": 6
             },
             "can_attack": [
               "Infantry",
@@ -4661,6 +4845,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 1.6,
           "cost": 30,
+          "ground": true,
           "preferred_targets": [
             "Vehicle",
             "Aircraft"
@@ -4776,6 +4961,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 2.7,
           "cost": 230,
+          "ground": true,
           "preferred_targets": [
             "Vehicle",
             "Infantry",
@@ -5134,6 +5320,7 @@
           "attack_range_tiles": 2,
           "avoidance_radius": 2.7,
           "cost": 80,
+          "ground": true,
           "preferred_targets": [
             "Vehicle",
             "Structure"
@@ -5275,6 +5462,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 2.7,
           "cost": 30,
+          "ground": true,
           "preferred_targets": [
             "Infantry",
             "Aircraft"
@@ -5370,7 +5558,6 @@
           "武器 gasWeapon 找不到攻击间隔，时序留空",
           "周期取自另一把武器的 catalystBurst；面板数值由伤害最高的那把决定",
           "双武器：周期取自另一把武器（catalystBurst），面板数值由被引爆那把决定",
-          "索敌方式未知（descriptors 空表）",
           "多武器并行（同时开火）"
         ],
         "primary": "catalystWeapon1",
@@ -5379,6 +5566,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 1.7,
           "cost": 60,
+          "leaves_gas": "modifier_chem_warrior_gas_cloud",
           "preferred_targets": [
             "Infantry"
           ],
@@ -5419,10 +5607,30 @@
           },
           {
             "area": {
-              "kind": "none"
+              "falloff": [],
+              "kind": "radius",
+              "radius": 6
             },
-            "can_attack": [],
+            "can_attack": [
+              "Infantry",
+              "Vehicle",
+              "Structure",
+              "Harvester"
+            ],
             "damage": 270,
+            "explosion": {
+              "damage": 800,
+              "overrides": [
+                [
+                  "Structure",
+                  800
+                ],
+                [
+                  "Infantry",
+                  300
+                ]
+              ]
+            },
             "homing": true,
             "id": "catalystWeapon1",
             "name": "catalystWeapon",
@@ -5433,7 +5641,7 @@
               ]
             ],
             "range_tiles": 2.5,
-            "targeting_unknown": true,
+            "targeting_unknown": false,
             "type": "炸弹"
           }
         ]
@@ -5486,6 +5694,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 2.7,
           "cost": 100,
+          "ground": true,
           "preferred_targets": [
             "Vehicle"
           ],
@@ -5577,11 +5786,14 @@
           "avoidance_radius": 1.7,
           "can_be_crushed": true,
           "cost": 60,
+          "ground": true,
+          "leaves_gas": "modifier_chem_warrior_gas_cloud",
           "preferred_targets": [
             "Infantry"
           ],
           "range_tiles": 2.5,
           "separation_ms": 300,
+          "spawn_gas_ms": 750,
           "speed": 5.5424,
           "stealth_detect_tiles": 1,
           "tags": [
@@ -5668,10 +5880,13 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 2.7,
           "cost": 60,
+          "ground": true,
+          "leaves_gas": "modifier_chem_warrior_gas_cloud",
           "preferred_targets": [
             "Infantry"
           ],
           "range_tiles": 1.25,
+          "spawn_gas_ms": 2100,
           "speed": 6.928,
           "tags": [
             "Vehicle",
@@ -5762,6 +5977,7 @@
           "avoidance_radius": 1.7,
           "can_be_crushed": true,
           "cost": 100,
+          "ground": true,
           "preferred_targets": [
             "Infantry",
             "Aircraft"
@@ -5821,6 +6037,16 @@
         "start_major": 3
       },
       "source": "gameplay/units/unit_nod_confessor.lua",
+      "stat_mods": [
+        {
+          "duration_ms": 5000,
+          "name": "zeal",
+          "stats": {
+            "attack_speed_pct": 50,
+            "reload_speed_pct": 50
+          }
+        }
+      ],
       "variant": "confessor",
       "warnings": [
         "已丢弃占位/未解析字段：SetStatOverrides=<function>, oldTuning.SetStatOverrides=<function>"
@@ -5846,6 +6072,7 @@
           "aggro_radius_tiles": 2.5,
           "attack_range_tiles": 1,
           "avoidance_radius": 6,
+          "ground": true,
           "tags": [
             "override_structure"
           ],
@@ -5899,6 +6126,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 1.7,
           "cost": 10,
+          "ground": true,
           "preferred_targets": [
             "Infantry"
           ],
@@ -5988,6 +6216,17 @@
           "avoidance_radius": 1.6,
           "can_be_crushed": true,
           "cost": 130,
+          "emp": {
+            "attack_speed_pct": 15,
+            "duration_ms": 5000,
+            "move_speed_pct": 20,
+            "reload_speed_pct": 15,
+            "targets": [
+              "Vehicle"
+            ],
+            "turn_speed_pct": 20
+          },
+          "ground": true,
           "preferred_targets": [
             "Vehicle",
             "Aircraft"
@@ -6043,6 +6282,16 @@
         "start_major": 5
       },
       "source": "gameplay/units/unit_nod_cyborg.lua",
+      "stat_mods": [
+        {
+          "duration_ms": 5000,
+          "name": "emp",
+          "stats": {
+            "attack_speed_pct": -15,
+            "reload_speed_pct": -15
+          }
+        }
+      ],
       "variant": "cyborg",
       "warnings": [
         "已丢弃占位/未解析字段：SetStatOverrides=<function>, oldTuning.SetStatOverrides=<function>"
@@ -6069,6 +6318,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 2.7,
           "cost": 70,
+          "ground": true,
           "preferred_targets": [
             "Infantry"
           ],
@@ -6112,6 +6362,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 2.7,
           "cost": 70,
+          "ground": true,
           "hidden": true,
           "preferred_targets": [
             "Infantry"
@@ -6175,6 +6426,7 @@
           "avoidance_radius": 1.7,
           "can_be_crushed": true,
           "cost": 30,
+          "ground": true,
           "preferred_targets": [
             "Infantry"
           ],
@@ -6228,6 +6480,16 @@
         "start_major": 3
       },
       "source": "gameplay/units/unit_nod_fanatic.lua",
+      "stat_mods": [
+        {
+          "duration_ms": 5000,
+          "name": "zeal",
+          "stats": {
+            "attack_speed_pct": 45,
+            "reload_speed_pct": 10
+          }
+        }
+      ],
       "variant": "fanatic",
       "warnings": [
         "已丢弃占位/未解析字段：SetStatOverrides=<function>, oldTuning.SetStatOverrides=<function>"
@@ -6264,6 +6526,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 1.098,
           "cost": 100,
+          "leaves_fire": "modifier_fire_bomber_fire",
           "preferred_targets": [
             "Infantry",
             "Structure",
@@ -6271,6 +6534,7 @@
           ],
           "range_tiles": 2.5,
           "speed": 5.5424,
+          "speed_mod_while_empty_pct": 20,
           "tags": [
             "Aircraft",
             "override_aircraft"
@@ -6303,6 +6567,7 @@
               ]
             ],
             "range_tiles": 2.5,
+            "squad_damage": true,
             "targeting_unknown": false,
             "type": "炸弹"
           }
@@ -6357,6 +6622,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 2.7,
           "cost": 90,
+          "ground": true,
           "preferred_targets": [
             "Infantry",
             "Structure"
@@ -6458,6 +6724,7 @@
           "avoidance_radius": 1.7,
           "can_be_crushed": true,
           "cost": 40,
+          "ground": true,
           "preferred_targets": [
             "Infantry",
             "Structure"
@@ -6535,6 +6802,7 @@
         "stats": {
           "avoidance_radius": 3,
           "cost": 60,
+          "ground": true,
           "kill_award_tiberium": 80,
           "speed": 3.958857,
           "tags": [
@@ -6574,6 +6842,7 @@
         "stats": {
           "avoidance_radius": 3,
           "cost": 60,
+          "ground": true,
           "hidden": true,
           "kill_award_tiberium": 80,
           "speed": 6.928,
@@ -6731,6 +7000,7 @@
           "avoidance_radius": 1.7,
           "can_be_crushed": true,
           "cost": 10,
+          "ground": true,
           "preferred_targets": [
             "Infantry"
           ],
@@ -6823,6 +7093,7 @@
           "avoidance_radius": 1.7,
           "can_be_crushed": true,
           "cost": 60,
+          "ground": true,
           "preferred_targets": [
             "Vehicle"
           ],
@@ -6910,6 +7181,7 @@
           "aggro_radius_tiles": 2.5,
           "attack_range_tiles": 2,
           "avoidance_radius": 2.7,
+          "ground": true,
           "preferred_targets": [
             "Vehicle",
             "Infantry"
@@ -6988,6 +7260,7 @@
           "aggro_radius_tiles": 2.5,
           "attack_range_tiles": 2,
           "avoidance_radius": 2.7,
+          "ground": true,
           "hidden": true,
           "preferred_targets": [
             "Vehicle",
@@ -7071,6 +7344,7 @@
           "avoidance_radius": 2.7,
           "cost": 120,
           "deploy_ms": 2000,
+          "must_deploy_to_fire": true,
           "preferred_targets": [
             "Vehicle"
           ],
@@ -7170,12 +7444,16 @@
           "can_be_crushed": true,
           "cost": 40,
           "deploy_ms": 2000,
+          "ground": true,
+          "leaves_fire": "modifier_fire_bomber_fire",
+          "must_deploy_to_fire": true,
           "preferred_targets": [
             "Infantry",
             "Vehicle",
             "Aircraft"
           ],
           "range_tiles": 2.5,
+          "self_destruct": true,
           "separation_ms": 2000,
           "speed": 5.5424,
           "tags": [
@@ -7209,6 +7487,7 @@
               ]
             ],
             "range_tiles": 2.5,
+            "squad_damage": true,
             "targeting_unknown": false,
             "type": "炸弹"
           }
@@ -7267,6 +7546,7 @@
           "avoidance_radius": 1.7,
           "can_be_crushed": true,
           "cost": 30,
+          "ground": true,
           "preferred_targets": [
             "Vehicle",
             "Aircraft"
@@ -7360,6 +7640,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 2.7,
           "cost": 70,
+          "ground": true,
           "preferred_targets": [
             "Vehicle"
           ],
@@ -7442,6 +7723,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 2.7,
           "cost": 100,
+          "ground": true,
           "preferred_targets": [
             "Vehicle",
             "Aircraft"
@@ -7541,6 +7823,7 @@
           "avoidance_radius": 1.7,
           "can_be_crushed": true,
           "cost": 20,
+          "ground": true,
           "preferred_targets": [
             "Vehicle",
             "Aircraft"
@@ -7635,6 +7918,7 @@
           "avoidance_radius": 1.7,
           "can_be_crushed": true,
           "cost": 40,
+          "ground": true,
           "hidden": true,
           "preferred_targets": [
             "Vehicle",
@@ -7743,6 +8027,7 @@
           "cost": 70,
           "damage_reduction_pct": 70,
           "deploy_ms": 2000,
+          "ground": true,
           "preferred_targets": [
             "Vehicle"
           ],
@@ -7931,6 +8216,16 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 1.7,
           "cost": 100,
+          "emp": {
+            "attack_speed_pct": 50,
+            "duration_ms": 4000,
+            "move_speed_pct": 30,
+            "reload_speed_pct": 50,
+            "targets": [
+              "Vehicle"
+            ],
+            "turn_speed_pct": 30
+          },
           "preferred_targets": [
             "Aircraft"
           ],
@@ -7980,6 +8275,16 @@
         "start_major": 3
       },
       "source": "gameplay/units/unit_nod_viper.lua",
+      "stat_mods": [
+        {
+          "duration_ms": 4000,
+          "name": "emp",
+          "stats": {
+            "attack_speed_pct": -50,
+            "reload_speed_pct": -50
+          }
+        }
+      ],
       "variant": "viper"
     },
     {
@@ -8029,6 +8334,7 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 2.7,
           "cost": 80,
+          "ground": true,
           "preferred_targets": [
             "Infantry",
             "Aircraft",
@@ -8139,7 +8445,17 @@
           "attack_range_tiles": 1,
           "avoidance_radius": 1.7,
           "cost": 70,
-          "emp_radius_tiles": 2.25,
+          "emp": {
+            "attack_speed_pct": 100,
+            "duration_ms": 2000,
+            "move_speed_pct": 0,
+            "reload_speed_pct": 100,
+            "targets": [
+              "Vehicle"
+            ],
+            "turn_speed_pct": 0
+          },
+          "emp_radius": 18,
           "preferred_targets": [
             "Vehicle"
           ],
@@ -8199,6 +8515,16 @@
         "start_major": 5
       },
       "source": "gameplay/units/unit_nod_wraith.lua",
+      "stat_mods": [
+        {
+          "duration_ms": 2000,
+          "name": "emp",
+          "stats": {
+            "attack_speed_pct": -100,
+            "reload_speed_pct": -100
+          }
+        }
+      ],
       "variant": "wraith"
     },
     {

@@ -1,0 +1,4 @@
+{
+  "_note": "手写的游戏内事实补丁，按单位 id + 路径覆盖 data/units.json。规则见 web/src/patch.ts。空文件/缺文件时行为与没有它完全一致。",
+  "units": {}
+}

@@ -1,0 +1,757 @@
+[
+  {
+    "case": "步枪兵 rifle（循环类）",
+    "source": "unit_gdi_riflemen.lua:32-36",
+    "durationMs": 4000,
+    "states": [
+      {
+        "start": 0,
+        "state": "cooling"
+      },
+      {
+        "start": 1720,
+        "state": "cooling"
+      },
+      {
+        "start": 3440,
+        "state": "cooling"
+      }
+    ],
+    "events": [
+      {
+        "at": 0,
+        "event": "firing"
+      },
+      {
+        "at": 1720,
+        "event": "firing"
+      },
+      {
+        "at": 3440,
+        "event": "firing"
+      }
+    ],
+    "shots": [
+      0,
+      1720,
+      3440
+    ]
+  },
+  {
+    "case": "弹弓（连发族，有前摇与首轮蓄力）",
+    "source": "unit_gdi_slingshot.lua 的 modifier_sequence.tuning",
+    "durationMs": 4000,
+    "states": [
+      {
+        "start": 0,
+        "state": "init_charging"
+      },
+      {
+        "start": 500,
+        "state": "charging"
+      },
+      {
+        "start": 800,
+        "state": "cooling"
+      },
+      {
+        "start": 1500,
+        "state": "charging"
+      },
+      {
+        "start": 1800,
+        "state": "cooling"
+      },
+      {
+        "start": 2500,
+        "state": "charging"
+      },
+      {
+        "start": 2800,
+        "state": "cooling"
+      },
+      {
+        "start": 3500,
+        "state": "charging"
+      },
+      {
+        "start": 3800,
+        "state": "cooling"
+      }
+    ],
+    "events": [
+      {
+        "at": 800,
+        "event": "firing"
+      },
+      {
+        "at": 1800,
+        "event": "firing"
+      },
+      {
+        "at": 2800,
+        "event": "firing"
+      },
+      {
+        "at": 3800,
+        "event": "firing"
+      }
+    ],
+    "shots": [
+      800,
+      1800,
+      2800,
+      3800
+    ]
+  },
+  {
+    "case": "MLRS（弹夹类，打 3 发装填 5s）",
+    "source": "unit_gdi_mlrs.lua:40-49",
+    "durationMs": 12000,
+    "states": [
+      {
+        "start": 0,
+        "state": "init_charging"
+      },
+      {
+        "start": 250,
+        "state": "cooling"
+      },
+      {
+        "start": 500,
+        "state": "cooling"
+      },
+      {
+        "start": 750,
+        "state": "wait_reload"
+      },
+      {
+        "start": 5000,
+        "state": "charging"
+      },
+      {
+        "start": 5250,
+        "state": "cooling"
+      },
+      {
+        "start": 5500,
+        "state": "cooling"
+      },
+      {
+        "start": 5750,
+        "state": "wait_reload"
+      },
+      {
+        "start": 10000,
+        "state": "charging"
+      },
+      {
+        "start": 10250,
+        "state": "cooling"
+      },
+      {
+        "start": 10500,
+        "state": "cooling"
+      },
+      {
+        "start": 10750,
+        "state": "wait_reload"
+      }
+    ],
+    "events": [
+      {
+        "at": 250,
+        "event": "firing"
+      },
+      {
+        "at": 500,
+        "event": "firing"
+      },
+      {
+        "at": 750,
+        "event": "firing"
+      },
+      {
+        "at": 5250,
+        "event": "reload"
+      },
+      {
+        "at": 5250,
+        "event": "firing"
+      },
+      {
+        "at": 5500,
+        "event": "firing"
+      },
+      {
+        "at": 5750,
+        "event": "firing"
+      },
+      {
+        "at": 10250,
+        "event": "reload"
+      },
+      {
+        "at": 10250,
+        "event": "firing"
+      },
+      {
+        "at": 10500,
+        "event": "firing"
+      },
+      {
+        "at": 10750,
+        "event": "firing"
+      }
+    ],
+    "shots": [
+      250,
+      500,
+      750,
+      5250,
+      5500,
+      5750,
+      10250,
+      10500,
+      10750
+    ]
+  },
+  {
+    "case": "巨无霸（多发：一轮 3 发，周期 2500）",
+    "source": "unit_gdi_juggernaut.lua 的 modifier_sequence.tuning",
+    "durationMs": 6000,
+    "states": [
+      {
+        "start": 0,
+        "state": "cooling"
+      },
+      {
+        "start": 250,
+        "state": "cooling"
+      },
+      {
+        "start": 500,
+        "state": "cooling"
+      },
+      {
+        "start": 2500,
+        "state": "cooling"
+      },
+      {
+        "start": 2750,
+        "state": "cooling"
+      },
+      {
+        "start": 3000,
+        "state": "cooling"
+      },
+      {
+        "start": 5000,
+        "state": "cooling"
+      },
+      {
+        "start": 5250,
+        "state": "cooling"
+      },
+      {
+        "start": 5500,
+        "state": "cooling"
+      }
+    ],
+    "events": [
+      {
+        "at": 0,
+        "event": "firing"
+      },
+      {
+        "at": 250,
+        "event": "firing"
+      },
+      {
+        "at": 500,
+        "event": "firing"
+      },
+      {
+        "at": 2500,
+        "event": "firing"
+      },
+      {
+        "at": 2750,
+        "event": "firing"
+      },
+      {
+        "at": 3000,
+        "event": "firing"
+      },
+      {
+        "at": 5000,
+        "event": "firing"
+      },
+      {
+        "at": 5250,
+        "event": "firing"
+      },
+      {
+        "at": 5500,
+        "event": "firing"
+      }
+    ],
+    "shots": [
+      0,
+      250,
+      500,
+      2500,
+      2750,
+      3000,
+      5000,
+      5250,
+      5500
+    ]
+  },
+  {
+    "case": "光束炮（分段：3 段递增，每段 250ms 一跳）",
+    "source": "unit_nod_beamcannon.lua:50-92",
+    "durationMs": 12000,
+    "states": [
+      {
+        "start": 0,
+        "state": "init_charging"
+      },
+      {
+        "start": 500,
+        "state": "cooling"
+      },
+      {
+        "start": 750,
+        "state": "cooling"
+      },
+      {
+        "start": 1000,
+        "state": "cooling"
+      },
+      {
+        "start": 1250,
+        "state": "cooling"
+      },
+      {
+        "start": 1500,
+        "state": "cooling"
+      },
+      {
+        "start": 1750,
+        "state": "cooling"
+      },
+      {
+        "start": 2000,
+        "state": "cooling"
+      },
+      {
+        "start": 2250,
+        "state": "cooling"
+      },
+      {
+        "start": 2500,
+        "state": "cooling"
+      },
+      {
+        "start": 2750,
+        "state": "cooling"
+      },
+      {
+        "start": 3000,
+        "state": "cooling"
+      },
+      {
+        "start": 3250,
+        "state": "cooling"
+      },
+      {
+        "start": 3500,
+        "state": "cooling"
+      },
+      {
+        "start": 3750,
+        "state": "cooling"
+      },
+      {
+        "start": 4000,
+        "state": "cooling"
+      },
+      {
+        "start": 4250,
+        "state": "cooling"
+      },
+      {
+        "start": 4500,
+        "state": "cooling"
+      },
+      {
+        "start": 4750,
+        "state": "cooling"
+      },
+      {
+        "start": 5000,
+        "state": "cooling"
+      },
+      {
+        "start": 5250,
+        "state": "cooling"
+      },
+      {
+        "start": 5500,
+        "state": "cooling"
+      },
+      {
+        "start": 5750,
+        "state": "cooling"
+      },
+      {
+        "start": 6000,
+        "state": "cooling"
+      },
+      {
+        "start": 6250,
+        "state": "cooling"
+      },
+      {
+        "start": 6500,
+        "state": "cooling"
+      },
+      {
+        "start": 6750,
+        "state": "cooling"
+      },
+      {
+        "start": 7000,
+        "state": "cooling"
+      },
+      {
+        "start": 7250,
+        "state": "cooling"
+      },
+      {
+        "start": 7500,
+        "state": "cooling"
+      },
+      {
+        "start": 7750,
+        "state": "cooling"
+      },
+      {
+        "start": 8000,
+        "state": "cooling"
+      },
+      {
+        "start": 8250,
+        "state": "cooling"
+      },
+      {
+        "start": 8500,
+        "state": "cooling"
+      },
+      {
+        "start": 8750,
+        "state": "cooling"
+      },
+      {
+        "start": 9000,
+        "state": "cooling"
+      },
+      {
+        "start": 9250,
+        "state": "cooling"
+      },
+      {
+        "start": 9500,
+        "state": "cooling"
+      },
+      {
+        "start": 9750,
+        "state": "cooling"
+      },
+      {
+        "start": 10000,
+        "state": "cooling"
+      },
+      {
+        "start": 10250,
+        "state": "cooling"
+      },
+      {
+        "start": 10500,
+        "state": "cooling"
+      },
+      {
+        "start": 10750,
+        "state": "cooling"
+      },
+      {
+        "start": 11000,
+        "state": "cooling"
+      },
+      {
+        "start": 11250,
+        "state": "cooling"
+      },
+      {
+        "start": 11500,
+        "state": "cooling"
+      },
+      {
+        "start": 11750,
+        "state": "cooling"
+      },
+      {
+        "start": 12000,
+        "state": "cooling"
+      }
+    ],
+    "events": [
+      {
+        "at": 500,
+        "event": "firing"
+      },
+      {
+        "at": 750,
+        "event": "firing"
+      },
+      {
+        "at": 1000,
+        "event": "firing"
+      },
+      {
+        "at": 1250,
+        "event": "firing"
+      },
+      {
+        "at": 1500,
+        "event": "firing"
+      },
+      {
+        "at": 1750,
+        "event": "firing"
+      },
+      {
+        "at": 2000,
+        "event": "firing"
+      },
+      {
+        "at": 2250,
+        "event": "firing"
+      },
+      {
+        "at": 2500,
+        "event": "firing"
+      },
+      {
+        "at": 2750,
+        "event": "firing"
+      },
+      {
+        "at": 3000,
+        "event": "firing"
+      },
+      {
+        "at": 3250,
+        "event": "firing"
+      },
+      {
+        "at": 3250,
+        "event": "stage"
+      },
+      {
+        "at": 3500,
+        "event": "firing"
+      },
+      {
+        "at": 3750,
+        "event": "firing"
+      },
+      {
+        "at": 4000,
+        "event": "firing"
+      },
+      {
+        "at": 4250,
+        "event": "firing"
+      },
+      {
+        "at": 4500,
+        "event": "firing"
+      },
+      {
+        "at": 4750,
+        "event": "firing"
+      },
+      {
+        "at": 5000,
+        "event": "firing"
+      },
+      {
+        "at": 5250,
+        "event": "firing"
+      },
+      {
+        "at": 5500,
+        "event": "firing"
+      },
+      {
+        "at": 5750,
+        "event": "firing"
+      },
+      {
+        "at": 6000,
+        "event": "firing"
+      },
+      {
+        "at": 6250,
+        "event": "firing"
+      },
+      {
+        "at": 6500,
+        "event": "firing"
+      },
+      {
+        "at": 6750,
+        "event": "firing"
+      },
+      {
+        "at": 7000,
+        "event": "firing"
+      },
+      {
+        "at": 7250,
+        "event": "firing"
+      },
+      {
+        "at": 7500,
+        "event": "firing"
+      },
+      {
+        "at": 7750,
+        "event": "firing"
+      },
+      {
+        "at": 8000,
+        "event": "firing"
+      },
+      {
+        "at": 8250,
+        "event": "firing"
+      },
+      {
+        "at": 8500,
+        "event": "firing"
+      },
+      {
+        "at": 8750,
+        "event": "firing"
+      },
+      {
+        "at": 9000,
+        "event": "firing"
+      },
+      {
+        "at": 9250,
+        "event": "firing"
+      },
+      {
+        "at": 9250,
+        "event": "stage"
+      },
+      {
+        "at": 9500,
+        "event": "firing"
+      },
+      {
+        "at": 9750,
+        "event": "firing"
+      },
+      {
+        "at": 10000,
+        "event": "firing"
+      },
+      {
+        "at": 10250,
+        "event": "firing"
+      },
+      {
+        "at": 10500,
+        "event": "firing"
+      },
+      {
+        "at": 10750,
+        "event": "firing"
+      },
+      {
+        "at": 11000,
+        "event": "firing"
+      },
+      {
+        "at": 11250,
+        "event": "firing"
+      },
+      {
+        "at": 11500,
+        "event": "firing"
+      },
+      {
+        "at": 11750,
+        "event": "firing"
+      },
+      {
+        "at": 12000,
+        "event": "firing"
+      }
+    ],
+    "shots": [
+      500,
+      750,
+      1000,
+      1250,
+      1500,
+      1750,
+      2000,
+      2250,
+      2500,
+      2750,
+      3000,
+      3250,
+      3500,
+      3750,
+      4000,
+      4250,
+      4500,
+      4750,
+      5000,
+      5250,
+      5500,
+      5750,
+      6000,
+      6250,
+      6500,
+      6750,
+      7000,
+      7250,
+      7500,
+      7750,
+      8000,
+      8250,
+      8500,
+      8750,
+      9000,
+      9250,
+      9500,
+      9750,
+      10000,
+      10250,
+      10500,
+      10750,
+      11000,
+      11250,
+      11500,
+      11750,
+      12000
+    ]
+  }
+]

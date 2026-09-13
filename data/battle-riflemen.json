@@ -1,0 +1,1468 @@
+{
+  "meta": {
+    "generatedBy": "core/test/battle-riflemen.ts（驱动：core/src/model/duel.ts）",
+    "dataset": "data/units.def.gen.json",
+    "unitId": "unit_gdi_riflemen",
+    "unitName": "步枪兵",
+    "stepMs": 1,
+    "weapon": {
+      "id": "rifle",
+      "timing": {
+        "kind": "cyclic",
+        "cooldownMs": 1720,
+        "chargeUpMs": 0,
+        "initialChargeUpMs": 0,
+        "hits": 1,
+        "intervalMs": 0
+      },
+      "damage": [
+        {
+          "main": {
+            "base": 38,
+            "overrides": [
+              [
+                "override_vehicle",
+                15
+              ]
+            ]
+          }
+        }
+      ],
+      "delivery": "one_member",
+      "muzzleCount": 1
+    },
+    "squad": {
+      "waveSize": 5,
+      "attackSeparationDurationMS": 344
+    },
+    "flight": {
+      "ms": 1,
+      "note": "占位值：只保证伤害不在开火那一帧落地（J45 还没按武器算）"
+    },
+    "notModelled": [
+      "`ability:GetDamageModifier()` 恒按 1（全库没有 Lua 写它，J51）",
+      "按距离衰减需要位置 ⇒ 未建模，按「每人各一份」处理并标 `falloff_unmodeled`",
+      "站位 / 射程 / 索敌未建模：两队恒在射程内、互相锁定（站桩）",
+      "飞行时间：按武器算需要产物补 `initialSpeed`（J45）⇒ 未填的用 1ms 占位",
+      "攻速/装填类 debuff：已记录并计时，但武器机吃固定参数 ⇒ 节奏未变"
+    ]
+  },
+  "squads": [
+    {
+      "side": "A",
+      "unitId": "unit_gdi_riflemen",
+      "name_zh": "步枪兵",
+      "level": "1-0",
+      "waveSize": 5,
+      "perMemberHp": 130,
+      "maxHp": 650,
+      "hp": 0,
+      "alive": false,
+      "aliveUnits": 0
+    },
+    {
+      "side": "B",
+      "unitId": "unit_gdi_riflemen",
+      "name_zh": "步枪兵",
+      "level": "1-0",
+      "waveSize": 5,
+      "perMemberHp": 130,
+      "maxHp": 650,
+      "hp": 0,
+      "alive": false,
+      "aliveUnits": 0
+    }
+  ],
+  "behaviorSeries": {
+    "durationMs": 15482,
+    "timeline": [
+      {
+        "atMs": 0,
+        "kind": "fired",
+        "side": "A",
+        "unitIndex": 0,
+        "weapon": "rifle",
+        "landAtMs": 1
+      },
+      {
+        "atMs": 0,
+        "kind": "fired",
+        "side": "B",
+        "unitIndex": 0,
+        "weapon": "rifle",
+        "landAtMs": 1
+      },
+      {
+        "atMs": 1,
+        "kind": "hit",
+        "side": "A",
+        "unitIndex": 0,
+        "targetSide": "B",
+        "targetIndex": 4,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 92,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 1,
+        "kind": "hit",
+        "side": "B",
+        "unitIndex": 0,
+        "targetSide": "A",
+        "targetIndex": 4,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 92,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 344,
+        "kind": "fired",
+        "side": "A",
+        "unitIndex": 1,
+        "weapon": "rifle",
+        "landAtMs": 345
+      },
+      {
+        "atMs": 344,
+        "kind": "fired",
+        "side": "B",
+        "unitIndex": 1,
+        "weapon": "rifle",
+        "landAtMs": 345
+      },
+      {
+        "atMs": 345,
+        "kind": "hit",
+        "side": "A",
+        "unitIndex": 1,
+        "targetSide": "B",
+        "targetIndex": 4,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 54,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 345,
+        "kind": "hit",
+        "side": "B",
+        "unitIndex": 1,
+        "targetSide": "A",
+        "targetIndex": 4,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 54,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 688,
+        "kind": "fired",
+        "side": "A",
+        "unitIndex": 2,
+        "weapon": "rifle",
+        "landAtMs": 689
+      },
+      {
+        "atMs": 688,
+        "kind": "fired",
+        "side": "B",
+        "unitIndex": 2,
+        "weapon": "rifle",
+        "landAtMs": 689
+      },
+      {
+        "atMs": 689,
+        "kind": "hit",
+        "side": "A",
+        "unitIndex": 2,
+        "targetSide": "B",
+        "targetIndex": 4,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 16,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 689,
+        "kind": "hit",
+        "side": "B",
+        "unitIndex": 2,
+        "targetSide": "A",
+        "targetIndex": 4,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 16,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 1032,
+        "kind": "fired",
+        "side": "A",
+        "unitIndex": 3,
+        "weapon": "rifle",
+        "landAtMs": 1033
+      },
+      {
+        "atMs": 1032,
+        "kind": "fired",
+        "side": "B",
+        "unitIndex": 3,
+        "weapon": "rifle",
+        "landAtMs": 1033
+      },
+      {
+        "atMs": 1033,
+        "kind": "hit",
+        "side": "A",
+        "unitIndex": 3,
+        "targetSide": "B",
+        "targetIndex": 4,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 0,
+        "killed": true,
+        "via": "one_member"
+      },
+      {
+        "atMs": 1033,
+        "kind": "unit_dead",
+        "side": "B",
+        "unitIndex": 4
+      },
+      {
+        "atMs": 1033,
+        "kind": "hit",
+        "side": "B",
+        "unitIndex": 3,
+        "targetSide": "A",
+        "targetIndex": 4,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 0,
+        "killed": true,
+        "via": "one_member"
+      },
+      {
+        "atMs": 1033,
+        "kind": "unit_dead",
+        "side": "A",
+        "unitIndex": 4
+      },
+      {
+        "atMs": 1720,
+        "kind": "fired",
+        "side": "A",
+        "unitIndex": 0,
+        "weapon": "rifle",
+        "landAtMs": 1721
+      },
+      {
+        "atMs": 1720,
+        "kind": "fired",
+        "side": "B",
+        "unitIndex": 0,
+        "weapon": "rifle",
+        "landAtMs": 1721
+      },
+      {
+        "atMs": 1721,
+        "kind": "hit",
+        "side": "A",
+        "unitIndex": 0,
+        "targetSide": "B",
+        "targetIndex": 3,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 92,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 1721,
+        "kind": "hit",
+        "side": "B",
+        "unitIndex": 0,
+        "targetSide": "A",
+        "targetIndex": 3,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 92,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 2064,
+        "kind": "fired",
+        "side": "A",
+        "unitIndex": 1,
+        "weapon": "rifle",
+        "landAtMs": 2065
+      },
+      {
+        "atMs": 2064,
+        "kind": "fired",
+        "side": "B",
+        "unitIndex": 1,
+        "weapon": "rifle",
+        "landAtMs": 2065
+      },
+      {
+        "atMs": 2065,
+        "kind": "hit",
+        "side": "A",
+        "unitIndex": 1,
+        "targetSide": "B",
+        "targetIndex": 3,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 54,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 2065,
+        "kind": "hit",
+        "side": "B",
+        "unitIndex": 1,
+        "targetSide": "A",
+        "targetIndex": 3,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 54,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 2408,
+        "kind": "fired",
+        "side": "A",
+        "unitIndex": 2,
+        "weapon": "rifle",
+        "landAtMs": 2409
+      },
+      {
+        "atMs": 2408,
+        "kind": "fired",
+        "side": "B",
+        "unitIndex": 2,
+        "weapon": "rifle",
+        "landAtMs": 2409
+      },
+      {
+        "atMs": 2409,
+        "kind": "hit",
+        "side": "A",
+        "unitIndex": 2,
+        "targetSide": "B",
+        "targetIndex": 3,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 16,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 2409,
+        "kind": "hit",
+        "side": "B",
+        "unitIndex": 2,
+        "targetSide": "A",
+        "targetIndex": 3,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 16,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 2752,
+        "kind": "fired",
+        "side": "A",
+        "unitIndex": 3,
+        "weapon": "rifle",
+        "landAtMs": 2753
+      },
+      {
+        "atMs": 2752,
+        "kind": "fired",
+        "side": "B",
+        "unitIndex": 3,
+        "weapon": "rifle",
+        "landAtMs": 2753
+      },
+      {
+        "atMs": 2753,
+        "kind": "hit",
+        "side": "A",
+        "unitIndex": 3,
+        "targetSide": "B",
+        "targetIndex": 3,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 0,
+        "killed": true,
+        "via": "one_member"
+      },
+      {
+        "atMs": 2753,
+        "kind": "unit_dead",
+        "side": "B",
+        "unitIndex": 3
+      },
+      {
+        "atMs": 2753,
+        "kind": "hit",
+        "side": "B",
+        "unitIndex": 3,
+        "targetSide": "A",
+        "targetIndex": 3,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 0,
+        "killed": true,
+        "via": "one_member"
+      },
+      {
+        "atMs": 2753,
+        "kind": "unit_dead",
+        "side": "A",
+        "unitIndex": 3
+      },
+      {
+        "atMs": 3440,
+        "kind": "fired",
+        "side": "A",
+        "unitIndex": 0,
+        "weapon": "rifle",
+        "landAtMs": 3441
+      },
+      {
+        "atMs": 3440,
+        "kind": "fired",
+        "side": "B",
+        "unitIndex": 0,
+        "weapon": "rifle",
+        "landAtMs": 3441
+      },
+      {
+        "atMs": 3441,
+        "kind": "hit",
+        "side": "A",
+        "unitIndex": 0,
+        "targetSide": "B",
+        "targetIndex": 2,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 92,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 3441,
+        "kind": "hit",
+        "side": "B",
+        "unitIndex": 0,
+        "targetSide": "A",
+        "targetIndex": 2,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 92,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 3784,
+        "kind": "fired",
+        "side": "A",
+        "unitIndex": 1,
+        "weapon": "rifle",
+        "landAtMs": 3785
+      },
+      {
+        "atMs": 3784,
+        "kind": "fired",
+        "side": "B",
+        "unitIndex": 1,
+        "weapon": "rifle",
+        "landAtMs": 3785
+      },
+      {
+        "atMs": 3785,
+        "kind": "hit",
+        "side": "A",
+        "unitIndex": 1,
+        "targetSide": "B",
+        "targetIndex": 2,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 54,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 3785,
+        "kind": "hit",
+        "side": "B",
+        "unitIndex": 1,
+        "targetSide": "A",
+        "targetIndex": 2,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 54,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 4128,
+        "kind": "fired",
+        "side": "A",
+        "unitIndex": 2,
+        "weapon": "rifle",
+        "landAtMs": 4129
+      },
+      {
+        "atMs": 4128,
+        "kind": "fired",
+        "side": "B",
+        "unitIndex": 2,
+        "weapon": "rifle",
+        "landAtMs": 4129
+      },
+      {
+        "atMs": 4129,
+        "kind": "hit",
+        "side": "A",
+        "unitIndex": 2,
+        "targetSide": "B",
+        "targetIndex": 2,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 16,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 4129,
+        "kind": "hit",
+        "side": "B",
+        "unitIndex": 2,
+        "targetSide": "A",
+        "targetIndex": 2,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 16,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 5160,
+        "kind": "fired",
+        "side": "A",
+        "unitIndex": 0,
+        "weapon": "rifle",
+        "landAtMs": 5161
+      },
+      {
+        "atMs": 5160,
+        "kind": "fired",
+        "side": "B",
+        "unitIndex": 0,
+        "weapon": "rifle",
+        "landAtMs": 5161
+      },
+      {
+        "atMs": 5161,
+        "kind": "hit",
+        "side": "A",
+        "unitIndex": 0,
+        "targetSide": "B",
+        "targetIndex": 2,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 0,
+        "killed": true,
+        "via": "one_member"
+      },
+      {
+        "atMs": 5161,
+        "kind": "unit_dead",
+        "side": "B",
+        "unitIndex": 2
+      },
+      {
+        "atMs": 5161,
+        "kind": "hit",
+        "side": "B",
+        "unitIndex": 0,
+        "targetSide": "A",
+        "targetIndex": 2,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 0,
+        "killed": true,
+        "via": "one_member"
+      },
+      {
+        "atMs": 5161,
+        "kind": "unit_dead",
+        "side": "A",
+        "unitIndex": 2
+      },
+      {
+        "atMs": 5504,
+        "kind": "fired",
+        "side": "A",
+        "unitIndex": 1,
+        "weapon": "rifle",
+        "landAtMs": 5505
+      },
+      {
+        "atMs": 5504,
+        "kind": "fired",
+        "side": "B",
+        "unitIndex": 1,
+        "weapon": "rifle",
+        "landAtMs": 5505
+      },
+      {
+        "atMs": 5505,
+        "kind": "hit",
+        "side": "A",
+        "unitIndex": 1,
+        "targetSide": "B",
+        "targetIndex": 1,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 92,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 5505,
+        "kind": "hit",
+        "side": "B",
+        "unitIndex": 1,
+        "targetSide": "A",
+        "targetIndex": 1,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 92,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 6880,
+        "kind": "fired",
+        "side": "A",
+        "unitIndex": 0,
+        "weapon": "rifle",
+        "landAtMs": 6881
+      },
+      {
+        "atMs": 6880,
+        "kind": "fired",
+        "side": "B",
+        "unitIndex": 0,
+        "weapon": "rifle",
+        "landAtMs": 6881
+      },
+      {
+        "atMs": 6881,
+        "kind": "hit",
+        "side": "A",
+        "unitIndex": 0,
+        "targetSide": "B",
+        "targetIndex": 1,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 54,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 6881,
+        "kind": "hit",
+        "side": "B",
+        "unitIndex": 0,
+        "targetSide": "A",
+        "targetIndex": 1,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 54,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 7224,
+        "kind": "fired",
+        "side": "A",
+        "unitIndex": 1,
+        "weapon": "rifle",
+        "landAtMs": 7225
+      },
+      {
+        "atMs": 7224,
+        "kind": "fired",
+        "side": "B",
+        "unitIndex": 1,
+        "weapon": "rifle",
+        "landAtMs": 7225
+      },
+      {
+        "atMs": 7225,
+        "kind": "hit",
+        "side": "A",
+        "unitIndex": 1,
+        "targetSide": "B",
+        "targetIndex": 1,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 16,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 7225,
+        "kind": "hit",
+        "side": "B",
+        "unitIndex": 1,
+        "targetSide": "A",
+        "targetIndex": 1,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 16,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 8600,
+        "kind": "fired",
+        "side": "A",
+        "unitIndex": 0,
+        "weapon": "rifle",
+        "landAtMs": 8601
+      },
+      {
+        "atMs": 8600,
+        "kind": "fired",
+        "side": "B",
+        "unitIndex": 0,
+        "weapon": "rifle",
+        "landAtMs": 8601
+      },
+      {
+        "atMs": 8601,
+        "kind": "hit",
+        "side": "A",
+        "unitIndex": 0,
+        "targetSide": "B",
+        "targetIndex": 1,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 0,
+        "killed": true,
+        "via": "one_member"
+      },
+      {
+        "atMs": 8601,
+        "kind": "unit_dead",
+        "side": "B",
+        "unitIndex": 1
+      },
+      {
+        "atMs": 8601,
+        "kind": "hit",
+        "side": "B",
+        "unitIndex": 0,
+        "targetSide": "A",
+        "targetIndex": 1,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 0,
+        "killed": true,
+        "via": "one_member"
+      },
+      {
+        "atMs": 8601,
+        "kind": "unit_dead",
+        "side": "A",
+        "unitIndex": 1
+      },
+      {
+        "atMs": 10320,
+        "kind": "fired",
+        "side": "A",
+        "unitIndex": 0,
+        "weapon": "rifle",
+        "landAtMs": 10321
+      },
+      {
+        "atMs": 10320,
+        "kind": "fired",
+        "side": "B",
+        "unitIndex": 0,
+        "weapon": "rifle",
+        "landAtMs": 10321
+      },
+      {
+        "atMs": 10321,
+        "kind": "hit",
+        "side": "A",
+        "unitIndex": 0,
+        "targetSide": "B",
+        "targetIndex": 0,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 92,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 10321,
+        "kind": "hit",
+        "side": "B",
+        "unitIndex": 0,
+        "targetSide": "A",
+        "targetIndex": 0,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 92,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 12040,
+        "kind": "fired",
+        "side": "A",
+        "unitIndex": 0,
+        "weapon": "rifle",
+        "landAtMs": 12041
+      },
+      {
+        "atMs": 12040,
+        "kind": "fired",
+        "side": "B",
+        "unitIndex": 0,
+        "weapon": "rifle",
+        "landAtMs": 12041
+      },
+      {
+        "atMs": 12041,
+        "kind": "hit",
+        "side": "A",
+        "unitIndex": 0,
+        "targetSide": "B",
+        "targetIndex": 0,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 54,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 12041,
+        "kind": "hit",
+        "side": "B",
+        "unitIndex": 0,
+        "targetSide": "A",
+        "targetIndex": 0,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 54,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 13760,
+        "kind": "fired",
+        "side": "A",
+        "unitIndex": 0,
+        "weapon": "rifle",
+        "landAtMs": 13761
+      },
+      {
+        "atMs": 13760,
+        "kind": "fired",
+        "side": "B",
+        "unitIndex": 0,
+        "weapon": "rifle",
+        "landAtMs": 13761
+      },
+      {
+        "atMs": 13761,
+        "kind": "hit",
+        "side": "A",
+        "unitIndex": 0,
+        "targetSide": "B",
+        "targetIndex": 0,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 16,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 13761,
+        "kind": "hit",
+        "side": "B",
+        "unitIndex": 0,
+        "targetSide": "A",
+        "targetIndex": 0,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 16,
+        "killed": false,
+        "via": "one_member"
+      },
+      {
+        "atMs": 15480,
+        "kind": "fired",
+        "side": "A",
+        "unitIndex": 0,
+        "weapon": "rifle",
+        "landAtMs": 15481
+      },
+      {
+        "atMs": 15480,
+        "kind": "fired",
+        "side": "B",
+        "unitIndex": 0,
+        "weapon": "rifle",
+        "landAtMs": 15481
+      },
+      {
+        "atMs": 15481,
+        "kind": "hit",
+        "side": "A",
+        "unitIndex": 0,
+        "targetSide": "B",
+        "targetIndex": 0,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 0,
+        "killed": true,
+        "via": "one_member"
+      },
+      {
+        "atMs": 15481,
+        "kind": "unit_dead",
+        "side": "B",
+        "unitIndex": 0
+      },
+      {
+        "atMs": 15481,
+        "kind": "hit",
+        "side": "B",
+        "unitIndex": 0,
+        "targetSide": "A",
+        "targetIndex": 0,
+        "weapon": "rifle",
+        "damage": 38,
+        "hpAfter": 0,
+        "killed": true,
+        "via": "one_member"
+      },
+      {
+        "atMs": 15481,
+        "kind": "unit_dead",
+        "side": "A",
+        "unitIndex": 0
+      },
+      {
+        "atMs": 15481,
+        "kind": "squad_dead",
+        "side": "A"
+      },
+      {
+        "atMs": 15481,
+        "kind": "squad_dead",
+        "side": "B"
+      }
+    ],
+    "units": [
+      {
+        "side": "A",
+        "unitIndex": 0,
+        "weaponId": "rifle",
+        "states": [
+          {
+            "start": 0,
+            "state": "cooling"
+          },
+          {
+            "start": 1720,
+            "state": "cooling"
+          },
+          {
+            "start": 3440,
+            "state": "cooling"
+          },
+          {
+            "start": 5160,
+            "state": "cooling"
+          },
+          {
+            "start": 6880,
+            "state": "cooling"
+          },
+          {
+            "start": 8600,
+            "state": "cooling"
+          },
+          {
+            "start": 10320,
+            "state": "cooling"
+          },
+          {
+            "start": 12040,
+            "state": "cooling"
+          },
+          {
+            "start": 13760,
+            "state": "cooling"
+          },
+          {
+            "start": 15480,
+            "state": "cooling"
+          }
+        ],
+        "events": [
+          {
+            "at": 0,
+            "event": "firing"
+          },
+          {
+            "at": 1720,
+            "event": "firing"
+          },
+          {
+            "at": 3440,
+            "event": "firing"
+          },
+          {
+            "at": 5160,
+            "event": "firing"
+          },
+          {
+            "at": 6880,
+            "event": "firing"
+          },
+          {
+            "at": 8600,
+            "event": "firing"
+          },
+          {
+            "at": 10320,
+            "event": "firing"
+          },
+          {
+            "at": 12040,
+            "event": "firing"
+          },
+          {
+            "at": 13760,
+            "event": "firing"
+          },
+          {
+            "at": 15480,
+            "event": "firing"
+          }
+        ],
+        "firedAtMs": [
+          0,
+          1720,
+          3440,
+          5160,
+          6880,
+          8600,
+          10320,
+          12040,
+          13760,
+          15480
+        ]
+      },
+      {
+        "side": "A",
+        "unitIndex": 1,
+        "weaponId": "rifle",
+        "states": [
+          {
+            "start": 344,
+            "state": "cooling"
+          },
+          {
+            "start": 2064,
+            "state": "cooling"
+          },
+          {
+            "start": 3784,
+            "state": "cooling"
+          },
+          {
+            "start": 5504,
+            "state": "cooling"
+          },
+          {
+            "start": 7224,
+            "state": "cooling"
+          }
+        ],
+        "events": [
+          {
+            "at": 344,
+            "event": "firing"
+          },
+          {
+            "at": 2064,
+            "event": "firing"
+          },
+          {
+            "at": 3784,
+            "event": "firing"
+          },
+          {
+            "at": 5504,
+            "event": "firing"
+          },
+          {
+            "at": 7224,
+            "event": "firing"
+          }
+        ],
+        "firedAtMs": [
+          344,
+          2064,
+          3784,
+          5504,
+          7224
+        ]
+      },
+      {
+        "side": "A",
+        "unitIndex": 2,
+        "weaponId": "rifle",
+        "states": [
+          {
+            "start": 688,
+            "state": "cooling"
+          },
+          {
+            "start": 2408,
+            "state": "cooling"
+          },
+          {
+            "start": 4128,
+            "state": "cooling"
+          }
+        ],
+        "events": [
+          {
+            "at": 688,
+            "event": "firing"
+          },
+          {
+            "at": 2408,
+            "event": "firing"
+          },
+          {
+            "at": 4128,
+            "event": "firing"
+          }
+        ],
+        "firedAtMs": [
+          688,
+          2408,
+          4128
+        ]
+      },
+      {
+        "side": "A",
+        "unitIndex": 3,
+        "weaponId": "rifle",
+        "states": [
+          {
+            "start": 1032,
+            "state": "cooling"
+          },
+          {
+            "start": 2752,
+            "state": "cooling"
+          }
+        ],
+        "events": [
+          {
+            "at": 1032,
+            "event": "firing"
+          },
+          {
+            "at": 2752,
+            "event": "firing"
+          }
+        ],
+        "firedAtMs": [
+          1032,
+          2752
+        ]
+      },
+      {
+        "side": "A",
+        "unitIndex": 4,
+        "weaponId": "rifle",
+        "states": [],
+        "events": [],
+        "firedAtMs": []
+      },
+      {
+        "side": "B",
+        "unitIndex": 0,
+        "weaponId": "rifle",
+        "states": [
+          {
+            "start": 0,
+            "state": "cooling"
+          },
+          {
+            "start": 1720,
+            "state": "cooling"
+          },
+          {
+            "start": 3440,
+            "state": "cooling"
+          },
+          {
+            "start": 5160,
+            "state": "cooling"
+          },
+          {
+            "start": 6880,
+            "state": "cooling"
+          },
+          {
+            "start": 8600,
+            "state": "cooling"
+          },
+          {
+            "start": 10320,
+            "state": "cooling"
+          },
+          {
+            "start": 12040,
+            "state": "cooling"
+          },
+          {
+            "start": 13760,
+            "state": "cooling"
+          },
+          {
+            "start": 15480,
+            "state": "cooling"
+          }
+        ],
+        "events": [
+          {
+            "at": 0,
+            "event": "firing"
+          },
+          {
+            "at": 1720,
+            "event": "firing"
+          },
+          {
+            "at": 3440,
+            "event": "firing"
+          },
+          {
+            "at": 5160,
+            "event": "firing"
+          },
+          {
+            "at": 6880,
+            "event": "firing"
+          },
+          {
+            "at": 8600,
+            "event": "firing"
+          },
+          {
+            "at": 10320,
+            "event": "firing"
+          },
+          {
+            "at": 12040,
+            "event": "firing"
+          },
+          {
+            "at": 13760,
+            "event": "firing"
+          },
+          {
+            "at": 15480,
+            "event": "firing"
+          }
+        ],
+        "firedAtMs": [
+          0,
+          1720,
+          3440,
+          5160,
+          6880,
+          8600,
+          10320,
+          12040,
+          13760,
+          15480
+        ]
+      },
+      {
+        "side": "B",
+        "unitIndex": 1,
+        "weaponId": "rifle",
+        "states": [
+          {
+            "start": 344,
+            "state": "cooling"
+          },
+          {
+            "start": 2064,
+            "state": "cooling"
+          },
+          {
+            "start": 3784,
+            "state": "cooling"
+          },
+          {
+            "start": 5504,
+            "state": "cooling"
+          },
+          {
+            "start": 7224,
+            "state": "cooling"
+          }
+        ],
+        "events": [
+          {
+            "at": 344,
+            "event": "firing"
+          },
+          {
+            "at": 2064,
+            "event": "firing"
+          },
+          {
+            "at": 3784,
+            "event": "firing"
+          },
+          {
+            "at": 5504,
+            "event": "firing"
+          },
+          {
+            "at": 7224,
+            "event": "firing"
+          }
+        ],
+        "firedAtMs": [
+          344,
+          2064,
+          3784,
+          5504,
+          7224
+        ]
+      },
+      {
+        "side": "B",
+        "unitIndex": 2,
+        "weaponId": "rifle",
+        "states": [
+          {
+            "start": 688,
+            "state": "cooling"
+          },
+          {
+            "start": 2408,
+            "state": "cooling"
+          },
+          {
+            "start": 4128,
+            "state": "cooling"
+          }
+        ],
+        "events": [
+          {
+            "at": 688,
+            "event": "firing"
+          },
+          {
+            "at": 2408,
+            "event": "firing"
+          },
+          {
+            "at": 4128,
+            "event": "firing"
+          }
+        ],
+        "firedAtMs": [
+          688,
+          2408,
+          4128
+        ]
+      },
+      {
+        "side": "B",
+        "unitIndex": 3,
+        "weaponId": "rifle",
+        "states": [
+          {
+            "start": 1032,
+            "state": "cooling"
+          },
+          {
+            "start": 2752,
+            "state": "cooling"
+          }
+        ],
+        "events": [
+          {
+            "at": 1032,
+            "event": "firing"
+          },
+          {
+            "at": 2752,
+            "event": "firing"
+          }
+        ],
+        "firedAtMs": [
+          1032,
+          2752
+        ]
+      },
+      {
+        "side": "B",
+        "unitIndex": 4,
+        "weaponId": "rifle",
+        "states": [],
+        "events": [],
+        "firedAtMs": []
+      }
+    ],
+    "tileEffects": [],
+    "modifiers": []
+  },
+  "summary": {
+    "totalFired": 40,
+    "totalHits": 40,
+    "totalDamage": 1520,
+    "deaths": 10,
+    "battleEndMs": 15482,
+    "outcome": "同归于尽",
+    "wallClockMs": 34
+  }
+}
