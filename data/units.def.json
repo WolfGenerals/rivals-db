@@ -207,10 +207,7 @@
               ],
               "usage": {
                 "canAttack": [
-                  "Infantry",
-                  "Vehicle",
-                  "Structure",
-                  "Harvester"
+                  "Structure"
                 ],
                 "muzzleCount": 1,
                 "flags": {}
@@ -682,20 +679,20 @@
                   "durationMs": 700,
                   "stats": [
                     [
+                      "AttackSpeedDecrease",
+                      0.25
+                    ],
+                    [
                       "AngularSpeedPercentDecrease",
+                      0.3
+                    ],
+                    [
+                      "MovementSpeedPercentDecrease",
                       0.3
                     ],
                     [
                       "ReloadSpeedPercentDecrease",
                       0.25
-                    ],
-                    [
-                      "AttackSpeedDecrease",
-                      0.25
-                    ],
-                    [
-                      "MovementSpeedPercentDecrease",
-                      0.3
                     ]
                   ]
                 }
@@ -1112,7 +1109,7 @@
               "id": "rockets",
               "timing": {
                 "kind": "cyclic",
-                "cooldownMs": 4000,
+                "cooldownMs": 2500,
                 "chargeUpMs": 250,
                 "initialChargeUpMs": 0,
                 "hits": 3,
@@ -1241,9 +1238,10 @@
         "rockets：伤害转自 `projectile.modifier`（按 `effectiveDamage` 的优先级）—— **要人核一眼**"
       ],
       "defPatched": [
-        "combatant.weapons.0.timing.hits"
+        "combatant.weapons.0.timing.hits",
+        "combatant.weapons.0.timing.cooldownMs"
       ],
-      "defPatchNote": "神像机甲：**一轮 3 连发**（`ability_juggernaut_weapon_sequence.lua:69,73,77` 三个 `Fire`，间隔 `delayAfterShot`；`unit_gdi_juggernaut.lua:148-153` 的 `MUZZLE_INFO` 也是 3 条）—— 发数在**视觉块**里，提取器还没收 `*_visual`，所以机器按 1 占位。另有待确认：齐射前摇是武器级 250ms 还是序列的 `initialChargeUpMs = 500ms`（后者更像真值，未改）。"
+      "defPatchNote": "神像机甲：**一轮 3 连发**（`ability_juggernaut_weapon_sequence.lua:69,73,77` 三个 `Fire`，间隔 `delayAfterShot`；`unit_gdi_juggernaut.lua:148-153` 的 `MUZZLE_INFO` 也是 3 条）—— 发数在**视觉块**里，提取器还没收 `*_visual`，所以机器按 1 占位。**周期取序列的 `durationBetweenVolley = 2500`（`unit_gdi_juggernaut.lua:75`），不是武器级的 `burstTiming.cooldown = 4`（:60）**—— 官方面板公式就是 `damageMain × #MUZZLE_INFO ÷ durationBetweenVolley`（`ability_juggernaut_weapon_sequence.lua:18`），实测面板 5-0 = 611.2 ⇒ 1-0 基准 480 = 400 × 3 ÷ 2.5（旧产物 `derived.dps` 也是 480）；机器现在按 `fromSequence` 判成 4000 ⇒ 会算出 300。另有待确认：齐射前摇是武器级 250ms 还是序列的 `initialChargeUpMs = 500ms`（后者更像真值，未改）。"
     },
     "unit_gdi_juggernaut_ST": {
       "id": "unit_gdi_juggernaut_ST",
@@ -2020,10 +2018,10 @@
         },
         "modifiers": {
           "death": {
+            "behaviour": {},
             "tuning": {
               "durationMs": 500
             },
-            "behaviour": {},
             "name": "modifier_mgsquad_death"
           }
         },
@@ -3657,27 +3655,11 @@
         },
         "modifiers": {
           "spawn": {
+            "behaviour": {},
             "tuning": {
-              "healFlat": {
-                "default": -4,
-                "override": [
-                  [
-                    "Infantry",
-                    -4
-                  ]
-                ]
-              },
+              "durationMs": -1,
               "ARMY_FILTER_FLAG": "kQueryArmyFilter_Friendly",
               "DESCRIPTOR_FILTERS": 32768,
-              "tickPeriodMs": 250,
-              "healMaxUnitModifier": [
-                1,
-                0.5,
-                0.5,
-                0.5,
-                0.5,
-                0.5
-              ],
               "healFullTimeMs": {
                 "default": 27000,
                 "override": [
@@ -3687,10 +3669,26 @@
                   ]
                 ]
               },
-              "durationMs": -1,
-              "range": 1
+              "range": 1,
+              "healMaxUnitModifier": [
+                1,
+                0.5,
+                0.5,
+                0.5,
+                0.5,
+                0.5
+              ],
+              "tickPeriodMs": 250,
+              "healFlat": {
+                "default": -4,
+                "override": [
+                  [
+                    "Infantry",
+                    -4
+                  ]
+                ]
+              }
             },
-            "behaviour": {},
             "name": "modifier_repair_drone_heal"
           }
         },
@@ -3811,27 +3809,11 @@
         },
         "modifiers": {
           "spawn": {
+            "behaviour": {},
             "tuning": {
-              "healFlat": {
-                "default": -10,
-                "override": [
-                  [
-                    "Infantry",
-                    -500
-                  ]
-                ]
-              },
+              "durationMs": -1,
               "ARMY_FILTER_FLAG": "kQueryArmyFilter_Friendly",
               "DESCRIPTOR_FILTERS": 32768,
-              "tickPeriodMs": 250,
-              "healMaxUnitModifier": [
-                1,
-                0.5,
-                0.5,
-                0.5,
-                0.5,
-                0.5
-              ],
               "healFullTimeMs": {
                 "default": 2000,
                 "override": [
@@ -3841,10 +3823,26 @@
                   ]
                 ]
               },
-              "durationMs": -1,
-              "range": 30
+              "range": 30,
+              "healMaxUnitModifier": [
+                1,
+                0.5,
+                0.5,
+                0.5,
+                0.5,
+                0.5
+              ],
+              "tickPeriodMs": 250,
+              "healFlat": {
+                "default": -10,
+                "override": [
+                  [
+                    "Infantry",
+                    -500
+                  ]
+                ]
+              }
             },
-            "behaviour": {},
             "name": "modifier_repair_drone_CR_heal"
           }
         },
@@ -4755,8 +4753,8 @@
                 "cooldownMs": 3000,
                 "chargeUpMs": 0,
                 "initialChargeUpMs": 0,
-                "hits": 1,
-                "intervalMs": 0,
+                "hits": 12,
+                "intervalMs": 35,
                 "impl": "ability_sandstorm_ST_weapon_sequence"
               },
               "damage": [
@@ -4847,7 +4845,12 @@
       },
       "defGaps": [
         "cannon：一轮发数读不到 —— 它在单位的 **视觉块** `cannon_visual.MUZZLE_INFO` 里（例如 `unit_gdi_kodiak.lua:89-93` 有 3 个枪口），而提取器**还没收 `*_visual` 那些全局表**⇒ 这里 `hits` 按 1 占位。**这是机器侧的缺口，不是\"要人手填的事实\"**"
-      ]
+      ],
+      "defPatched": [
+        "combatant.weapons.0.timing.hits",
+        "combatant.weapons.0.timing.intervalMs"
+      ],
+      "defPatchNote": "钢爪沙暴导弹车：一轮 **12 发 × 35ms**（`unit_gdi_sandstorm_ST.lua:61-67` 的 `perTargetCount[1]`；与基型沙暴同一套写法，1 队 12 / 2 队 24 / 3 队 36 / 4 队 48 / 5 队 60 发）。模型只有一个 `hits`/`intervalMs` ⇒ 这里填**第 1 档**。周期 3000ms 与伤害 150 机器已转对，不改。"
     },
     "unit_gdi_shatterer": {
       "id": "unit_gdi_shatterer",
@@ -4929,12 +4932,12 @@
                   "durationMs": 200,
                   "stats": [
                     [
-                      "AttackSpeedDecrease",
-                      0.35
-                    ],
-                    [
                       "MovementSpeedPercentDecrease",
                       0.85
+                    ],
+                    [
+                      "AttackSpeedDecrease",
+                      0.35
                     ]
                   ]
                 }
@@ -6106,15 +6109,15 @@
         },
         "modifiers": {
           "spawn": {
+            "behaviour": {},
             "tuning": {
+              "durationMs": -1,
+              "healingDelayMs": 500,
               "tickPeriodMs": 250,
               "heal": {
                 "default": -10
-              },
-              "durationMs": -1,
-              "healingDelayMs": 500
+              }
             },
-            "behaviour": {},
             "name": "modifier_zone_trooper_heal"
           }
         },
@@ -6217,20 +6220,20 @@
                   "durationMs": 5000,
                   "stats": [
                     [
-                      "AngularSpeedPercentDecrease",
-                      0.9
-                    ],
-                    [
-                      "ReloadSpeedPercentDecrease",
-                      0.15
-                    ],
-                    [
                       "AttackSpeedDecrease",
                       0.15
                     ],
                     [
+                      "AngularSpeedPercentDecrease",
+                      0.9
+                    ],
+                    [
                       "MovementSpeedPercentDecrease",
                       0.4
+                    ],
+                    [
+                      "ReloadSpeedPercentDecrease",
+                      0.15
                     ]
                   ]
                 }
@@ -6705,7 +6708,6 @@
               ],
               "usage": {
                 "canAttack": [
-                  "Infantry",
                   "Vehicle",
                   "Structure",
                   "Harvester"
@@ -6762,9 +6764,7 @@
               "usage": {
                 "canAttack": [
                   "Infantry",
-                  "Vehicle",
-                  "Structure",
-                  "Harvester"
+                  "Structure"
                 ],
                 "muzzleCount": 1,
                 "muzzleStrategy": "All",
@@ -6810,12 +6810,12 @@
         },
         "modifiers": {
           "death": {
+            "behaviour": {},
             "tuning": {
+              "durationMs": 3500,
               "ARMY_FILTER_FLAG": "kQueryArmyFilter_None",
-              "DESCRIPTOR_FILTERS": 8,
               "explosions": [
                 {
-                  "timeMs": 3000,
                   "damage": {
                     "default": 1700,
                     "override": [
@@ -6824,13 +6824,13 @@
                         300
                       ]
                     ]
-                  }
+                  },
+                  "timeMs": 3000
                 }
               ],
-              "durationMs": 3500,
-              "radius": 20
+              "radius": 20,
+              "DESCRIPTOR_FILTERS": 8
             },
-            "behaviour": {},
             "name": "modifier_avatar_death"
           }
         },
@@ -7670,6 +7670,10 @@
                     "damageMs": 300
                   },
                   "groundOnly": true
+                },
+                {
+                  "kind": "remove_modifier",
+                  "name": "modifier_chem_warrior_gas_cloud"
                 }
               ],
               "usage": {
@@ -7715,8 +7719,6 @@
         "modifiers": {},
         "tunings": {
           "tiberiumExplosionTuning": {
-            "ARMY_FILTER_FLAG": "kQueryArmyFilter_None",
-            "NUM_RINGS_EXPLOSION": 2,
             "damageMain": {
               "default": 800,
               "override": [
@@ -7730,8 +7732,10 @@
                 ]
               ]
             },
-            "DESCRIPTOR_FILTERS": 8,
-            "DAMAGE_TIME": 300
+            "ARMY_FILTER_FLAG": "kQueryArmyFilter_None",
+            "NUM_RINGS_EXPLOSION": 2,
+            "DAMAGE_TIME": 300,
+            "DESCRIPTOR_FILTERS": 8
           }
         },
         "source": {
@@ -7773,7 +7777,11 @@
         "gasWeapon：这个槽的序列有 **2 套节奏**（`catalystBurst` 1600ms（蓄 0ms） / **`gasBurst` 6000ms（蓄 4500ms）**）—— 模型只有一种，按\"名字跟武器槽对上\"取了 `gasBurst`；⚠️ 它的充能**不攻击时会回退**（`fullChargeLostMs`），模型没有这个形状",
         "gasWeapon：一轮发数读不到 —— 它在单位的 **视觉块** `gasWeapon_visual.MUZZLE_INFO` 里（例如 `unit_gdi_kodiak.lua:89-93` 有 3 个枪口），而提取器**还没收 `*_visual` 那些全局表**⇒ 这里 `hits` 按 1 占位。**这是机器侧的缺口，不是\"要人手填的事实\"**",
         "catalystWeapon 弹头（modifier_catalystgunship_projectile）：视觉开演时刻（`visual.EXPLOSION_START_TIME`）在视觉块里、提取器还没收 ⇒ 只转了扣血时刻 300ms"
-      ]
+      ],
+      "defPatched": [
+        "combatant.weapons.1.warhead.1"
+      ],
+      "defPatchNote": "催化剂炮艇：**引爆后毒气云被移除**（所以同一片毒气只会被炸一次）。依据：`modifier_catalystgunship_projectile.lua:37-42` —— 弹体命中时先 `RemoveModifierByNameId(tile, MODIFIER_THAT_ACTIVATES_EXPLOSION)`，然后才 `RequestAbility(EXPLOSION_MODIFIER)`；而 `unit_nod_catalystgunship.lua:113` 写着 `MODIFIER_THAT_ACTIVATES_EXPLOSION = RequiredHash(\"modifier_chem_warrior_gas_cloud\")`。 ⚠️ findings J100 早先只读了 `ability_catalyst_explosion.lua`（里面确实没有 `RemoveModifier`）⇒ 结论错了，已更正。转换器只扫爆炸那个 ability 的调参 ⇒ 这里按 patch 给 `catalystWeapon` 的弹头**追加一条 `remove_modifier`**（槽 1 = catalystWeapon；槽 0 是铺毒气的 `gasWeapon`，不动；追加在 `catalyst_explosion` **之后** —— 见 warhead-def.ts 的说明）。"
     },
     "unit_nod_centurion": {
       "id": "unit_nod_centurion",
@@ -7884,11 +7892,11 @@
         },
         "modifiers": {
           "squadSpawn": {
+            "behaviour": {},
             "tuning": {
               "durationMs": -1,
               "chargeTimeMs": 6000
             },
-            "behaviour": {},
             "name": "modifier_centurion_shield"
           }
         },
@@ -8373,22 +8381,22 @@
         },
         "modifiers": {
           "squadSpawn": {
+            "behaviour": {},
             "tuning": {
-              "MODIFIER": "modifier_confessor_zeal",
+              "durationMs": -1,
+              "ARMY_FILTER_FLAG": "kQueryArmyFilter_Friendly",
               "zeal": {
                 "MODIFIER": "modifier_confessor_zeal_combatant",
-                "durationMs": 5000,
                 "stats": {
                   "AttackSpeedIncrease": 0.5,
                   "ReloadSpeedPercentIncrease": 0.5
-                }
+                },
+                "durationMs": 5000
               },
+              "MODIFIER": "modifier_confessor_zeal",
               "tickPeriodMs": 250,
-              "DESCRIPTOR_FILTERS": 256,
-              "durationMs": -1,
-              "ARMY_FILTER_FLAG": "kQueryArmyFilter_Friendly"
+              "DESCRIPTOR_FILTERS": 256
             },
-            "behaviour": {},
             "name": "modifier_confessor_spawn_zeal_squad"
           }
         },
@@ -8695,20 +8703,20 @@
                   "durationMs": 5000,
                   "stats": [
                     [
+                      "AttackSpeedDecrease",
+                      0.15
+                    ],
+                    [
                       "AngularSpeedPercentDecrease",
+                      0.2
+                    ],
+                    [
+                      "MovementSpeedPercentDecrease",
                       0.2
                     ],
                     [
                       "ReloadSpeedPercentDecrease",
                       0.15
-                    ],
-                    [
-                      "AttackSpeedDecrease",
-                      0.15
-                    ],
-                    [
-                      "MovementSpeedPercentDecrease",
-                      0.2
                     ]
                   ]
                 }
@@ -8840,13 +8848,13 @@
         },
         "modifiers": {
           "spawn": {
-            "tuning": {
-              "PERCENT_DAMAGE_PASSED_TO_SPAWNED_SQUAD": 1,
-              "unitNameId": "Unit_Nod_FlameTroopers",
-              "durationMs": 2800,
-              "DEAL_TRAMPLE_TO_SPAWNED_SQUAD": true
-            },
             "behaviour": {},
+            "tuning": {
+              "durationMs": 2800,
+              "unitNameId": "Unit_Nod_FlameTroopers",
+              "DEAL_TRAMPLE_TO_SPAWNED_SQUAD": true,
+              "PERCENT_DAMAGE_PASSED_TO_SPAWNED_SQUAD": 1
+            },
             "name": "modifier_drillpod_intro"
           }
         },
@@ -8925,13 +8933,13 @@
         },
         "modifiers": {
           "spawn": {
-            "tuning": {
-              "PERCENT_DAMAGE_PASSED_TO_SPAWNED_SQUAD": 1,
-              "unitNameId": "Unit_Nod_Cyborg",
-              "durationMs": 2400,
-              "DEAL_TRAMPLE_TO_SPAWNED_SQUAD": true
-            },
             "behaviour": {},
+            "tuning": {
+              "durationMs": 2400,
+              "unitNameId": "Unit_Nod_Cyborg",
+              "DEAL_TRAMPLE_TO_SPAWNED_SQUAD": true,
+              "PERCENT_DAMAGE_PASSED_TO_SPAWNED_SQUAD": 1
+            },
             "name": "modifier_drillpod_intro_CR"
           }
         },
@@ -9070,23 +9078,23 @@
         },
         "modifiers": {
           "death": {
+            "behaviour": {},
             "tuning": {
-              "MODIFIER": "modifier_fanatic_zeal",
+              "durationMs": 0,
+              "ARMY_FILTER_FLAG": "kQueryArmyFilter_Friendly",
               "zeal": {
                 "MODIFIER": "modifier_fanatic_zeal_combatant",
-                "durationMs": 5000,
                 "stats": {
-                  "AttackSpeedIncrease": 0.45,
-                  "MovementSpeedPercentIncrease": 0.4,
+                  "AngularSpeedPercentIncrease": 0.4,
                   "ReloadSpeedPercentIncrease": 0.1,
-                  "AngularSpeedPercentIncrease": 0.4
-                }
+                  "AttackSpeedIncrease": 0.45,
+                  "MovementSpeedPercentIncrease": 0.4
+                },
+                "durationMs": 5000
               },
-              "DESCRIPTOR_FILTERS": 1024,
-              "durationMs": 0,
-              "ARMY_FILTER_FLAG": "kQueryArmyFilter_Friendly"
+              "MODIFIER": "modifier_fanatic_zeal",
+              "DESCRIPTOR_FILTERS": 1024
             },
-            "behaviour": {},
             "name": "modifier_fanatic_death"
           }
         },
@@ -9493,7 +9501,7 @@
                 "cooldownMs": 2000,
                 "chargeUpMs": 0,
                 "initialChargeUpMs": 0,
-                "hits": 1,
+                "hits": 2,
                 "intervalMs": 0,
                 "impl": "ability_flame_trooper_weapon_sequence"
               },
@@ -9582,7 +9590,11 @@
       },
       "defGaps": [
         "rifle：一轮发数读不到 —— 它在单位的 **视觉块** `rifle_visual.MUZZLE_INFO` 里（例如 `unit_gdi_kodiak.lua:89-93` 有 3 个枪口），而提取器**还没收 `*_visual` 那些全局表**⇒ 这里 `hits` 按 1 占位。**这是机器侧的缺口，不是\"要人手填的事实\"**"
-      ]
+      ],
+      "defPatched": [
+        "combatant.weapons.0.timing.hits"
+      ],
+      "defPatchNote": "烈焰之手：**一轮同刻两发**（每发 75，共 150 / 2s / 每员）。依据：`unit_nod_flametroopers.lua:40` 的 `muzzleCount = 2` 与 `:50` 序列 tuning 里的 `muzzleStrategy = MuzzleStrategy.All` —— `ability_simple_weapon_sequence.lua:63` 读的正是**序列的那个键**（不是武器级的），所以两个枪口各出一发；真跑 Timeline 的实测也是 `[500ms#0, 500ms#1, 2500ms#0, 2500ms#1, …]`（findings I195）。⚠️ 游戏面板按 `damage ÷ burstCooldown × waveSize` 给 112.5（漏了枪口数）—— 界面的**面板 DPS** 格照旧显示它，而伤害矩阵/对目标实际 DPS 要的是**真实输出** 225。转换器只读武器级 `muzzleStrategy` ⇒ 这里补 `hits = 2`。"
     },
     "unit_nod_harvester": {
       "id": "unit_nod_harvester",
@@ -10339,6 +10351,7 @@
                 "canAttack": [
                   "Infantry",
                   "Vehicle",
+                  "Aircraft",
                   "Structure",
                   "Harvester"
                 ],
@@ -10869,10 +10882,10 @@
         },
         "modifiers": {
           "squadSpawn": {
+            "behaviour": {},
             "tuning": {
               "tiberium": 10
             },
-            "behaviour": {},
             "name": "modifier_scavenger"
           }
         },
@@ -11630,10 +11643,10 @@
         },
         "modifiers": {
           "death": {
+            "behaviour": {},
             "tuning": {
               "durationMs": 500
             },
-            "behaviour": {},
             "name": "modifier_tick_tank_death"
           }
         },
@@ -11880,20 +11893,20 @@
                   "durationMs": 4000,
                   "stats": [
                     [
+                      "AttackSpeedDecrease",
+                      0.5
+                    ],
+                    [
                       "AngularSpeedPercentDecrease",
+                      0.3
+                    ],
+                    [
+                      "MovementSpeedPercentDecrease",
                       0.3
                     ],
                     [
                       "ReloadSpeedPercentDecrease",
                       0.5
-                    ],
-                    [
-                      "AttackSpeedDecrease",
-                      0.5
-                    ],
-                    [
-                      "MovementSpeedPercentDecrease",
-                      0.3
                     ]
                   ]
                 }
@@ -12101,6 +12114,7 @@
               ],
               "usage": {
                 "canAttack": [
+                  "Aircraft",
                   "Structure"
                 ],
                 "muzzleCount": 6,
@@ -12300,25 +12314,25 @@
         },
         "modifiers": {
           "squadSpawn": {
+            "behaviour": {},
             "tuning": {
+              "durationMs": -1,
+              "ARMY_FILTER_FLAG": "kQueryArmyFilter_Enemy",
               "empRadius": 18,
               "MODIFIER": "modifier_wraith_emp",
               "emp": {
                 "MODIFIER": "modifier_wraith_emp_combatant",
-                "durationMs": 2000,
                 "stats": {
-                  "AngularSpeedPercentDecrease": 0,
-                  "ReloadSpeedPercentDecrease": 1,
                   "AttackSpeedDecrease": 1,
-                  "MovementSpeedPercentDecrease": 0
-                }
+                  "AngularSpeedPercentDecrease": 0,
+                  "MovementSpeedPercentDecrease": 0,
+                  "ReloadSpeedPercentDecrease": 1
+                },
+                "durationMs": 2000
               },
               "TRANSPORT_TYPE_FILTER": 128,
-              "DESCRIPTOR_FILTERS": 32,
-              "durationMs": -1,
-              "ARMY_FILTER_FLAG": "kQueryArmyFilter_Enemy"
+              "DESCRIPTOR_FILTERS": 32
             },
-            "behaviour": {},
             "name": "modifier_wraith_squad"
           }
         },

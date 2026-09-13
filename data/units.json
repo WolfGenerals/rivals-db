@@ -795,10 +795,7 @@
               "kind": "none"
             },
             "can_attack": [
-              "Infantry",
-              "Vehicle",
-              "Structure",
-              "Harvester"
+              "Structure"
             ],
             "damage": 600,
             "id": "cannon",
@@ -4983,7 +4980,6 @@
               "kind": "none"
             },
             "can_attack": [
-              "Infantry",
               "Vehicle",
               "Structure",
               "Harvester"
@@ -5012,9 +5008,7 @@
             },
             "can_attack": [
               "Infantry",
-              "Vehicle",
-              "Structure",
-              "Harvester"
+              "Structure"
             ],
             "damage": 140,
             "homing": true,
@@ -7283,6 +7277,7 @@
             "can_attack": [
               "Infantry",
               "Vehicle",
+              "Aircraft",
               "Structure",
               "Harvester"
             ],
@@ -8384,6 +8379,7 @@
               "kind": "none"
             },
             "can_attack": [
+              "Aircraft",
               "Structure"
             ],
             "damage": 80,
