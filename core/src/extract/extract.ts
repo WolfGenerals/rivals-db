@@ -27,6 +27,21 @@ export interface ExtractResult {
   skippedModules: string[];
   /** 用到的基础路径信息 */
   root: string;
+  /**
+   * **`gameplay/auras/*.lua` 里那些"格子效果"的数值**（键是 aura 名）。
+   *
+   * 它们不属于任何单位，却被单位引用（圣甲虫/火焰轰炸机的 `MODIFIER_FIRE` 指向
+   * `modifier_fire_bomber_fire`，真正的时长与每跳伤害在 `aura_fire.fire_tuning` /
+   * `burn_tuning` 里）。所以单独提出来放在数据集顶层，而不是硬编码进 UI。
+   */
+  auraTables: Record<string, Record<string, unknown>>;
+  /**
+   * **按"单位侧引用的名字"索引的共享效果表** —— 写进产物的 `auras` 就是它。
+   * 键是 `modifier_fire_bomber_fire` / `modifier_chem_warrior_gas_cloud` 这种
+   * （即 `stats.leaves_fire` / `stats.leaves_gas` 的值），值是归一后的字段
+   * （`tick_ms` / `tick_damage` / `persist_ms` / `ground_only` / `vs` / `immune`）。
+   */
+  sharedAuras: Record<string, Record<string, unknown>>;
 }
 
 export class RivalsError extends Error {}
@@ -339,8 +354,23 @@ export async function extractAll(opts: ExtractOptions): Promise<ExtractResult> {
     const bldgSources = await readSources(join(root, "gameplay", "buildings"), root, /\.lua$/);
     // 能力实现（`TranslateToken` 里硬编码读本体）—— 给 `attachReadsUnit` 用
     const abilitySources = await readSources(join(root, "gameplay", "abilities"), root, /\.lua$/);
+    /**
+     * **实现文件的并集：`abilities/` + `modifiers/`**。
+     *
+     * ⚠️ 只读 `abilities/` 是不够的 —— **大量伤害是在 `modifiers/` 里施加的**：
+     * 神像的 `modifier_juggernaut_projectile`、火焰轰炸机的 `modifier_fire_bomber_explosion`、
+     * 圣甲虫的 `modifier_scarab_projectile`、自行火炮的 `modifier_artillery_projectile` 全在那里。
+     * 判定"整队伤害"（`attachSquadDamage`）必须两个目录都扫，否则会**漏掉一半**
+     * （第一版只扫 `abilities/`，6 个条目里只认出 2 个）。
+     */
+    const implSources = [
+      ...abilitySources,
+      ...(await readSources(join(root, "gameplay", "modifiers"), root, /\.lua$/)),
+    ];
 
     const failures = await evalTwoPass(lua, [...unitSources, ...cmdrSources, ...bldgSources], onError);
+    /** 全部实体来源（单位 + 指挥官 + 建筑）—— 变体沿 `readsUnit` 找本体时用 */
+    const allSources: SourceFile[] = [...unitSources, ...cmdrSources, ...bldgSources];
 
     // pb 提供 Lua 里没有的稀有度
     const pbByLuaName = new Map<string, PbUnit>();
@@ -470,6 +500,462 @@ export async function extractAll(opts: ExtractOptions): Promise<ExtractResult> {
       if (m) (rec as { multiHex?: unknown }).multiHex = { shape: m[1]!, size: Number(m[2]!) };
     };
 
+    /**
+     * **判断这把武器的伤害是不是"整队每人一份"**（用户："哪些武器是全队伤害"）。
+     *
+     * 判据**不是** `area`（那只说"打到几个目标"），而是**伤害走哪个 API**：
+     *
+     *   · `nDamageUtil.AoeDamageSquad*`  ⇒ `squad:TakeAOEDamage(...)` —— **整队每人各吃一份**
+     *   · `DamageCombatant(List)` / `DamageSquad(List)` ⇒ `TakeDirectDamage` / `TakeRedirectDamage`
+     *     —— **只打到具体某一员**（`DamageSquadList` 打 `GetLastCombatant()`）
+     *
+     * 反直觉的实例（findings I239）：**火焰坦克与万钧巨炮的"溅射"都只掉一员**
+     * （`ability_flametank_weapon_sequence.lua:89,123`、`ability_beamcannon_weapon_sequence.lua:335`
+     * 全走 `DamageSquadList`/`DamageSquadOverride`）；而**音波坦克/神像/火焰轰炸机/圣甲虫**才是整队伤害。
+     *
+     * ## 判据的粒度：**整个单位**，不是逐把武器
+     *
+     * 伤害实现常常隔着一两层才被引用，而且有些是**别名**（地狱火的 `MODIFIER_FIRE` 指向
+     * `modifier_fire_bomber_fire`，真正的实现在它指向的 `modifier_fire_bomber_explosion`），
+     * 逐把武器追链会漏（第一版就只认出 2/6）。
+     * 所以改成：**扫该单位源码里所有被引用的 `modifier_*`/`ability_*` 名字，
+     * 逐个实现文件看有没有 `AoeDamageSquad`** —— 命中就把该单位**所有有伤害的武器**标上。
+     *
+     * ⚠️ 这个粒度是**有意的取舍**：全库命中这条判据的单位**都只有一把武器**
+     * （音波坦克 / 神像 / 深岩巨虫 / 圣甲虫 / 地狱火 / 催化剂炮艇），所以"单位级"在这里
+     * 等于"武器级"。将来若出现"一把单挑、一把 AOE"的多武器单位，这里要改回逐武器归因。
+     *
+     * ## 变体传染
+     *
+     * `_ST` 这类变体自己**不写**实现，它复用本体的能力（`TranslateToken` 硬编码读本体，
+     * 见 findings I196/I197）—— 所以若 `readsUnit` 指向的**本体**被标了，变体也一起标。
+     */
+    /** 该单位源码里引用到的全部实现名（`"modifier_x"` 与 `behaviour = x` 两种写法） */
+    const implRefsOf = (src: string): Set<string> => {
+      const refs = new Set<string>();
+      for (const m of src.matchAll(/"((?:modifier|ability)_[a-z0-9_]+)"/g)) {
+        refs.add(m[1]!.replace(/_behaviour$/, ""));
+      }
+      /*
+       * ⚠️ **`RequiredHash("modifier_x")` 里的名字也要收**。
+       *
+       * 伤害经常经 `MODIFIER_FIRE` / `EXPLOSION_MODIFIER` 这类**常量字段**引用别的实现，
+       * 例如催化剂：`EXPLOSION_MODIFIER = RequiredHash("ability_catalyst_explosion")`。
+       * 字符串本身长得跟上面那条一样，但**在 `tuning` 表里**、且 `RequiredHash(...)` 是
+       * 运行期求值 —— 早先的 `"..."` 扫描只覆盖了源码里**直接写名字**的位置，
+       * 于是催化剂/音波坦克的整队伤害全都归因不到（实测：只剩 4 条）。
+       */
+      for (const m of src.matchAll(/RequiredHash\(\s*"([^"]+)"/g)) {
+        if (/^(modifier|ability)_/.test(m[1]!)) refs.add(m[1]!.replace(/_behaviour$/, ""));
+      }
+      // `behaviour = <标识符>` 形式（函数名不带引号）也要算
+      for (const m of src.matchAll(/behaviour\s*=\s*(\w+)/g)) {
+        refs.add(m[1]!.replace(/_behaviour$/, ""));
+      }
+      return refs;
+    };
+    /** 被引用的实现里，有没有一个含整队伤害 */
+    const refsHaveAoe = (src: string): boolean => {
+      const implHasAoe = (bare: string): boolean => {
+        for (const dir of ["abilities", "modifiers"]) {
+          const body = implSources.find((s) => s.rel === `gameplay/${dir}/${bare}.lua`)?.text;
+          if (body !== undefined && /AoeDamageSquad/.test(body)) return true;
+        }
+        return false;
+      };
+      return [...implRefsOf(src)].some(implHasAoe);
+    };
+
+    /**
+     * **独立的伤害组** —— 从两处源码结构里解出来（都不是"字段嗅探"，是文件里真实写着的）：
+     *
+     * ① `SetupModifierTuning { name = "X", behaviour = Y, tuning = <表达式> }`
+     * ② `SetupCombatAbility(<名>, <tuning 表达式>, …)`
+     *
+     * 为什么需要它：**伤害不一定挂在那把武器自己的 `projectile.modifier.tuning` 上**。
+     * 催化剂炮艇就是反例（用户指出："实际上是用小炮打，5s 后发毒气弹，小炮打毒气会炸"）：
+     *
+     * ```lua
+     * -- unit_nod_catalystgunship.lua
+     * tiberiumExplosionTuning = { damageMain = { default = 800, override = { Structure:800, Infantry:300 } } }
+     * SetupModifierTuning { name = "ability_catalyst_explosion", tuning = unit_nod_catalystgunship.tiberiumExplosionTuning }
+     * ```
+     *
+     * `ability_catalyst_explosion.lua:33` 用 **`damageMain`** 打整队 —— 那个 800 在任何武器上
+     * 都读不到，只有把 `SetupModifierTuning` 解出来才拿得到。
+     *
+     * 同时把 `unit_x.tiberiumExplosionTuning` 这种**点号引用**解析到已求值的 config 里
+     * （那些 tuning 本来就是单位表的成员，`toPlain` 之后的普通对象可以直接查）。
+     */
+    const attachGroups = (rec: EntityRecord, config: Record<string, unknown>, text: string): void => {
+      /**
+       * 把 `unit_nod_catalystgunship.tiberiumExplosionTuning` 解析到**该单位**的 config 上。
+       *
+       * ⚠️ 表达式里**带单位自己的全局名做前缀**（Lua 里 `unit_x` 就是那张表本身），
+       * 而我们在 JS 侧拿到的是它的内容 ⇒ 必须把第一段（等于 `rec.id`）剥掉，
+       * 否则 `config["unit_nod_catalystgunship"]` 恒为 undefined。
+       * 第一版就是这么错的：组解出来了，`tuning` 却是 undefined。
+       */
+      const resolveDot = (expr: string): unknown => {
+        const parts = expr.split(".");
+        const keys = parts[0] === rec.id ? parts.slice(1) : parts;
+        return keys.reduce<unknown>((cur, key) => {
+          if (cur === null || typeof cur !== "object") return undefined;
+          return (cur as Record<string, unknown>)[key];
+        }, config);
+      };
+
+      const groups: Array<{ name: string; behaviour?: string; tuning?: unknown }> = [];
+      for (const m of text.matchAll(
+        /SetupModifierTuning\s*\{([\s\S]*?)\n\}/g,
+      )) {
+        const body = m[1]!;
+        const name = /name\s*=\s*"([^"]+)"/.exec(body)?.[1];
+        if (!name) continue;
+        const behaviour = /behaviour\s*=\s*(\w+)/.exec(body)?.[1];
+        const expr = /tuning\s*=\s*([A-Za-z_][\w.]*)/.exec(body)?.[1];
+        const tuning = expr ? resolveDot(expr) : undefined;
+        groups.push({
+          name,
+          ...(behaviour ? { behaviour } : {}),
+          ...(tuning !== undefined ? { tuning } : {}),
+        });
+      }
+      for (const m of text.matchAll(/SetupCombatAbility\s*\(\s*([\w.]+)\s*,\s*([\w.]+)\s*,/g)) {
+        const name = m[1]!.split(".").pop()!;
+        if (groups.some((g) => g.name === name)) continue;
+        const tuning = resolveDot(m[2]!);
+        groups.push({ name, ...(tuning !== undefined ? { tuning } : {}) });
+      }
+      if (groups.length) (rec as { groups?: unknown }).groups = groups;
+    };
+    /**
+     * **被引用的实现里，有没有一个会让**自己**原地消失**。
+     *
+     * 圣甲虫的 `ability_scarab_weapon_sequence.lua:51` 打完最后一发后直接
+     * `self:GetOwnerCombatant():TakeHiddenDestroyDamage()` —— **自爆不是"受到伤害"**，
+     * 所以它不受减伤、也不会漏给周围（用户实测："自爆不会杀死自己, 也不会对全队造成伤害"）。
+     *
+     * ⚠️ **判据必须窄到"开火序列自己那一个文件"，不能像 `attachSquadDamage` 那样扫全部引用**：
+     * 全库有两处 `TakeHiddenDestroyDamage`，另一处是钻地车的
+     * `modifier_drillpod_intro.lua:74` —— 那是**部署动作**里的自毁（钻地车钻出来就没了本体），
+     * 不是"打完一枪就死"。第一版扫全部引用，于是钻地车 ×2 被误标。
+     */
+    const refsHaveSelfDestruct = (behaviourName: string): boolean => {
+      const rel = `gameplay/abilities/${behaviourName.replace(/_behaviour$/, "")}.lua`;
+      const body = implSources.find((s) => s.rel === rel)?.text;
+      return body !== undefined && /TakeHiddenDestroyDamage/.test(body);
+    };
+
+    /**
+     * **实现名 → 源码**，以及从源码里预抽好的**引用集合**。
+     *
+     * ⚠️ **为什么不能从求值后的 config 里找引用**：`RequiredHash("ability_catalyst_explosion")`
+     * 是**运行期**求值，而 `toPlain()` 会把函数丢掉、把值搬位置 —— 走完 Lua 之后
+     * "谁引用了谁"这条信息就没有了。判引用关系**只能读源码**（`initImplRefs` 扫一遍存下来）。
+     */
+    const implText = new Map<string, string>();
+    const implRefs = new Map<string, Set<string>>();
+    /** 见 `implRefs` 的说明：从**源码**预抽引用，求值后的 config 里找不回来 */
+    const initImplRefs = (): void => {
+      for (const s of implSources) {
+        const key = s.stem.replace(/_behaviour$/, "");
+        implText.set(key, s.text);
+        implRefs.set(key, implRefsOf(s.text));
+      }
+    };
+    initImplRefs();
+
+    /**
+     * **整队伤害（一次性打对面全队）—— 逐把武器归因，不再按"整个单位"一刀切。**
+     *
+     * 判据是**伤害走哪个 API**（`DamageUtil.lua`）：
+     *
+     * | 实现 | API | 效果 |
+     * | --- | --- | --- |
+     * | `AoeDamageSquad*` | `squad:TakeAOEDamage` | **整队每人各一份** |
+     * | `DamageCombatantList*` | `combatant:TakeDirectDamage` | 列表里每个战斗员各一份 |
+     * | `DamageSquadList*` | `GetLastCombatant():TakeRedirectDamage` | **只掉一员** |
+     *
+     * ⚠️ **只认这把武器自己的实现**。早先是"整个单位引用的实现里有一个含 `AoeDamageSquad`
+     * 就把该单位所有武器都标上"——单武器单位上等价，但**催化剂炮艇有两把武器**
+     * （gasWeapon 铺毒气、catalystWeapon 引爆），一刀切会把**铺毒气的小炮也标成整队伤害**（错的）。
+     *
+     * ⚠️ **还要沿一层"引爆"跳转**：催化剂的小炮自己不含 `AoeDamageSquad`，它只是
+     * `RequestAbility(EXPLOSION_MODIFIER = ability_catalyst_explosion)`，
+     * 真正打整队的是那个被引爆的实现（`ability_catalyst_explosion.lua:33`）。
+     * 所以：武器自己的实现里若引用了别的 `ability_*`/`modifier_*`，那些也一起看。
+     *
+     * 变体传染照旧：`readsUnit` 指向的本体被标了，变体也标（`unit_gdi_juggernaut_ST`）。
+     */
+    const attachSquadDamage = (rec: EntityRecord, text: string): void => {
+      /**
+       * 一个实现（**以及它引用的实现，最多再跳两跳**）里有没有 `AoeDamageSquad`。
+       *
+       * 为什么必须跳：催化剂那条链是
+       * `modifier_catalystgunship_projectile`（只 `RequestAbility`）
+       *   → `ability_catalyst_explosion`（**这里才 `AoeDamageSquadListOverride`**）
+       * —— 只看武器自己那一个文件会**漏掉催化剂 800 那个整队爆炸**（第一版修完就是这样）。
+       *
+       * 为什么限制跳数：`modifier_catalystgunship_projectile` 里引用了
+       * `modifier_chem_warrior_gas_cloud`，那是**无限递归**（它引回来），必须定深。
+       */
+      const depth = 2;
+      const implHasAoe = (bare: string, seen: Set<string>, left: number): boolean => {
+        const key = bare.replace(/_behaviour$/, "");
+        if (seen.has(key) || left < 0) return false;
+        seen.add(key);
+        const body = implText.get(key);
+        // 没在 `abilities/`+`modifiers/` 里的（`inherits(...)` 之类）当成"看不见"，不猜
+        if (body === undefined) return false;
+        if (/AoeDamageSquad/.test(body)) return true;
+        return [...(implRefs.get(key) ?? [])].some((r) => implHasAoe(r, seen, left - 1));
+      };
+
+      const ct = rec.config["combatantTuning"] as { weaponTunings?: unknown[] } | undefined;
+      if (!Array.isArray(ct?.weaponTunings)) return;
+
+      for (const w of ct.weaponTunings) {
+        const ww = w as {
+          squadDamage?: boolean;
+          projectile?: { modifier?: { name?: string; behaviour?: string } };
+          modifier_spawn?: { name?: string; behaviour?: string };
+          modifier_shot?: { name?: string; behaviour?: string };
+          modifier_sequence?: { name?: string; behaviourName?: string; readsUnit?: string };
+        };
+        /** 这把武器自己挂的实现名（弹体 modifier / spawn / shot） */
+        const own: string[] = [ww.projectile?.modifier, ww.modifier_spawn, ww.modifier_shot]
+          .map((m) => m?.name)
+          .filter((n): n is string => typeof n === "string");
+        let flag = own.some((n) => implHasAoe(n, new Set(), depth));
+        /*
+         * **变体传染**：`readsUnit` 指向本体的那把武器 —— 变体自己不写实现
+         * （`TranslateToken` 硬编码读本体，见 I196/I197），所以照本体的实现判。
+         */
+        const readsUnit = ww.modifier_sequence?.readsUnit;
+        if (!flag && readsUnit) {
+          const baseText = allSources.find((s) => s.stem === readsUnit)?.text;
+          if (baseText) {
+            const baseRec = buildRecord(
+              { stem: readsUnit, rel: `gameplay/units/${readsUnit}.lua`, text: baseText },
+              lua.get(readsUnit),
+              pbByLuaName,
+              [],
+            );
+            const bct = baseRec.config["combatantTuning"] as { weaponTunings?: unknown[] } | undefined;
+            flag = (bct?.weaponTunings ?? []).some((bw) => {
+              const b = bw as {
+                projectile?: { modifier?: { name?: string } };
+                modifier_spawn?: { name?: string };
+              };
+              return [b.projectile?.modifier?.name, b.modifier_spawn?.name]
+                .filter((n): n is string => typeof n === "string")
+                .some((n) => implHasAoe(n, new Set(), depth));
+            });
+          }
+        }
+        if (flag) ww.squadDamage = true;
+      }
+      void text;
+    };
+
+    /**
+     * **命中后会在目标格留下一层火**（`modifier_scarab_projectile.lua:71-72` 的
+     * `RequestModifier(tile, …, MODIFIER_FIRE, …)`）。
+     *
+     * 用户指出圣甲虫"会在对面格子留下火焰，就像毒车在对面格子留下毒雾"。
+     * 铺下的是 `modifier_fire_bomber_fire`（`unit_nod_scarab.lua:31` 的 `MODIFIER_FIRE`），
+     * **和火焰轰炸机同一个**（`unit_nod_firebomber.lua:39`）。
+     *
+     * 判据：单位源码里引用了 `modifier_fire_bomber_fire`（含变体沿 `readsUnit` 传染）。
+     */
+    const attachLeavesFire = (rec: EntityRecord, text: string): void => {
+      const FIRE = "modifier_fire_bomber_fire";
+      const hit = text.includes(FIRE)
+        ? true
+        : (rec.config["combatantTuning"] as { weaponTunings?: unknown[] } | undefined)?.weaponTunings?.some(
+            (w) => {
+              const reads = (w as { modifier_sequence?: { readsUnit?: string } }).modifier_sequence
+                ?.readsUnit;
+              if (!reads) return false;
+              return allSources.find((s) => s.stem === reads)?.text.includes(FIRE) === true;
+            },
+          ) === true;
+      if (!hit) return;
+      (rec as { leavesFire?: string }).leavesFire = FIRE;
+      /*
+       * ⚠️ **不往单位里写数值副本** —— 数值只活在顶层 `auras` 表里，
+       * 单位侧只有 `stats.leaves_fire` 这个**引用**（名字就是那个 modifier）。
+       */
+      void fireOf();
+    };
+
+    /**
+     * **命中后会在目标格铺一层毒气** —— 三个单位：催化剂炮艇 / 化武兵 / 生化越野车（毒车）。
+     *
+     * 判据：源码里引用了 `modifier_chem_warrior_gas_cloud`
+     * （`unit_nod_catalystgunship.lua:56` 的 `gasCloudModifierId`、
+     * `unit_nod_chemquad.lua:51`、`unit_nod_chemicalwarrior.lua:46`）。
+     * 数值同样来自 `auras/aura_gas_cloud.lua`（见 `gasOf`）。
+     */
+    const attachLeavesGas = (rec: EntityRecord, text: string): void => {
+      const GAS = "modifier_chem_warrior_gas_cloud";
+      if (!text.includes(GAS)) return;
+      (rec as { leavesGas?: string }).leavesGas = GAS;
+    };
+
+    /**
+     * **火/毒这类「格子效果」的数值** —— 从 `gameplay/auras/*.lua` 提取。
+     *
+     * ⚠️ 这些数**不在 `units/` 里**：圣甲虫只是 `MODIFIER_FIRE = RequiredHash("modifier_fire_bomber_fire")`，
+     * 真正的持续时间/每跳伤害/跳间隔在 `auras/aura_fire.lua`：
+     *
+     * ```
+     * fire_tuning  = { PERSIST_DURATION_MS = 10000, condition = { DESCRIPTOR_MASK = Ground } }
+     * burn_tuning  = { damage = { default = 25, override = { Vehicle = 25 } }, tickPeriodMs = 250 }
+     * ```
+     *
+     * **必须在提取期解出来**（而不是在 UI 里硬编码）：`auras/` 是原样分发的 Lua，
+     * 跑一遍 `wasmoon` 就能拿到真值；硬编码等于把这个项目的立身之本
+     * （"数值来自游戏源码"）丢掉。见 findings I243。
+     *
+     * ⚠️ 求值 `auras/` 一度**整体失败**：`aura_fire.lua` 的
+     * `bit32.bor(CombatantDescriptor.Ground)` 在 autotable 桩上报
+     * "attempt to call a table value (field 'bor')"。修 `luaRuntime` 的 `bit32` 之后才有数据。
+     */
+    const auraSources = await readSources(join(root, "gameplay", "auras"), root, /\.lua$/);
+    /** aura 名 → 求值后的普通对象（键名与 Lua 里一致，数值原样） */
+    const auraTables: Record<string, Record<string, unknown>> = {};
+    for (const src of auraSources) {
+      try {
+        lua.exec(src.text);
+      } catch {
+        continue; // 单个 aura 解析失败不该拖垮整轮提取
+      }
+      const raw = lua.get(src.stem);
+      if (raw === null || typeof raw !== "object" || Array.isArray(raw)) continue;
+      const dropped: string[] = [];
+      const plain = toPlain(raw, dropped);
+      if (plain && typeof plain === "object") {
+        auraTables[src.stem] = plain as Record<string, unknown>;
+      }
+    }
+    /**
+     * **顶层 `auras` 表的最终形状** —— 单位只引用它的键，数值全在这里。
+     *
+     * 键用**单位侧引用的那个名字**（不是 `aura_fire` 这种文件 stem），
+     * 因为单位源码里写的是 `RequiredHash("modifier_fire_bomber_fire")`：
+     *
+     * | 键 | 来源 aura | 谁铺的 |
+     * | --- | --- | --- |
+     * | `modifier_fire_bomber_fire` | `aura_fire` | 圣甲虫 / 火焰轰炸机 |
+     * | `modifier_chem_warrior_gas_cloud` | `aura_gas_cloud` | 催化剂 / 化武兵 / 毒车 |
+     */
+    const sharedAuras: Record<string, Record<string, unknown>> = {};
+    /**
+     * 把一个 aura 的两段 tuning 归一成一组字段。
+     *
+     * | aura | 触发条件 | 每跳 | 持续 |
+     * | --- | --- | --- | --- |
+     * | `aura_fire` | `DESCRIPTOR_MASK = Ground` | 25/250ms | 10000 |
+     * | `aura_gas_cloud` | `Ground + Infantry`，且**化武兵/毒车免疫** | 6/200ms（**载具 0**） | 10000 |
+     *
+     * `vs` 是"这个效果打谁"：火只记 `ground_only`；毒气把 `override` 读成明确的逐类型表
+     * （`Vehicle: 0` ⇒ 载具**完全不吃**），并记下免疫名单 —— 免疫是**单位 id**，
+     * 不在本页的 1v1 建模范围内，但产物要如实留着。
+     */
+    const auraEffectOf = (
+      auraName: string,
+      /** "铺"那段的 key，带 `PERSIST_DURATION_MS` / `condition`，如 `gas_tuning` */
+      coatKey: string,
+      /** "跳"那段的 key，带 `damage` / `tickPeriodMs`，如 `poison_tuning` */
+      tickKey: string,
+    ): Record<string, unknown> | undefined => {
+      const raw = auraTables[auraName] as Record<string, unknown> | undefined;
+      if (!raw) return undefined;
+      const coat = raw[coatKey] as Record<string, unknown> | undefined;
+      const tick = raw[tickKey] as
+        | { damage?: { default?: number; override?: unknown }; tickPeriodMs?: number }
+        | undefined;
+      const persist = coat?.["PERSIST_DURATION_MS"];
+      const tickMs = tick?.tickPeriodMs;
+      const dmg = tick?.damage?.default;
+      if (typeof persist !== "number" || typeof tickMs !== "number" || typeof dmg !== "number") {
+        return undefined;
+      }
+      const cond = coat?.["condition"] as Record<string, unknown> | undefined;
+      const overrides = Array.isArray(tick?.damage?.override)
+        ? (tick.damage.override as Array<[string, number]>)
+        : [];
+      const out: Record<string, unknown> = {
+        tick_ms: tickMs,
+        tick_damage: dmg,
+        persist_ms: persist,
+        ground_only: cond !== undefined,
+      };
+      if (overrides.length) out.vs = Object.fromEntries(overrides);
+      const immune: string[] = [];
+      for (const k of Object.keys(cond ?? {})) {
+        if (/^IMMUNE_UNIT\d+$/.test(k)) immune.push(String(cond![k]));
+      }
+      if (immune.length) out.immune = immune;
+      return out;
+    };
+    const fireOf = () => auraEffectOf("aura_fire", "fire_tuning", "burn_tuning");
+    const gasOf = () => auraEffectOf("aura_gas_cloud", "gas_tuning", "poison_tuning");
+    /*
+     * 键用**单位侧引用的那个名字**（不是 `aura_fire` 这种文件 stem），
+     * 因为单位源码里写的是 `RequiredHash("modifier_fire_bomber_fire")`。
+     */
+    const fireStats = fireOf();
+    if (fireStats) sharedAuras["modifier_fire_bomber_fire"] = fireStats;
+    const gasStats = gasOf();
+    if (gasStats) sharedAuras["modifier_chem_warrior_gas_cloud"] = gasStats;
+    /*
+     * **其余 aura 也收**（太伯利亚力场这种没有任何单位"拥有"的）——
+     * 按"文件 stem + 归一字段"进表。它们现在没有单位引用，但**产物里要有**：
+     * 结算是"查共享表"，将来谁引用了就能直接用，不必再改提取器。
+     */
+    for (const [name, raw] of Object.entries(auraTables)) {
+      if (name === "aura_fire" || name === "aura_gas_cloud") continue;
+      const head = Object.values(raw).find(
+        (v) => v !== null && typeof v === "object" && !Array.isArray(v),
+      ) as Record<string, unknown> | undefined;
+      if (!head) continue;
+      const tuningKeys = Object.keys(head).filter((k) => k.endsWith("_tuning"));
+      if (tuningKeys.length < 2) continue;
+      const fields = auraEffectOf(name, tuningKeys[0]!, tuningKeys[1]!);
+      if (fields) sharedAuras[name] = fields;
+    }
+
+    /**
+     * **攻击后自身消失**（自杀式单位）—— 记在单位上，`stats.self_destruct`。
+     *
+     * 与 `attachSquadDamage` 一样带**变体传染**：变体自己不写实现、由 `readsUnit` 指回本体
+     * （`TranslateToken` 硬编码读本体，见 I196/I197），所以本体自杀 ⇒ 变体也自杀。
+     */
+    const attachSelfDestruct = (rec: EntityRecord): void => {
+      const ct = rec.config["combatantTuning"] as { weaponTunings?: unknown[] } | undefined;
+      for (const w of ct?.weaponTunings ?? []) {
+        const beh = (w as { modifier_sequence?: { behaviourName?: string; readsUnit?: string } })
+          .modifier_sequence;
+        if (!beh) continue;
+        /*
+         * ① 自己文件里的开火序列实现；② `readsUnit` 指向的本体的开火序列实现
+         * （本体的 `behaviourName` 要从本体源码里重新解析 —— 提取结果里只有变体那份）。
+         */
+        if (beh.behaviourName && refsHaveSelfDestruct(beh.behaviourName)) {
+          (rec as { selfDestruct?: boolean }).selfDestruct = true;
+          return;
+        }
+        const base = beh.readsUnit ? allSources.find((s) => s.stem === beh.readsUnit) : undefined;
+        if (base && /TakeHiddenDestroyDamage/.test(base.text)) {
+          (rec as { selfDestruct?: boolean }).selfDestruct = true;
+          return;
+        }
+      }
+    };
+
     const collect = (sources: SourceFile[]): EntityRecord[] => {
       const out: EntityRecord[] = [];
       for (const src of sources) {
@@ -479,6 +965,11 @@ export async function extractAll(opts: ExtractOptions): Promise<ExtractResult> {
           attachBehaviour(rec, src.text);
           attachReadsUnit(rec);
           attachMultiHex(rec, src.text);
+          attachSquadDamage(rec, src.text);
+          attachSelfDestruct(rec);
+          attachLeavesFire(rec, src.text);
+          attachLeavesGas(rec, src.text);
+          attachGroups(rec, rec.config as unknown as Record<string, unknown>, src.text);
           const visual = visualOf(src.stem);
           if (visual) rec.visual = visual;
           out.push(rec);
@@ -514,6 +1005,8 @@ export async function extractAll(opts: ExtractOptions): Promise<ExtractResult> {
       failures: [...failures.entries()].sort((a, b) => a[0].localeCompare(b[0])),
       skippedModules,
       root,
+      auraTables,
+      sharedAuras,
     };
   } finally {
     lua.close();

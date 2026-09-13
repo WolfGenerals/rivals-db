@@ -72,9 +72,9 @@ const cols = computed<Col[]>(() => {
     const dps = props.level.dps(base * td.ratio);
     const arrow = percent > 100 ? "▲" : percent < 100 ? "▼" : "";
     const tip = td.unknown
-      ? `${label}：索敌方式未知\n该武器的 descriptors 是空表，不走常规索敌 —— 不猜能不能打`
+      ? `${label}：索敌方式未知`
       : !td.reachable
-        ? `${label}：打不到\n该武器的可攻击集里没有这类目标`
+        ? `${label}：打不到这类目标`
         : [
             `${label} —— ${props.weapon.name}`,
             `单发 ${single}`,

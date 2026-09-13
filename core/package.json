@@ -10,6 +10,14 @@
     "./attack": "./src/attack.ts",
     "./derive": "./src/derive.ts",
     "./query": "./src/query.ts",
+    "./def-json": "./src/model/def-json.ts",
+    "./model/unit-def": "./src/model/unit-def.ts",
+    "./model/weapon-def": "./src/model/weapon-def.ts",
+    "./model/warhead-def": "./src/model/warhead-def.ts",
+    "./model/damage": "./src/model/damage.ts",
+    "./model/duel": "./src/model/duel.ts",
+    "./units": "./src/units/index.ts",
+    "./convert": "./src/convert/unit-def.ts",
     "./extract": "./src/extract/index.ts"
   },
   "scripts": {

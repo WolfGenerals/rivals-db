@@ -38,6 +38,9 @@ wheels/
 node_modules/
 .pnpm-store/
 
+# 编辑器（JetBrains）
+.idea/
+
 # 临时输出
 /out/
 
@@ -48,6 +51,7 @@ _*.js
 _*.ps1
 _*.ts
 _*.md
+_*.json
 
 # 网页构建时从 data/ 同步进来的副本（唯一真相是仓库根的 data/）
 /web/public/data/

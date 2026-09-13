@@ -23,6 +23,11 @@ const props = defineProps<{
   pickable?: boolean;
   /** 已选中的 id（画高亮） */
   picked?: string[];
+  /**
+   * **只显示这些 id** —— 对战页用：能上场的只有**转出新格式 def** 的单位
+   * （没有 `def` 就没有武器/血量，画不出时序，点进去只会得到一句"还没转换"）。
+   */
+  only?: string[];
 }>();
 
 const emit = defineEmits<{ (e: "pick", id: string): void }>();
@@ -79,9 +84,11 @@ function sortKey(rec: DatasetEntry): number {
 
 const shown = computed(() => {
   const wantCommander = Boolean(props.commandersOnly);
+  const allowed = props.only === undefined ? null : new Set(props.only);
 
   const list = records.value.filter((rec) => {
 
+    if (allowed !== null && !allowed.has(rec.id)) return false;
     if (faction.value && rec.faction !== faction.value) return false;
     if (rarity.value && (rec.pb?.rarity ?? "") !== rarity.value) return false;
     // 类型：空字符串（总部这类 `unit_type` 缺失的）只在"全部类型"下出现

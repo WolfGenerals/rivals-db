@@ -192,17 +192,24 @@ button:focus-visible {
   left: 50%;
   z-index: 40;
   padding: 5px 9px;
-  max-width: min(280px, calc(100vw - 24px)); /* 手机上别宽出屏幕 */
+  /*
+   * ⚠️ **提示框必须窄 + 强制折行**：时序图上的段很窄、横轴就是时间，
+   * 提示框一宽就把下面的条盖住 ⇒ "看不出这一段是什么时刻"（用户报的）。
+   * `max-content` 只是"别在词中间断"，真正的上限交给 `max-width`。
+   */
+  max-width: min(210px, calc(100vw - 24px));
   width: max-content;
   font-size: 11px;
   line-height: 1.5;
   font-weight: 400;
+  text-align: left;
   color: #eef1f6;
   background: #0b0e14;
   border: 1px solid var(--accent);
   border-radius: 6px;
   box-shadow: 0 6px 18px #000c;
-  white-space: pre-line;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   pointer-events: none;
   /* 浮入：从下方 4px 处淡入上移 */
   animation: tip-in 0.12s ease-out;
@@ -210,21 +217,38 @@ button:focus-visible {
 @keyframes tip-in {
   from {
     opacity: 0;
-    transform: translate(-50%, 4px);
+    transform: translate(-50%, 0) translateY(4px);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, 0);
+    transform: translate(-50%, 0) translateY(0);
   }
 }
-/* 让 `transform` 参与动画终态（否则动画结束后会回跳） */
+/*
+ * 让 `transform` 参与动画终态（否则动画结束后会回跳）。
+ *
+ * ⚠️ **必须写成"叠加式"**（`translate(-50%, 0)` + 另一个 `translateY`），
+ * 不能写成单个 `translate(-50%, 0)` 之外的位移：
+ * `::after` 是**挂在被悬停元素上的**，元素自身的 `transform`（如标志的
+ * `translate(-50%,-50%)`、战斗时间线的大量绝对定位元素）会**原样作用于伪元素**。
+ * 所以这里只需要补"水平居中"这一份，多写只会让提示框错位。
+ */
 [data-tip]:hover::after {
   transform: translate(-50%, 0);
+  /* 提示框可能伸出行容器（时间线的行底色带等），别被后续兄弟节点压住 */
+  z-index: 40;
 }
 
 /*
- * **悬浮抬升** —— 加 `data-float` 的元素在悬停时轻微上浮 + 发光，
+ * **悬浮反馈** —— 加 `data-float` 的元素在悬停时**原地放大** + 发光，
  * 让人知道"这里可以看/可以点"。
+ *
+ * ⚠️ **必须是 `scale`，不能用 `translateY(-2px)`**：
+ * 这条规则会**整条替换**元素的 `transform`，而很多元素是靠
+ * `transform: translate(-50%, -50%)` 定位的（战斗时间线的标志、浮层锚点等）。
+ * 一旦被替换成 `translateY`，居中位移就丢了 —— 表现是"鼠标一上去图标直接跑掉"
+ * （用户报的就是这个）。`scale` 只是**追加**在现有 transform 之后、绕自身中心缩放，
+ * 不影响任何已有位移，任何元素都能安全套用。
  */
 [data-float] {
   transition:
@@ -232,7 +256,7 @@ button:focus-visible {
     filter 0.12s ease-out;
 }
 [data-float]:hover {
-  transform: translateY(-2px);
+  transform: scale(1.06);
   filter: brightness(1.18);
   z-index: 5;
 }

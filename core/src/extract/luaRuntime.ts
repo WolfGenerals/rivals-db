@@ -158,6 +158,29 @@ Fixed32 = setmetatable({}, {
   end,
 })
 
+-- 位运算库。
+--
+-- ⚠️ 必须显式定义：未定义全局会落到 autotable，而 autotable 的属性是**表**，
+-- 于是 bit32.bor(a, b) 报 "attempt to call a table value (field 'bor')"。
+-- 真实踩过：aura_fire.lua 的 condition.DESCRIPTOR_MASK = bit32.bor(CombatantDescriptor.Ground)
+-- 让整个 aura 求值失败、auras 表全空。Lua 5.4 有原生位运算符，直接用它实现。
+bit32 = {
+  bor = function(...)
+    local r = 0
+    for _, v in ipairs({...}) do r = r | (tonumber(v) or 0) end
+    return r
+  end,
+  band = function(...)
+    local r = -1
+    for _, v in ipairs({...}) do r = r & (tonumber(v) or 0) end
+    return r
+  end,
+  bxor = function(a, b) return (tonumber(a) or 0) ~ (tonumber(b) or 0) end,
+  bnot = function(a) return ~(tonumber(a) or 0) end,
+  lshift = function(a, n) return (tonumber(a) or 0) << (tonumber(n) or 0) end,
+  rshift = function(a, n) return (tonumber(a) or 0) >> (tonumber(n) or 0) end,
+}
+
 -- 位掩码枚举必须给数字，Lua 的按位或才合法。
 --
 -- ⚠️ **位值必须钉死，不能按访问顺序自增。** 原来写的是 i = i + 1; t[k] = 2 ^ i，

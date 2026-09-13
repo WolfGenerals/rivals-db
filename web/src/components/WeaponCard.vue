@@ -1,293 +1,293 @@
 <script setup lang="ts">
 /**
- * 单件武器。
+ * **一件武器** —— 只有三块（用户定的范围）：
  *
- * 数据全部来自 `derived`：`weapon`（打出去的**是什么**）+ `tracks`（**什么时候**打）。
- * **不再有 `WeaponAttack`**，也不在这里重算伤害。
+ * | 块 | 数据 | 说明 |
+ * | --- | --- | --- |
+ * | ① 伤害 | `damage[]`（分段武器每段一行） | 基础值 + 逐目标覆写，**随等级缩放**（J50） |
+ * | ② 发射时序 | `timing`（只有 `cyclic` / `magazine` / `staged`） | 图（`WeaponTimingBar`）+ 话（口径写清） |
+ * | ③ 弹头效果 | `warhead`（**不写 = 只打最后一个成员**） | 命中之后做什么（J55） |
  *
- * 排版按「读者想知道什么」分层：
- *   ① 结论行     类型 · 单发伤害 · DPS · 射程
- *   ② 时序       该武器的轨道（一轮打几下 / 一轮多长 / 一轮内间隔 / 空档）
- *   ③ 范围       范围伤害机制（溅射目标数 / 半径衰减 / 相邻格伤害）
- *   ④ 逐目标伤害 五类目标各打多少
+ * ⚠️ 数据**一律来自新格式 def**（`record.def.combatant.weapons[i]`），不再读旧 `derived`。
+ * 机器转换还没吃下的部分显示在卡片底部的「待办」里（`record.defGaps`）。
  */
 import { computed } from "vue";
 
-import type { Track, Weapon } from "@rivals/core/derive";
-import { weaponDps } from "../dps.ts";
-import { fmtSec } from "../format.ts";
-import { DPS_MODES, dpsMode } from "../state.ts";
 import type { Level } from "@rivals/core/levels";
+import type { WeaponDef } from "@rivals/core/model/weapon-def";
+import type { CatalystTriggerDef, WarheadEffectDef } from "@rivals/core/model/warhead-def";
 
-import DamageMatrix from "./DamageMatrix.vue";
-import StatIcon from "./StatIcon.vue";
+import { displayName } from "../display-names.ts";
+import { fmtTime } from "../format.ts";
+import { targetZh } from "../text.ts";
+import { DPS_MODES, dpsMode } from "../state.ts";
+import { defTimeline } from "../def-timeline.ts";
+import {
+  TARGETS,
+  damageAgainst,
+  damageRows,
+  dpsOf,
+  dpsStageLabel,
+  explosionDamageView,
+  hasOverrides,
+  headlineTier,
+  scaled,
+  targetingUnknown,
+  tileDamageView,
+  timingView,
+  volleyCount,
+  volleyWord,
+  warheadEntries,
+  warheadLines,
+} from "../weapon-view.ts";
+import EffectDamageMatrix from "./EffectDamageMatrix.vue";
+import WeaponDamageMatrix from "./WeaponDamageMatrix.vue";
 import WeaponTimeline from "./WeaponTimeline.vue";
 
 const props = defineProps<{
-  weapon: Weapon;
-  /** 指向这把武器的时序轨道（`sequence` 下每把武器各一条） */
-  tracks: Track[];
+  weapon: WeaponDef;
   index: number;
-  /** 是否是单位的主武器 */
-  primary?: boolean;
   level: Level;
-  /** 小队人数与成员错开 —— 时序条要按它们画每条队员的轴 */
+  /** 是否单位的主武器（源码里第一把） */
+  primary?: boolean;
+  /** 这个单位 def 还没转出来的东西（可能包含本武器的） */
+  gaps?: string[];
+  /** 小队人数与成员错开 —— 时序条要给每个队员各画一条 */
   waveSize?: number;
   separationMs?: number;
+  /** 单位中文名 —— 只用来把"节奏由哪个脚本驱动"说成中文（界面不露内部脚本名） */
+  unitName?: string;
 }>();
 
+const rows = computed(() => damageRows(props.weapon));
+const timing = computed(() =>
+  timingView(props.weapon, { ...(props.unitName === undefined ? {} : { unitName: props.unitName }) }),
+);
 /**
- * 时序条 —— 现在**所有**有时序的武器都画。
- *
- * 旧版只吃 `{cycle, chargeUp}` 两个数，于是 `sequence`（万钧巨炮多段）与装填型
- * （虎鲸轰炸机）都被挡在外面。新版 `WeaponTimeline` 直接消费 `tracks`，所以这里
- * 不再有"能不能画"的判断 —— 只要有时序就画。
+ * **时序图**：一段一轮的段 + 小队错开 —— 算式在 `web/src/def-timeline.ts`，
+ * 段语义与配色与战斗时间线共用（`squad-timeline.ts` 的 `Seg`）。
  */
-
+const timeline = computed(() =>
+  defTimeline(props.weapon, {
+    waveSize: props.waveSize ?? 1,
+    separationMs: props.separationMs ?? 0,
+  }),
+);
 /**
- * 一把武器的两个 DPS 口径 + 单轮总伤害（**都是时间轴算的实际值**）。
+ * **弹头效果的一条一行** —— 效果名加大上色，`tile` / `explosion` 那两条再挂一个伤害矩阵。
  *
- * ```
- * 单轮总伤害 = damage × hits
- * burst（爆发） = damage × hits ÷ (hits × interval) = damage ÷ interval
- * avg（平均）   = damage × hits ÷ 完整周期      ← 蓄力/装填/空档都摊进去
- * ```
- *
- * 音波坦克最能说明差别：`burst` = 650，`avg` = **137**（3 秒蓄力摊进去）。见 findings I164。
- * 游戏面板值（650 那个）不在这里 —— 它是面板口径，只在单位页显示。
+ * ⚠️ 矩阵的构造留在这里（它要等级），条目本身是 `warheadEntries()` 给的纯数据。
  */
-const dpsSet = computed(() => weaponDps(props.weapon, props.tracks, props.waveSize ?? 1));
+const warheadBlocks = computed(() =>
+  warheadEntries(props.weapon).map((e) => {
+    const eff = e.effect;
+    const matrix =
+      eff?.kind === "place_modifier"
+        ? tileDamageView(eff, props.level)
+        : eff?.kind === "catalyst_explosion" && eff.damage !== undefined
+          ? explosionDamageView(eff.damage, props.level, { ...(eff.groundOnly === undefined ? {} : { groundOnly: eff.groundOnly }) })
+          : undefined;
+    return { ...e, ...(matrix === undefined ? {} : { matrix }) };
+  }),
+);
+const dpsLabel = computed(() => DPS_MODES.find((m) => m.key === dpsMode.value)?.label ?? "");
+const dps = computed(() => dpsOf(props.weapon, props.level, dpsMode.value));
+/** 另一个口径也一并给出 —— 两个数放一起才看得出"蓄力/装填摊掉多少" */
+const dpsOther = computed(() => dpsOf(props.weapon, props.level, dpsMode.value === "avg" ? "burst" : "avg"));
+const dpsOtherLabel = computed(() => (dpsMode.value === "avg" ? "爆发" : "平均"));
+const dpsStage = computed(() => dpsStageLabel(props.weapon));
 
-/** 按顶栏选的 DPS 口径取 1-0 基准值 */
-const baseDps = computed(() => (dpsMode.value === "avg" ? dpsSet.value.avg : dpsSet.value.burst));
+/** **一轮/一跳的总伤害（全队）** —— 单发 × 一轮发数 × 人数（小队每人各打各的） */
+const volleyTotal = computed(
+  () => scaled(props.level, headlineTier(props.weapon)?.main.base ?? 0) * volleyCount(props.weapon) * Math.max(1, props.waveSize ?? 1),
+);
 
-const levelDps = computed(() => (baseDps.value > 0 ? props.level.dps(baseDps.value) : undefined));
-
-/** 当前口径的显示名，用在 DPS 标签上 */
-const DPS_LABEL = computed(() => DPS_MODES.find((m) => m.key === dpsMode.value)?.label ?? "");
-
-/** 单轮总伤害也随等级缩放（与单发、DPS 同一个系数） */
-const levelVolley = computed(() => {
-  const v = dpsSet.value.volley;
-  return v > 0 ? Math.round(props.level.dps(v)) : 0;
+/** 结论行下面那句说明（只在需要解释时出现） */
+const damageNote = computed(() => {
+  if (targetingUnknown(props.weapon)) return "这把武器的索敌范围还没有数据，所以打谁、打多少都不确定。";
+  if (props.weapon.timing.kind === "staged") {
+    return `分段武器：伤害逐段变强，下面是末段的数；每段见下表（每 ${fmtTime(props.weapon.timing.stages[0]?.tickPeriodMs ?? 0)} 一次）。`;
+  }
+  return undefined;
 });
 
-/**
- * **单发伤害也要随等级缩放。**
- *
- * `weapon.damage` 是 **1-0 基准值**，必须乘上同样的等级系数 —— 否则会出现
- * "单发伤害 45 但 DPS 180" 这种对不上的组合（DPS 变了、单发没变）。
- * 用 `level.dps()` 而不是 `level.hp()`：伤害与 DPS 同一个系数，与血量无关。
- */
-const levelDamage = computed(() => {
-  const d = props.weapon.damage;
-  return d > 0 ? Math.round(props.level.dps(d)) : d;
-});
-
-// 时间一律用秒 —— 格式化只有一处实现（`web/src/format.ts`，用户要求统一单位）
-
-/**
- * 把一条时序**按顺序读成一句话**。
- *
- * ⚠️ **必须说清前摇与周期的关系** —— 用户指出"光说前摇+冷却让人不知道前摇是否在冷却内"。
- * 靠两个符号区分，不靠形容词：
- *
- *   · **`含`** —— 前摇**在周期之内**（普通武器的 `chargeUpDuration`，周期不因它变长）
- *     `每 3.44s 一发（含前摇 0.60s）`
- *   · **`→`** —— 前摇在连打**之前**，时间**相加**（序列武器的 `initialChargeUpMs`）
- *     `前摇 3.00s → 连打 20 发（每 0.04s 一发，共 0.80s）`
- */
-function describeTiming(tm: Track["timing"]): string {
-  const dmg = levelDamage.value;
-  /** `75×2` / 单发就 `150` —— 读者能自己验算 DPS = A×B÷X */
-  const amount = (hits: number) => (hits > 1 ? `${dmg}×${hits}` : `${dmg}`);
-
-  if (tm.kind === "一次") return `蓄力 ${fmtSec(tm.charge_ms)} 后一次性造成 ${dmg} 伤害`;
-  if (tm.kind === "装填") {
-    /*
-     * 装填型：**装填窗口从首发那一刻开始**（面板公式 = `clip ÷ reloadTimeMs`，findings I201），
-     * 所以这一段就是 `reload_ms`，连打是在它**之内**完成的。
-     */
-    const iv = tm.interval_ms;
-    const cadence = iv ? `，每 ${fmtSec(iv)} 一发` : "";
-    return `每 ${fmtSec(tm.reload_ms)} 造成 ${amount(tm.clip)} 伤害（弹夹 ${tm.clip} 发${cadence}，从第一发计时）`;
+/** 把文案里的 `\`代码\`` 与 `**加粗**` 拆成片段渲染（不用 v-html） */
+function parts(text: string): Array<{ t: string; b?: boolean; c?: boolean }> {
+  const out: Array<{ t: string; b?: boolean; c?: boolean }> = [];
+  for (const chunk of text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g)) {
+    if (!chunk) continue;
+    if (chunk.startsWith("**") && chunk.endsWith("**")) out.push({ t: chunk.slice(2, -2), b: true });
+    else if (chunk.startsWith("`") && chunk.endsWith("`")) out.push({ t: chunk.slice(1, -1), c: true });
+    else out.push({ t: chunk });
   }
-  /*
-   * 单发 —— 核心是「每 X 秒造成 A[×B] 伤害」（用户要求；DPS = A×B÷X 一眼可验）：
-   *   · `hits === 1`（只打一次）⇒ 不写「每 X 一发」
-   *   · `interval_ms === 0`（一次性全打出去：烈焰之手两枪口齐射 / 网际光轮"没写当 0"）
-   *     ⇒ 也不写「每 X 一发」，改说"同时出膛"
-   *   · 有每发间隔 ⇒ 括号里补连打细节
-   */
-  const head = `每 ${fmtSec(tm.cycle_ms)} 造成 ${amount(tm.hits)} 伤害`;
-  if (tm.hits <= 1) return head;
-  if ((tm.interval_ms ?? 0) <= 0) return `${head}（${tm.hits} 发同时出膛）`;
-  const iv = tm.interval_ms!;
-  return `${head}（连打，每 ${fmtSec(iv)} 一发，共 ${fmtSec(tm.hits * iv)}）`;
-}
-/** 这条轨在整轮里的位置（`sequence` 才是按时间接替）：起始 / 持续 / 目标 */
-function describeWhen(t: Track): string {
-  const parts: string[] = [];
-  const hasAfter = t.after_ms !== undefined && t.after_ms > 0;
-  if (hasAfter) parts.push(`${fmtSec(t.after_ms!)} 起`);
-  /*
-   * `持续` 只在它**不等于连打的自身跨度**时才说 —— 分段轨的 `lasts_ms` 就是
-   * `attackCount × tickPeriodMs`，与 `连打 N 发（共 …）` 是同一个数，说两遍是噪声。
-   */
-  const tm = t.timing;
-  const span = tm.kind === "单发" ? (tm.interval_ms ?? 0) * tm.hits : 0;
-  if (t.lasts_ms === null) parts.push("之后持续");
-  else if (t.lasts_ms !== undefined && Math.abs(t.lasts_ms - span) > 1) parts.push(`持续 ${fmtSec(t.lasts_ms)}`);
-  if (t.when?.target?.length) parts.push(`目标 ${t.when.target.join("/")}`);
-  return parts.join("、");
-}
-
-/**
- * 把一条时序读成一句话 —— **核心是「每 X 秒造成 A[×B] 伤害」**（用户要求）。
- *
- * 这样读者能自己验算：`A × B ÷ X` 就是上面那个 DPS（`A` = 已按等级缩放的单发伤害，
- * `B` = 一轮发数）。⚠️ `A×B` 是**每个队员**的量；结论行的「单轮总伤害」是**全队**的
- * （已乘人数，见 I172）。
- *
- * 前缀/后缀规则（**互斥，不重复说**）：
- *   · **分段轨**（有 `after_ms`）：位置由 `X 起` 表达，不再单说前摇（它的 `charge_ms` 与
- *     `after_ms` 本就是同一个数）
- *   · **`chargeInCycle === true`**（常规武器的 `chargeUpDuration`）：前摇在冷却**之内**
- *     ⇒ 句尾 `，其中前摇 0.30s`
- *   · **`chargeInCycle === false`**（序列武器的 `initialChargeUpMs`）：前摇在连打**之前**、
- *     时间相加 ⇒ 前缀 `前摇 3.00s →`
- *
- * 早先这段拼出过「前摇 0.30s、（含前摇 0.30s）」这种莫名其妙的话（同一件事说了两三遍，
- * 且与前面的句之间没有分隔符），是用户报的 bug —— 见 findings I204。
- */
-function describeTrack(t: Track): string {
-  const hasAfter = t.after_ms !== undefined && t.after_ms > 0;
-  const charge = t.charge_ms ?? 0;
-  const wave = props.waveSize ?? 1;
-
-  const what = describeTiming(t.timing);
-  const head =
-    charge > 0 && !hasAfter && t.chargeInCycle === true
-      ? `${what}，其中前摇 ${fmtSec(charge)}`
-      : charge > 0 && !hasAfter
-        ? `前摇 ${fmtSec(charge)} → ${what}`
-        : what;
-  const rest = describeWhen(t);
-  const parts = [head];
-  if (rest) parts.push(rest);
-  // 全队倍率：句子里的 `A×B` 是**每个队员**的量（与结论行的「单发伤害」同一口径），
-  // 而 DPS 是**全队**的 —— 补一句 `全队 ×N` 才能验算：`A×B×N ÷ X = DPS`
-  if (wave > 1) parts.push(`全队 ×${wave}`);
-  return parts.join(" · ");
-}
-
-/** 范围伤害机制 */
-const areaText = computed(() => {
-  const a = props.weapon.area;
-  if (a.kind === "side_targets") return `溅射 ${a.targets} 个目标`;
-  if (a.kind === "radius") {
-    const f = a.falloff?.length ? `，衰减 ${a.falloff.map((x) => `${x.distance}格${x.percent}%`).join(" → ")}` : "";
-    return `半径 ${a.radius_tiles} 格${f}`;
-  }
-  if (a.kind === "side_damage") return `相邻格 ${a.side_value}`;
-  // 多格伤害图案：格内全额、无衰减 —— 与 `radius` 的渐衰机制不同（findings I125）
-  if (a.kind === "multi_hex") {
-    const SHAPE: Record<string, string> = { Circle: "圆", Diamond: "菱形", Line: "直线" };
-    return `${SHAPE[a.shape ?? ""] ?? a.shape} 图案 ${a.size}`;
-  }
-  return null;
-});
-
-const minor = computed(() => {
-  const out: Array<[string, string]> = [];
-  /*
-   * ⚠️ **不展示 `weapon.range_tiles`。**
-   *
-   * 它是 `weapon.maxRangeInTiles`，但**无法作为射程使用**：步枪兵（基础步兵，攻击距离 1）
-   * 与 MLRS（炮兵，攻击距离 2）**都是 2.5** —— 连最基本的角色差异都区分不了。
-   * 游戏面板的攻击距离用的是 `squadTuning.maxAttackRangeInTiles`（单位总览行已显示）。
-   * 见 findings I126/I127/I129。
-   */
-  if (props.weapon.homing !== undefined) out.push(["弹道", props.weapon.homing ? "追踪" : "不追踪"]);
-  if (props.weapon.targeting_unknown) out.push(["索敌", "未知"]);
   return out;
+}
+
+/** 逐目标矩阵：只有真的写了覆写才铺满五类（否则一行基础值就够） */
+const showMatrix = computed(() => rows.value.some((r) => hasOverrides(r.tier?.main)));
+
+/**
+ * **这把武器打不到的目标** —— 逐目标伤害表里显示 `—`，不是显示一个数。
+ *
+ * ⚠️ 这是两张不同的表：**能不能打**看 `usage.canAttack`（`descriptors` 位掩码展开，
+ * findings J53），**打多少**才看覆写表。步枪兵对空返回 38（基础值），但它**根本没有
+ * 飞行位** ⇒ 打不到空中；照抄覆写表会显示成一个不存在的伤害。
+ */
+const cannotHit = computed(() => new Set(TARGETS.filter((t) => !props.weapon.usage.canAttack.includes(t))));
+/** 顶部那个小标签的中文（`cyclic` / `magazine` / `staged` 是内部形状名，不直接露） */
+const timingWord = computed(() => {
+  switch (props.weapon.timing.kind) {
+    case "cyclic":
+      return "周期";
+    case "magazine":
+      return "弹夹";
+    case "staged":
+      return "分段";
+    default:
+      return "时序";
+  }
 });
 </script>
 
 <template>
   <div class="weapon" :class="{ primary }">
     <div class="head">
-      <b>{{ weapon.name }}</b>
-      <span class="dim">{{ weapon.type }}</span>
-      <span v-if="weapon.targeting_unknown" class="tag warn">索敌未知</span>
-      <span class="idx">武器 {{ index + 1 }}</span>
+      <!--
+        标题只写**由数据决定的序数**（单武器 = 主武器，多武器 = 武器 N）。
+        ⚠️ 源码槽名（`rifle` / `gasWeapon` …）**不显示**：它是内部标识，而且同一名字
+        在不同单位上是不同武器（摩托的 `rifle` 其实是双联火箭）—— 产物里也没有武器的本地化名。
+      -->
+      <b>{{ primary ? "主武器" : `武器 ${index + 1}` }}</b>
+      <span class="tag" :class="weapon.timing.kind">{{ timingWord }}</span>
+      <span v-if="weapon.selfDestruct === true" class="tag suicide" title="打完这一发自己就销毁，只有一轮">自杀式</span>
     </div>
 
-    <!-- ① 结论行 -->
-    <div class="key">
-      <div class="key-item">
-        <StatIcon name="dps" />
-        <span>单发伤害</span>
-        <b>{{ levelDamage }}</b>
+    <!-- ① 伤害 -->
+    <section class="block">
+      <h4>伤害</h4>
+      <div class="key">
+        <div class="key-item">
+          <span>{{ rows.length > 1 ? "末段单跳" : "单发" }}</span>
+          <b>{{ scaled(level, headlineTier(weapon)?.main.base ?? 0) }}</b>
+        </div>
+        <div class="key-item">
+          <span>{{ volleyWord(weapon) }}总伤害<template v-if="(waveSize ?? 1) > 1">（全队 ×{{ waveSize }}）</template></span>
+          <b>{{ volleyTotal }}</b>
+        </div>
+        <div class="key-item">
+          <span>DPS（{{ dpsLabel }}<template v-if="dpsStage">，{{ dpsStage }}</template>）</span>
+          <b>{{ dps.toFixed(1) }}</b>
+          <span class="alt">{{ dpsOtherLabel }} {{ dpsOther.toFixed(1) }}</span>
+        </div>
       </div>
-      <div class="key-item">
-        <StatIcon name="dps" />
-        <span>单轮总伤害</span>
-        <b>{{ levelVolley }}</b>
+      <p v-if="damageNote" class="sub dim">{{ damageNote }}</p>
+
+      <!-- 逐目标矩阵（五个目标各四个数，档位色）—— 与旧版同一套语言 -->
+      <WeaponDamageMatrix :weapon="weapon" :level="level" :wave-size="waveSize ?? 1" />
+
+      <!-- 分段武器：每段的数逐条列出来（矩阵画的是末段） -->
+      <table v-if="rows.length > 1" class="matrix">
+        <thead>
+          <tr>
+            <th>段</th>
+            <th>每跳</th>
+            <th v-for="t in TARGETS" :key="t" :class="{ no: cannotHit.has(t) }">{{ t }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="r in rows" :key="r.stage">
+            <td class="stage">{{ r.stage }}<span class="dim">{{ r.stageLabel }}</span></td>
+            <td class="num">{{ scaled(level, r.tier?.main.base ?? 0) }}</td>
+            <td
+              v-for="t in TARGETS"
+              :key="t"
+              class="num"
+              :class="{ dim: !hasOverrides(r.tier?.main) || cannotHit.has(t), no: cannotHit.has(t) }"
+              :title="cannotHit.has(t) ? `打不到${targetZh(t)}` : undefined"
+            >
+              {{ cannotHit.has(t) ? "—" : r.tier ? damageAgainst(r.tier.main, t, level) : "—" }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p v-if="rows.some((r) => r.tier?.side)" class="sub">
+        <span class="dim">副目标</span>
+        <span v-for="r in rows.filter((x) => x.tier?.side)" :key="r.stage">
+          段 {{ r.stage }}：{{ scaled(level, r.tier!.side!.base) }}
+          <template v-if="r.tier!.sideTargetCount !== undefined">× {{ r.tier!.sideTargetCount }} 个</template>
+        </span>
+      </p>
+    </section>
+
+    <!-- ② 发射时序：图（每名队员一条，段的位置关系自己说话） + 字（口径写清） -->
+    <section class="block">
+      <h4>发射时序 <span class="dim">{{ timing.headline }}</span></h4>
+      <WeaponTimeline
+        v-if="timeline.segs.length"
+        :segs="timeline.segs"
+        :cycle-ms="timeline.cycleMs"
+        :initial-ms="timeline.initialMs"
+        :span-ms="timeline.spanMs"
+        :wave-size="waveSize ?? 1"
+        :separation-ms="separationMs ?? 0"
+        :axis-note="timeline.axisNote"
+      />
+      <p v-else class="sub dim">时序图画不出来（这一把的节奏还没转出来，见下面的待办）。</p>
+      <ul class="lines">
+        <li v-for="(l, i) in timing.lines" :key="i">
+          <span v-for="(p, j) in parts(l)" :key="j" :class="{ b: p.b, c: p.c }">{{ p.t }}</span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ③ 弹头效果：一条一行 —— **效果名加大上色**，细节交给旁边的伤害矩阵 -->
+    <section class="block">
+      <h4>弹头效果</h4>
+      <div v-for="(e, i) in warheadBlocks" :key="i" class="eff">
+        <p class="sub">
+          <b v-if="e.name !== ''" class="eff-name" :class="e.tone">{{ e.name }}</b>
+          <span class="eff-detail">{{ e.detail }}</span>
+        </p>
+        <EffectDamageMatrix v-if="e.matrix" :view="e.matrix" :title="e.name" />
       </div>
-      <div class="key-item">
-        <StatIcon name="dps" />
-        <span>DPS（{{ DPS_LABEL }}）</span>
-        <b>{{ levelDps?.toFixed(1) ?? "—" }}</b>
-      </div>
-    </div>
-
-    <!--
-      ⚠️ **`weapon.range_tiles` 已从结论行撤到下面的小字行。**
-      它是 `weapon.maxRangeInTiles` —— 引擎内部字段。游戏面板显示的攻击距离用的是
-      `squadTuning.maxAttackRangeInTiles`（整数字数，≤1 不显示，见 findings I126/I127）。
-      两者不是同一个量：步枪兵 攻击距离 1 却射程 2.5、破坏者 攻击距离 2 却射程 1.25。
-      但**它不是伪造值**（4 个取值：2.5/1.25/1.1/3.5，与攻击距离松散相关），
-      Lua 侧无读取说明是 C++ 在读，所以**数据保留，只是不摆在结论行**。
-    -->
-
-    <!--
-      ② 时序条 —— **段与段的位置关系自己就说明了"前摇在不在周期内"**，不需要措辞。
-      这是图，下面是字：图给形状、字给数字，互补而不互相替代。
-    -->
-    <WeaponTimeline
-      v-if="tracks.length"
-      :tracks="tracks"
-      :wave-size="waveSize ?? 1"
-      :separation-ms="separationMs ?? 0"
-    />
-
-    <!-- ② 时序 —— 图给形状、字给数字，互补而不互相替代 -->
-    <ul v-if="tracks.length" class="timing">
-      <li v-for="(t, i) in tracks" :key="i">
-        <span class="step">{{ tracks.length > 1 ? i + 1 : "" }}</span>
-        <span>{{ describeTrack(t) }}</span>
-      </li>
-    </ul>
-
-    <!-- ③ 范围 -->
-    <p v-if="areaText" class="area"><span class="dim">范围</span>{{ areaText }}</p>
-
-    <!-- ④ 逐目标伤害 -->
-    <DamageMatrix :weapon="weapon" :level="level" :tracks="tracks" :wave-size="waveSize ?? 1" />
-
-    <p v-if="minor.length" class="minor">
-      <span v-for="[k, v] in minor" :key="k"><i>{{ k }}</i>{{ v }}</span>
-    </p>
+    </section>
   </div>
 </template>
+
+<style scoped>
+/* 效果名：比正文大一档 + 按种类上色（毒气绿 / 火焰橙 / 爆炸紫 / 伤害对象蓝） */
+.eff-name {
+  margin-right: 6px;
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.eff-name.delivery {
+  color: #8cc4ff;
+}
+.eff-name.gas {
+  color: #b6e34a;
+}
+.eff-name.fire {
+  color: #ffb347;
+}
+.eff-name.explosion {
+  color: #c9a6ff;
+}
+.eff-detail {
+  font-size: 12px;
+  color: var(--dim, #9aa5b8);
+  line-height: 1.6;
+}
+</style>
 
 <style scoped>
 .weapon {
   border: 1px solid var(--line, #2a3550);
   border-radius: 8px;
   padding: 10px 12px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 .weapon.primary {
   border-left: 3px solid #4a9eff;
@@ -305,20 +305,27 @@ const minor = computed(() => {
 .dim {
   color: #7f8aa6;
   font-size: 12px;
+  font-weight: 400;
 }
 .tag {
   font-size: 11px;
   padding: 1px 7px;
   border-radius: 999px;
-  white-space: nowrap;
+  background: #22304a;
+  color: #9fc0ee;
 }
-.tag.primary {
-  background: #1d3a5c;
-  color: #8fc4ff;
+.tag.magazine {
+  background: #3a2b4f;
+  color: #c8a8f0;
 }
-.tag.warn {
-  background: #4a3a1d;
-  color: #e0b050;
+.tag.staged {
+  background: #1f4148;
+  color: #8fd8e8;
+}
+/* 自杀式：红褐色，与"时序类型"那种中性标签区分开 */
+.tag.suicide {
+  background: #4a2626;
+  color: #ff9b8a;
 }
 .idx {
   margin-left: auto;
@@ -326,11 +333,37 @@ const minor = computed(() => {
   color: #6b7a99;
 }
 
+.block {
+  margin-top: 8px;
+}
+/*
+ * **区块标题**（伤害 / 发射时序 / 弹头效果）—— 用户要求："更上层的标题，要更大加粗上色"。
+ * 左侧一道色条给出层级感；同一套样式在 `UnitTimeline` / `DuelPanel` / `UnitWeapons` 里保持一致
+ * （第 2 步会把这套值收进 `theme.css` 的设计令牌）。
+ */
+.block h4 {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 14px 0 8px;
+  padding-left: 9px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #a8c8f0;
+  border-left: 3px solid #4a9eff;
+}
+.block h4 .dim {
+  font-size: 11.5px;
+  font-weight: 400;
+  color: #7f8aa6;
+}
+
 .key {
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 .key-item {
   display: flex;
@@ -346,49 +379,93 @@ const minor = computed(() => {
   font-variant-numeric: tabular-nums;
 }
 
-.timing {
+.matrix {
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+.matrix th,
+.matrix td {
+  border: 1px solid #232b3d;
+  padding: 2px 8px;
+  text-align: right;
+}
+.matrix th {
+  color: #7f8aa6;
+  font-weight: 500;
+  background: #1b2233;
+}
+.matrix th.no {
+  color: #4f5872;
+  text-decoration: line-through;
+}
+.matrix td.stage {
+  text-align: left;
+  color: #cfd8ea;
+}
+.matrix td.stage .dim {
+  margin-left: 6px;
+}
+.matrix .num {
+  font-variant-numeric: tabular-nums;
+}
+.matrix .num.dim {
+  color: #8b96b3;
+}
+.matrix .num.no {
+  color: #5b6580;
+}
+
+.lines {
   list-style: none;
-  margin: 0 0 8px;
+  margin: 0;
   padding: 0;
   font-size: 12.5px;
   color: #b9c4dc;
 }
-.timing li {
-  padding: 3px 0;
-  border-bottom: 1px solid #232b3d;
+.lines li {
+  padding: 2px 0;
 }
-.timing li:last-child {
-  border-bottom: none;
+.lines .b {
+  color: #ffd08a;
+  font-weight: 600;
 }
-/* 多段时用序号标出顺序 */
-.timing .step {
-  display: inline-block;
-  min-width: 18px;
-  margin-right: 6px;
-  color: #6b7a99;
-  font-variant-numeric: tabular-nums;
+.lines .c {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 11.5px;
+  color: #9fc0ee;
+  background: #1b2233;
+  padding: 0 4px;
+  border-radius: 3px;
 }
-
-.area {
-  margin: 0 0 8px;
+.small {
+  font-size: 12px;
+}
+.sub {
+  margin: 4px 0 0;
   font-size: 12px;
   color: #b9c4dc;
 }
-.area .dim {
+.sub > span:first-child {
   margin-right: 8px;
 }
 
-.minor {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 14px;
+.gaps {
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: #c8a86a;
+}
+.gaps summary {
+  cursor: pointer;
+}
+.gaps ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  color: #a89a7a;
+}
+.src {
   margin: 8px 0 0;
   font-size: 11px;
-  color: #b9c4dc;
-}
-.minor i {
-  font-style: normal;
   color: #6b7a99;
-  margin-right: 4px;
 }
 </style>

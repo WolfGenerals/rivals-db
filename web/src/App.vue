@@ -51,6 +51,7 @@ const unitCount = computed(() => data.value?.dataset.unit_count ?? 0);
 const activeNav = computed(() => {
   const n = String(route.name ?? "");
   if (n === "compare") return "compare";
+  if (n === "battle") return "battle";
   if (n === "table") return "table";
   return "units";
 });
@@ -66,6 +67,7 @@ const activeNav = computed(() => {
       </RouterLink>
       <RouterLink to="/table" :class="{ active: activeNav === 'table' }">表格</RouterLink>
       <RouterLink to="/compare" :class="{ active: activeNav === 'compare' }">对比</RouterLink>
+      <RouterLink to="/battle" :class="{ active: activeNav === 'battle' }">战斗</RouterLink>
     </nav>
 
     <LevelControls />

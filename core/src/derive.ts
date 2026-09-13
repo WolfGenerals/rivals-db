@@ -16,7 +16,13 @@
  */
 
 import type { EntityRecord, WeaponTuning } from "./types.ts";
-import { canAttackTarget, effectiveDamage, targetingUnknown, type DamageOverrideTag } from "./types.ts";
+import {
+  canAttackTarget,
+  effectiveDamage,
+  projectileDescriptors,
+  targetingUnknown,
+  type DamageOverrideTag,
+} from "./types.ts";
 
 const ALL_TARGETS: DamageOverrideTag[] = ["Infantry", "Vehicle", "Aircraft", "Structure", "Harvester"];
 
@@ -34,9 +40,9 @@ export interface Area {
   size?: number;
   /** `side_targets`：溅射目标数 */
   targets?: number;
-  /** `radius`：半径（格） */
-  radius_tiles?: number;
-  /** `radius`：随距离衰减（百分比） */
+  /** `radius`：半径，**世界单位**（与 Lua 原值一致；换算成格是展示层的事） */
+  radius?: number;
+  /** `radius`：随距离衰减 —— `distance` 也是**世界单位**，`percent` 是百分比 */
   falloff?: Array<{ distance: number; percent: number }>;
   /** `side_damage`：相邻格的伤害值 */
   side_value?: number;
@@ -53,6 +59,33 @@ export interface Weapon {
   range_tiles?: number;
   homing?: boolean;
   area: Area;
+  /**
+   * **伤害是「整队每人一份」**（`nDamageUtil.AoeDamageSquad*` ⇒ `squad:TakeAOEDamage`）。
+   *
+   * ⚠️ 这**不是** `area` 能推出来的东西 —— `area` 只说"打到几个目标"：
+   *
+   *   · 火焰坦克的 `side_damage`、万钧巨炮的 `side_targets` 看着像溅射，
+   *     但实现走 `DamageSquadList`/`DamageSquadOverride` ⇒ **只掉一员**
+   *   · 而音波坦克/神像/火焰轰炸机/圣甲虫是 `AoeDamageSquad` ⇒ **整队每人各吃一份**
+   *
+   * 来源：提取时扫武器引用到的能力/修饰器实现（见 `extract.ts` 的 `attachSquadDamage`），
+   * 判据是"有没有调用 `AoeDamageSquad*`"。**没有实现文件的武器不标记**（不猜）。
+   */
+  squad_damage?: boolean;
+  /**
+   * **引爆类武器的真实伤害** —— 挂在武器上的**第二组**伤害，来自被它引爆的实现。
+   *
+   * 催化剂炮艇的 `catalystWeapon`：`damage = 270`（武器级）与
+   * `projectile.modifier.tuning.damage = 50` **都不是它实际造成的伤害** ——
+   * `modifier_catalystgunship_projectile.lua:42` 命中后只是
+   * `RequestAbility(ability_catalyst_explosion)`，真正打整队的是
+   * `ability_catalyst_explosion.lua:33` 里 `tiberiumExplosionTuning.damageMain`
+   * = **800（步兵 300、建筑 800）**。
+   *
+   * ⇒ **这把武器的实际单次伤害以本字段为准**（模拟器与 DPS 都该先看它）。
+   * 判据见 `extract.ts` 的 `attachGroups`（`SetupModifierTuning` 解出独立伤害组）。
+   */
+  explosion?: { damage: number; overrides: Array<[DamageOverrideTag, number]> };
 }
 
 // ── 时序 ──────────────────────────────────────────────────────────
@@ -223,25 +256,44 @@ function areaOf(w: WeaponTuning, stage?: string, multiHex?: { shape: string; siz
   if (splash) return { kind: "side_targets", targets: splash };
 
   const mod = w.projectile?.modifier?.tuning as
-    | { damageRadius?: number; damageFalloff?: { distances?: Array<{ distance?: number; percent?: number }> } }
+    | {
+        damageRadius?: number;
+        /** ⚠️ 还有**裸的 `radius`** —— 自行火炮 / 催化炮艇用的是这个（见下方注释） */
+        radius?: number;
+        damageFalloff?: { distances?: Array<{ distance?: number; percent?: number }> };
+      }
     | undefined;
-  if (num(mod?.damageRadius)) {
+  /*
+   * ⚠️ **弹体 modifier 的半径有两个字段名**，都要认：
+   *
+   *   · `damageRadius` —— 奥卡轰炸（`modifier_orcabomber_projectile`）
+   *   · **`radius`** —— **自行火炮**（`unit_nod_artillery.lua:43` 的 `radius = Fixed16(6)`）、
+   *     **催化炮艇**（`unit_nod_catalystgunship.lua:100`）
+   *
+   * 只认前者会把这两把**范围武器误判成单体** —— 用户正是因此发现
+   * "自行火炮一次开火只死一个"（findings I238）。
+   * 两者的消费端也印证是同类：都走 `GetCombatantsInCircle(impactPos, …, radius)`。
+   */
+  const rawRadius = num(mod?.damageRadius) ?? num(mod?.radius);
+  if (rawRadius !== undefined) {
     /*
-     * ⚠️ **`damageRadius` / `fireRadius` / 衰减 `distance` 的单位是 1/8 格**，
-     * 不是格 —— 源码里是裸的 `damageRadius = 18`（`unit_gdi_orcabomber.lua:72`）。
+     * ⚠️ **提取期不做任何换算** —— `radius` / `falloff[].distance` 存的是**原始世界单位**，
+     * 与 `tmp/` 里的 Lua 逐字对应（奥卡就是 18 / 6 / 12 / 18）。
      *
-     * 两组证据：① 18/8 = **2.25 格**，与用户游戏内观察到的"才两格"吻合；
-     * ② 衰减断点 0/6/12/18 → **0 / 0.75 / 1.5 / 2.25 格** 合理，
-     *    若按格读则是 0/6/12/18 格，**超过地图宽度**（约 10 格）。
-     * 见 findings I132。
+     * **换算成「格」是展示层的事**（用户决定："换算应该前端进行"）：`web/src/format.ts`
+     * 的 `fmtTiles()` 用 `WORLD_UNITS_PER_TILE`（= 14，实测标定）现算。
+     * 理由：① 那个常数是**实测标定值**，随时可能被新的测量推翻，放在提取期意味着
+     * 每改一次都要重跑产物；② 原始值可审计，产物能直接和源码对照。
+     *
+     * 历史：这里曾写死 `PER_TILE = 8`（按 I132 的"18 世界单位 ≈ 2 格"目测反推），
+     * 且 `format.ts` 与 `write.ts` 各又写了一个 8 —— **同一个常数三处定义，
+     * 错了两处却一直没人发现**。现在常数只有 `types.ts` 一处，且只在展示层使用。
      */
-    const PER_TILE = 8;
-    const rawRadius = mod?.damageRadius as number;
     return {
       kind: "radius",
-      radius_tiles: rawRadius / PER_TILE,
+      radius: rawRadius,
       falloff: (mod!.damageFalloff?.distances ?? []).map((d) => ({
-        distance: (d.distance ?? 0) / PER_TILE,
+        distance: d.distance ?? 0,
         percent: d.percent ?? 0,
       })),
     };
@@ -254,11 +306,64 @@ function areaOf(w: WeaponTuning, stage?: string, multiHex?: { shape: string; siz
 }
 
 /** 由单把武器 + 可选阶段，造一个「武器」条目 */
-function makeWeapon(w: WeaponTuning, id: string, stage?: string, multiHex?: { shape: string; size: number }): Weapon {
+function makeWeapon(
+  w: WeaponTuning,
+  id: string,
+  stage?: string,
+  multiHex?: { shape: string; size: number },
+  /** 所属单位（需要它的 `groups` 解"引爆类武器"的真实伤害，见下） */
+  unit?: { groups?: Array<{ name: string; tuning?: unknown }> },
+): Weapon {
   const t = seqTuning(w);
   const st = stage ? (t[stage] as SeqTuning | undefined) : undefined;
-  const dm = st?.["damageMain"] as { default?: number; override?: unknown } | undefined;
   const base = effectiveDamage(w);
+  /**
+   * **伤害有三级来源，按优先级取第一处有值的**：
+   *
+   * ① 阶段的 `damageMain`（万钧巨炮/催化剂这种 `sequence` 分段的）
+   * ② **开火序列调参自己的 `damageMain`** —— 火焰坦克走的就是这条：
+   *    `unit_nod_flametank.lua:46` 的 `modifier_sequence.tuning.damageMain = 380`，
+   *    而武器级的 `damageTuning` 里**根本没有 380**（那是给引擎默认逻辑用的）。
+   *    早先漏了这一级 ⇒ 火焰坦克靠 `effectiveDamage` 的兜底碰上同一个数，纯属巧合；
+   *    换一个 `damageMain ≠ damageTuning.default` 的单位就会直接错。
+   * ③ 武器级 `damageTuning`
+   */
+  const dm =
+    (st?.["damageMain"] as { default?: number; override?: unknown } | undefined) ??
+    (t["damageMain"] as { default?: number; override?: unknown } | undefined);
+
+  /*
+   * **引爆类武器的真实伤害** —— 催化剂炮艇的 `catalystWeapon` 是个反例：
+   * 它的 `damageTuning` 是 270、`projectile.modifier.tuning.damage` 是 50，
+   * **两个都不是它实际造成的伤害** —— `modifier_catalystgunship_projectile.lua:42`
+   * 命中后只是 `RequestAbility(ability_catalyst_explosion)`，真正打人的是那个实现里
+   * 的 `tiberiumExplosionTuning.damageMain` = **800（步兵 300）**。
+   *
+   * 判据（**源码结构，不是字段嗅探**）：武器引用了别的实现、且那个实现在
+   * `SetupModifierTuning`/`SetupCombatAbility` 里绑了一个带 `damageMain` 的 tuning。
+   * 见 `extract.ts` 的 `attachGroups`。
+   */
+  const groups =
+    ((unit as { groups?: Array<{ name: string; tuning?: unknown }> } | undefined)?.groups ?? []);
+  const refsOfWeapon = new Set<string>();
+  for (const raw of [w.projectile?.modifier, (w as { modifier_spawn?: unknown }).modifier_spawn]) {
+    const m = raw as { tuning?: Record<string, unknown> } | undefined;
+    for (const v of Object.values(m?.tuning ?? {})) {
+      if (typeof v === "string" && /^(ability|modifier)_/.test(v)) refsOfWeapon.add(v);
+    }
+  }
+  let explosion: { default?: number; override?: unknown } | undefined;
+  for (const g of groups) {
+    if (!refsOfWeapon.has(g.name)) continue;
+    const main = (g.tuning as { damageMain?: { default?: number; override?: unknown } } | undefined)
+      ?.damageMain;
+    if (main) explosion = main;
+  }
+  const explosionOverrides = Array.isArray(explosion?.override)
+    ? (explosion.override as unknown[]).filter(
+        (e): e is [DamageOverrideTag, number] => Array.isArray(e) && e.length === 2,
+      )
+    : [];
 
   // 阶段的伤害优先于武器级的
   const overrideRaw = (dm?.override ?? base?.overrides ?? []) as unknown;
@@ -272,11 +377,34 @@ function makeWeapon(w: WeaponTuning, id: string, stage?: string, multiHex?: { sh
     type: weaponTypeOf(w),
     damage: num(dm?.default) ?? base?.default ?? 0,
     overrides,
-    can_attack: ALL_TARGETS.filter((tg) => canAttackTarget(w, tg)),
-    targeting_unknown: targetingUnknown(w),
+    /** 见上面 `explosion` 的说明：真正打人的是这一组伤害，不是 `damage` */
+    ...(explosion
+      ? {
+          explosion: {
+            damage: explosion.default ?? 0,
+            overrides: explosionOverrides,
+          },
+        }
+      : {}),
+    /*
+     * ⚠️ **可攻击集：武器自己的 `descriptors` 为空时退到弹体的 `DESCRIPTOR_FILTERS`**
+     * （`canAttackTarget` 里做回退，这里把弹体位掩码递过去）。
+     *
+     * 靠弹体施加伤害的武器在武器级是空表（全库 6 把），其中 3 把能从弹体救回来 ——
+     * **虎鲸炸弹 / 催化剂炮械 / M.S.V. 火箭**都是 `CombatantDescriptor.Ground`；
+     * 另 3 把（壁虱 `hidden`、维修无人机 `guns` 及其 `_CR`）弹体也没 filter，仍判未知。
+     * 见 findings I240。
+     */
+    can_attack: ALL_TARGETS.filter((tg) => {
+      if (canAttackTarget(w, tg)) return true;
+      return canAttackTarget({ ...w, descriptors: projectileDescriptors(w) }, tg);
+    }),
+    targeting_unknown: targetingUnknown(w) && !projectileDescriptors(w).length,
     range_tiles: w.maxRangeInTiles,
     homing: w.projectile?.homing,
     area: areaOf(w, stage, multiHex),
+    // 「整队每人一份」由提取时扫实现得出（`extract.ts` 的 `attachSquadDamage`）
+    ...((w as { squadDamage?: boolean }).squadDamage ? { squad_damage: true } : {}),
   };
 }
 
@@ -326,7 +454,7 @@ export function deriveAttack(unit: EntityRecord): DerivedAttack {
       let first = true;
       for (const s of stages) {
         const id = `${w.name ?? "w"}${wi}-${s}`;
-        const wp = makeWeapon(w, id, s, unit.multiHex);
+        const wp = makeWeapon(w, id, s, unit.multiHex, unit);
         weapons.push(wp);
         const st = t[s] as SeqTuning;
         const count = num(st["attackCount"]);
@@ -359,7 +487,7 @@ export function deriveAttack(unit: EntityRecord): DerivedAttack {
 
     // ── 情形 B：单把武器 ──
     const id = `${w.name ?? "w"}${ws.length > 1 ? wi : ""}`;
-    weapons.push(makeWeapon(w, id, undefined, unit.multiHex));
+    weapons.push(makeWeapon(w, id, undefined, unit.multiHex, unit));
 
     // 节奏
     if (w.reloadTuning?.clipSize && w.reloadTuning.reloadTimeMs) {
@@ -596,8 +724,72 @@ export interface DerivedStats {
   tags?: string[];
   /** 官方文案里的"强于 XXX" —— **AI 索敌意图，不是伤害克制** */
   preferred_targets?: string[];
+  /** 部署动作时长（`modifier_intro.durationMs`）—— **只是"有这段动作"** */
   deploy_ms?: number;
+  /** 收起动作时长（`modifier_outro.durationMs`） */
   undeploy_ms?: number;
+  /**
+   * **停下/架设完成前不能开火**（"必须先部署才能打"）。
+   *
+   * 判据（用户给的游戏内事实，与源码一致）：**有 `deploy_ms` 且武器不支持
+   * `canShootWhileMoving`**。
+   *
+   * | 单位 | `canShootWhileMoving` | 部署 |
+   * | --- | --- | --- |
+   * | **多管火箭 MLRS** | 无 | **停车自动部署，没架完不能开火** |
+   * | **壁虱坦克** | `true` | **可选** —— 可以停下来架好再打，也可以不架、边跑边打（架设收益是 70% 减伤，`canInterruptIntro` 让中途一动就丢） |
+   *
+   * ⚠️ 与 `deploy_ms` 是**两件事**：`deploy_ms` 说"有这段动作"，本字段说"它是门禁还是可选"。
+   * 数据来源：`canShootWhileMoving`（`CombatTuningInfo.lua:422` 读到面板上叫 "Raider"）。
+   */
+  must_deploy_to_fire?: boolean;
+  /**
+   * **地面单位**（`combatantTuning.descriptors` 含 `CombatantDescriptor.Ground`）。
+   *
+   * 用途：**格子上的持续效果只烧地面**。圣甲虫/火焰轰炸机留下的火是
+   * `trigger_single_tile_aura` + `aura_fire.fire_tuning.condition.DESCRIPTOR_MASK = Ground`
+   * （`gameplay/auras/aura_fire.lua`，判定见 `condition_fire_bomber_fire:Test` 的 `bit32.band`）
+   * ⇒ **空中单位站在火里不掉血**。
+   */
+  ground?: boolean;
+  /**
+   * **命中后铺一层火**（`modifier_fire_bomber_fire` 的名字）—— 圣甲虫 / 火焰轰炸机。
+   * 判据见 `extract.ts` 的 `attachLeavesFire`。数值在 `stats.fire`。
+   */
+  leaves_fire?: string;
+  /**
+   * 那层火的数值，**原样来自 `gameplay/auras/aura_fire.lua`**：
+   * `tick_ms` / `tick_damage` / `persist_ms` / `ground_only`。
+   *
+   * ⚠️ 它**不是武器伤害**：火是铺在格子上的 `trigger_single_tile_aura`，
+   * 只烧停在该格的地面小队，每跳 `AoeDamageSquadOverride`（整队每人一份）。
+   * 圣甲虫那 2000 是弹体直击，火是它**之后**独立生效的东西（用户指出）。
+   */
+  fire?: Record<string, unknown>;
+  /**
+   * **命中后铺一层毒气**（`modifier_chem_warrior_gas_cloud`）—— 催化剂炮艇 / 化武兵 / 毒车。
+   * 数值与语义同 `fire`，但**只对步兵**（载具 override 0），另有免疫名单。
+   */
+  leaves_gas?: string;
+  /**
+   * **毒车要"打多久"才铺得出毒气**（`ability_chemical_weapon_sequence.lua:58` 的
+   * `self:GetAgeMS() > spawnGasTimeMs`）—— 毒车 2100ms。
+   *
+   * ⚠️ 判据是**这条开火序列的存活时间**，不是"打了几发"；目标一换人就重开、**计时归零**。
+   * **催化剂没有这道门槛**（它直接 `RefreshCloud`），所以它没有这个字段。
+   */
+  spawn_gas_ms?: number;
+  /** 毒气数值，来自 `gameplay/auras/aura_gas_cloud.lua`（见 `DerivedStats.fire` 的说明） */
+  gas?: Record<string, unknown>;
+  /**
+   * **攻击后自身消失** —— 自杀式单位（圣甲虫）。
+   *
+   * 来源与判据：`ability_scarab_weapon_sequence.lua:51` 在 `FireFromMuzzle` 之后立刻
+   * `TakeHiddenDestroyDamage()`，提取时扫该单位引用到的实现里有没有这个调用
+   * （`extract.ts` 的 `attachSelfDestruct`）。**它是"直接销毁"而不是"受到伤害"**，
+   * 所以不参与减伤、也不溅射到周围（用户实测）。
+   */
+  self_destruct?: boolean;
   range_tiles?: number;
   can_be_crushed?: boolean;
   stealth_detect_tiles?: number;
@@ -616,8 +808,38 @@ export interface DerivedStats {
   damage_reduction_pct?: number;
   /** **最小攻击距离**（格）—— 有的单位有"死区"，太近打不到。神像 2 · 自行火炮 1 */
   min_attack_range_tiles?: number;
-  /** EMP 半径（格，已由 1/8 格换算）。幽灵原始 18 → 2.25 */
-  emp_radius_tiles?: number;
+  /**
+   * **EMP 半径** —— **世界单位**，不是格（幽灵 18）。
+   *
+   * ⚠️ 字段名**故意不带 `_tiles`**：带那个后缀的是"本来就是格"的字段
+   * （`attack_range_tiles` / `aggro_radius_tiles` / `vision_tiles`…），
+   * 而这个要除以 `WORLD_UNITS_PER_TILE` 才是格。换算在展示层做
+   * （`web/src/format.ts` 的 `fmtTiles()`）。
+   *
+   * 历史：它曾叫 `emp_radius_tiles` 且**在提取期就被除过 8** —— 名字说"格"、
+   * 值却由另一个常数决定，是当时量纲错误的中心。见 findings I224/I225。
+   */
+  emp_radius?: number;
+  /**
+   * **EMP —— 给对面挂减速的减益**（用户的说法）。不是属性而是**弹体上的 debuff**：
+   * `duration_ms` / `attack_speed_pct` / `reload_speed_pct` / `move_speed_pct` / `turn_speed_pct`
+   * （全部已 ×100）。来源：弹体 tuning 的 `emp` 子表，见 `write.ts` 的 `stats.emp`。
+   *
+   * ⚠️ **只对载具生效**（弹体 `DESCRIPTOR_FILTERS = CombatantDescriptor.Vehicle`）。
+   * 命中者的 `attack_speed_pct` 就是"对方开火周期被拉长多少" —— 掷弹兵 25%/0.7s、
+   * 生化兵 15%/5s、**飞影 100%/2s（等于定住）**。
+   */
+  emp?: {
+    duration_ms?: number;
+    attack_speed_pct?: number;
+    reload_speed_pct?: number;
+    move_speed_pct?: number;
+    turn_speed_pct?: number;
+    /** 生效的目标类型（从弹体 `DESCRIPTOR_FILTERS` 读；实测 5 个单位都是 `Vehicle`） */
+    targets?: string[];
+  };
+  /** **弹夹空时的移速修正**（火焰轰炸机 20%）—— 顺带解出来的，暂未在模拟器里用 */
+  speed_mod_while_empty_pct?: number;
   /**
    * **隐藏单位** —— 不在正常阵容里的条目，列表默认不显示：
    *   · 后缀 `_ST`（钢爪）/ `_CR`（指挥官衍生）/ `_mayhem` 的变体
@@ -672,6 +894,15 @@ export interface Dataset {
   _schema: number;
   unit_count: number;
   commander_count: number;
+  /**
+   * **共享的调参表** —— 目前只有 `gameplay/auras/*.lua` 那几个（火 / 毒气 / 太伯利亚力场）。
+   *
+   * ⚠️ 它们**不属于任何单位**，所以只能放这里：圣甲虫与火焰轰炸机铺的是**同一个**
+   * `modifier_fire_bomber_fire`；太伯利亚力场更是没有任何单位"拥有"它。
+   * 单位侧只留一个**引用**（`stats.leaves_fire` / `stats.leaves_gas`），
+   * 数值一律来这里查 —— 抄副本迟早分叉。见 findings I245。
+   */
+  auras?: Record<string, Record<string, unknown>>;
   units: DatasetEntry[];
   commanders: DatasetEntry[];
 }

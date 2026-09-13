@@ -24,8 +24,9 @@ import { level as makeLevel, startingMajorOfRarity, type Level } from "@rivals/c
 import type { DatasetEntry } from "@rivals/core/derive";
 import { TARGET_LABELS, TARGET_TYPES } from "../damageTiers.ts";
 import { unitDpsVs } from "../dps.ts";
-import { fmtSec, fmtTiles, fmtTilesPerSec } from "../format.ts";
+import { fmtSec, fmtSecPerTile, fmtTiles, fmtTilesPerSec } from "../format.ts";
 import { dpsMode } from "../state.ts";
+import { useData } from "../useData.ts";
 
 import StatIcon from "./StatIcon.vue";
 import TypeIcon from "./TypeIcon.vue";
@@ -156,8 +157,9 @@ function vsTip(v: (typeof vsTargets.value)[number]): string {
  * 基本信息：不随等级变的单位固有属性。空值不收集。行 = `[标签, 值, 悬停提示?]`。
  *
  * ⚠️ 两件事别搞错：
- * ① **单位逐字段核对**（台账 I205）：带 `InTiles` 的是**格**，其余裸数字是**世界单位（1 格 = 8）**
- *    —— 早先把 `avoidance_radius = 1.7` 写成「1.7 格」是错的（实为 0.21 格）。
+ * ① **单位逐字段核对**：带 `InTiles` 的是**格**，其余裸数字是**世界单位**
+ *    （换算常数只有一处：`@rivals/core/types` 的 `WORLD_UNITS_PER_TILE`）——
+ *    早先把 `avoidance_radius = 1.7` 写成「1.7 格」是错的（实为 0.12 格）。
  * ② **悬停提示是给用户看的文案**，不是注释：最多一句"这个数是什么"，
  *    不写字段名、不写台账编号、不用 markdown（`attr()` 是纯文本，`**` 不加粗）。
  */
@@ -165,7 +167,46 @@ const basics = computed(() => {
   const rows: Array<[string, string, string?]> = [];
   const st = props.unit.derived.stats;
   if (st.cost !== undefined) rows.push(["造价", String(st.cost)]);
-  if (st.speed !== undefined) rows.push(["移动速度", fmtTilesPerSec(st.speed)]);
+  /*
+   * **溅射 / 范围伤害** —— 这是"打几个"的图鉴信息，用户指出它此前只长在武器卡里、
+   * 单位详情页看不到（"光束炮火焰这样的溅射伤害在单位细节里也没有展示"）。
+   *
+   * 汇总规则：**尽量给出覆盖范围**，而不是把各武器的机制罗列一遍：
+   *   · 有 `multi_hex`（多格图案，格内全额）→ 报图案形状与尺寸
+   *   · 有 `side_targets`（万钧巨炮 stage2/3 那种"再溅 N 个目标"）→ 取最大 N
+   *   · 有 `side_damage`（火焰坦克锥形，相邻格伤害）→ 报"相邻格 N"
+   *   · 有 `radius`（奥卡 / 自行火炮 / 催化炮艇的圆形范围）→ 报半径（世界单位 → 格）
+   */
+  const ws = props.unit.derived.weapons;
+  const areas = ws.map((w) => w.area);
+  const multi = areas.find((a) => a.kind === "multi_hex");
+  const sideTargets = Math.max(0, ...areas.map((a) => (a.kind === "side_targets" ? (a.targets ?? 0) : 0)));
+  const sideDamage = areas.find((a) => a.kind === "side_damage");
+  const radius = areas.find((a) => a.kind === "radius");
+  if (multi) {
+    const SHAPE: Record<string, string> = { Circle: "圆", Diamond: "菱形", Line: "直线" };
+    rows.push(["范围", `${SHAPE[multi.shape ?? ""] ?? multi.shape}图案 ${multi.size} 格`, "格子内全额伤害、无衰减"]);
+  }
+  if (sideTargets > 0) {
+    rows.push(["溅射", `额外 ${sideTargets} 个目标`, "主目标之外还会打到附近的目标"]);
+  }
+  if (sideDamage) {
+    rows.push(["溅射", `相邻格 ${sideDamage.side_value}`, "攻击时对相邻格造成这个伤害"]);
+  }
+  if (radius) {
+    const f = radius.falloff?.length
+      ? `，${radius.falloff.map((x) => `${fmtTiles(x.distance)}${x.percent}%`).join(" → ")}`
+      : "";
+    rows.push(["范围", `半径 ${fmtTiles(radius.radius ?? 0)}`, `圆形范围伤害${f}`]);
+  }
+  /*
+   * 移动速度：主显示用**秒/格**（"走过去要多久"），悬停里再给格/秒。
+   * 两个是同一个数的倒数 —— 给秒是因为玩家真正关心的是耗时，而且它正是标定
+   * 换算常数时用的那把尺子（采集车 3.51s/格，见 findings I224）。
+   */
+  if (st.speed !== undefined) {
+    rows.push(["移动速度", fmtSecPerTile(st.speed), `约 ${fmtTilesPerSec(st.speed)}`]);
+  }
   if (st.turn_speed !== undefined) rows.push(["转向速度", `${st.turn_speed}°/秒`]);
   if (st.vision_tiles !== undefined) rows.push(["视野", `${st.vision_tiles} 格`]);
   // ⚠️ 攻击距离（格，整数）与武器射程（实际距离）**不是一回事** —— 万钧巨炮 2 vs 2.5
@@ -182,10 +223,10 @@ const basics = computed(() => {
     ]);
   }
   if (st.aggro_radius_tiles !== undefined) {
-    rows.push(["索敌半径", `${st.aggro_radius_tiles} 格`, "自动攻击走进这个范围的敌人"]);
+    rows.push(["索敌半径", `${st.aggro_radius_tiles} 格`, "自动索敌走进这个范围的敌人"]);
   }
   if (st.avoidance_radius !== undefined) {
-    rows.push(["避让半径", fmtTiles(st.avoidance_radius), "与其他单位互相让开的间距"]);
+    rows.push(["避让半径", fmtTiles(st.avoidance_radius), "含义未知"]);
   }
   if (st.can_be_crushed !== undefined) rows.push(["能否被碾压", st.can_be_crushed ? "是" : "否"]);
   if (st.stealth_detect_tiles !== undefined) rows.push(["反隐范围", `${st.stealth_detect_tiles} 格`]);
@@ -208,11 +249,58 @@ const squadRows = computed(() => {
   if (waveSize.value <= 1) return [] as Array<[string, string]>;
   const rows: Array<[string, string]> = [["小队人数", String(waveSize.value)]];
   const per = props.unit.derived.health?.per_member;
-  if (per !== undefined) rows.push(["每员血量", String(lv.value.hp(per))]);
+  if (per !== undefined) rows.push(["队员血量", String(lv.value.hp(per))]);
   const sep = props.unit.derived.stats.separation_ms;
   if (sep !== undefined) rows.push(["队员开火错开", fmtSec(sep)]);
   return rows;
 });
+
+/**
+ * **场地效果（火 / 毒气）** —— 用户："单位详情里要引用火和毒气等场地效果，说明一下什么条件触发"。
+ *
+ * ## 数值从哪来
+ *
+ * 单位里**只有引用名**（`stats.leaves_fire` / `stats.leaves_gas`），
+ * 数值在数据集顶层的 `auras` 共享表里（见 findings I245）。这张卡就是"把引用解开给人看"。
+ *
+ * ## 触发条件（每一句都能对到源码）
+ *
+ * | 效果 | 谁铺 | 触发条件 |
+ * | --- | --- | --- |
+ * | 火 | 圣甲虫 / 火焰轰炸机 | 命中即铺（`modifier_scarab_projectile.lua:71`） |
+ * | 毒气 | 催化剂 | 命中即铺（蓄力条 4.5s 决定"什么时候轮到大毒气弹"） |
+ * | 毒气 | 生化越野车 | **`GetAgeMS() > spawnGasTimeMs`（2100ms）** —— 要连续开打 2.1s 才铺得出 |
+ * | 毒气 | 化武兵 | 同上，750ms |
+ *
+ * 三者共同的两条附加条件：**与目标相距 ≤ 1 格**（`GetDistance(tile, myTile) <= 1`）·
+ * 每次满足条件的命中都只是 **`ResetPersistTime()` 续时**（不叠加、不重新生成）。
+ */
+interface FieldEffect {
+  kind: string;
+  /** 谁铺的（modifier 名） */
+  ref: string;
+  /** 触发条件那句话 */
+  trigger: string;
+  /** 每跳每员伤害（已套等级） */
+  tickDamage: number;
+  tickMs: number;
+  persistMs: number;
+  /** 打谁 */
+  hits: string;
+  /** 能不能铺（有 `spawn_gas_ms` 时的那条限制） */
+  note?: string;
+}
+
+/** 场地效果的数值在**数据集顶层的 `auras` 共享表**里，单位只带引用名（findings I245） */
+const data = useData();
+
+
+/** 场地效果的 modifier 名 → 源码位置（悬停里给出处，方便核对） */
+function fieldSource(ref: string): string {
+  if (ref === "modifier_fire_bomber_fire") return "gameplay/auras/aura_fire.lua";
+  if (ref === "modifier_chem_warrior_gas_cloud") return "gameplay/auras/aura_gas_cloud.lua";
+  return `gameplay/auras/${ref}.lua`;
+}
 
 /*
  * **不再转储原始 config** —— 那正是被淘汰的冗长部分。
@@ -470,6 +558,72 @@ const squadRows = computed(() => {
 .source {
   font-size: 11px;
   margin-top: 14px;
+}
+/* ── 场地效果（火 / 毒气）──────────────────────────────── */
+.field {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line, #232b3d);
+}
+.field:last-of-type {
+  border-bottom: none;
+}
+.field-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.field-head .kind {
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+.field-head .kind.fire {
+  background: #4a2f12;
+  color: #ffb347;
+}
+.field-head .kind.gas {
+  background: #2f4a12;
+  color: #b6e34a;
+}
+.field-head .trigger {
+  font-size: 12px;
+  color: #b9c4dc;
+}
+.field-head .ref {
+  margin-left: auto;
+  font-size: 11px;
+  color: #6f7c99;
+}
+.field-body {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #9aa6c2;
+}
+.field-body b {
+  color: #e6ecf7;
+  font-variant-numeric: tabular-nums;
+}
+.field-body .sep {
+  color: #4a5163;
+}
+.field .scope {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: #7f8aa6;
+}
+.warn-inline {
+  color: #d8c07a;
+}
+.small {
+  font-size: 11px;
+}
+.fields .small {
+  margin: 6px 0 0;
 }
 </style>
 

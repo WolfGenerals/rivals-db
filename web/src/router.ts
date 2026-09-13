@@ -10,6 +10,7 @@
  *   /cards             单位图鉴（卡片墙）
  *   /compare           左右分栏对比（可选两侧单位）
  *   /compare/:left/:right  对比指定两个单位（可分享）
+ *   /battle            战斗时间线（1v1 伤害赛跑，"假设计算器"）
  *   /unit/:id          单位详情
  *
  * ⚠️ **指挥官已从界面移除**（用户决定）—— 它们没有武器、不是战场单位，
@@ -20,6 +21,7 @@
 import { createRouter, createWebHashHistory, type RouteRecordRaw } from "vue-router";
 
 import Arsenal from "./views/Arsenal.vue";
+import BattleView from "./views/BattleView.vue";
 import CompareView from "./views/CompareView.vue";
 import NotFound from "./views/NotFound.vue";
 import UnitDetail from "./views/UnitDetail.vue";
@@ -29,6 +31,7 @@ const routes: RouteRecordRaw[] = [
   { path: "/", name: "units", component: Arsenal },
   { path: "/table", name: "table", component: UnitList },
   { path: "/compare/:left?/:right?", name: "compare", component: CompareView },
+  { path: "/battle", name: "battle", component: BattleView },
   // props: true 把 :id 直接作为 prop 传给详情页，页面不必自己读 route
   { path: "/unit/:id", name: "unit", component: UnitDetail, props: true },
   { path: "/:pathMatch(.*)*", name: "notFound", component: NotFound },

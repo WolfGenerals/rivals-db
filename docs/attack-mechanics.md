@@ -198,12 +198,51 @@ initialChargeUpMs = 1750, shotCooldownMs = 500
 
 ```
 0 世界单位 100%  →  6 → 65%  →  12 → 45%  →  18 → 25%      damageRadius = 18
-= 0 格 100%      →  0.75  65%  →  1.5  45%  →  2.25  25%   （÷8，与"游戏里约 2 格"吻合）
+= 0 格 100%      →  0.43  65%  →  0.86  45%  →  1.29  25%   （÷14，展示层现算）
 ```
+
+⚠️ 两件事：
+① 这里的换算常数**改过一次**：原按"约 2 格"取 `1 格 = 8 世界单位`（得 0.75/1.5/2.25 格），
+现按游戏内掐表标定为 **14**（采集车 3.51 s/格 ⇒ `speed 3.958857 × 3.51 ≈ 13.9`，取整 14）。
+新旧都落在"1~2 格"这个量级，但**格数少了 42%**。依据与两难见 `docs/unit-dimensions.md` §3。
+② **产物里存的是上面那一行（世界单位原值）**，下面那行"格"是 `web/src/format.ts` 的
+`toTiles()` 在展示时现算的 —— 换算不在提取期做（用户决定），所以改常数只需改一个数。
 
 ---
 
-## 4. 三条合成规则
+## 4. 伤害怎么落到目标身上：单体 vs 全体（findings I228）
+
+`gameplay/DamageUtil.lua` 一共 75 行，只有三个施加 API —— **打谁、打几员，全在这里分岔**：
+
+| API（`DamageUtil.lua`） | 落点 | 谁在用 |
+| --- | --- | --- |
+| `DamageCombatantList(Override)` L7-26 | **逐个 combatant** `TakeDirectDamage(combatant, ev)` ⇒ 按人头挨个结算 | **奥卡炸弹**（`modifier_orcabomber_projectile.lua:33` 的 `DamageCombatantsFalloff`）、**自行火炮**（`modifier_artillery_projectile.lua:32`）、离子炮 |
+| `DamageSquadList(Override)` L32-51 | 补正按 `squad:GetDamageTargetCombatant()` 查表，但伤害打在 **`squad:GetLastCombatant():TakeRedirectDamage(ev)`** ⇒ **只落一员** | **普通武器**（这正是"普通攻击一次只打到小队一个成员"） |
+| `AoeDamageSquadList(Override)` L57-75 | `squad:TakeAOEDamage(rankedDamage, …)` ⇒ **整队同时吃** | 圣甲虫、神像、火焰轰炸机等所有 `AoeDamage*` 调用方 |
+
+**★ `damage` 是「每员」值，有官方写法为证**（`modifier_drillpod_intro.lua:64-69`）：
+
+```lua
+local totalDamage = percentDamage * spawnedSquad:GetMaxHP()
+spawnedSquad:TakeAOEDamage(totalDamage / spawnedSquad:CountCombatants(), ...)
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 官方自己除以人头
+```
+
+**★ 血量同构**：`CombatTuningInfo.lua:332` 的 `squadBaseHealth = health × waveSize`（面板总血）。
+
+⇒ **`weapons[].damage`（每员）与 `health.per_member`（每员）是同一量纲**，两边乘除 `waveSize`
+的方式互为镜像。所以：
+
+- 普通武器对射 = **每轮只削掉一个成员的血**，减员是**一个一个死**
+- AoE（炮兵 / 轰炸机 / 圣甲虫 / 神像）= **整队同时各吃一份每员伤害** ⇒ 一轮可以打死多员，
+  这就是它们作为反步兵单位的机制根源（用户实测："自行火炮和奥卡轰炸机都可以让一个小队同时死亡"）
+
+⚠️ **写模拟器前必须先结的两条**：`GetLastCombatant()` / `GetDamageTargetCombatant()` 选哪一员
+（I229，决定减员顺序），以及 `GetCombatantsInCircle` 的覆盖判据（I227）。
+
+---
+
+## 5. 三条合成规则
 
 | 规则 | 结论 | 验证 |
 | --- | --- | --- |
@@ -213,7 +252,7 @@ initialChargeUpMs = 1750, shotCooldownMs = 500
 
 ---
 
-## 5. 可攻击目标（`descriptors` 位掩码）
+## 6. 可攻击目标（`descriptors` 位掩码）
 
 | `descriptors` | 含义 | 数量 |
 | --- | --- | --- |
@@ -239,7 +278,7 @@ initialChargeUpMs = 1750, shotCooldownMs = 500
 
 ---
 
-## 6. 小队开火错开
+## 7. 小队开火错开
 
 `waveSize` 是成员数，`attackSeparationDurationMS` 是成员间错开。每个成员各自按
 `t = i × 错开 + k × 周期` 开火，**数据里没有任何分组逻辑** —— "齐射"是相位漂移自然撞出来的。
@@ -255,7 +294,7 @@ initialChargeUpMs = 1750, shotCooldownMs = 500
 
 ---
 
-## 7. 展示建议（按族）
+## 8. 展示建议（按族）
 
 | 族 | 该展示的细节 |
 | --- | --- |
@@ -269,7 +308,7 @@ initialChargeUpMs = 1750, shotCooldownMs = 500
 
 ---
 
-## 8. 未解 / 待办
+## 9. 未解 / 待办
 
 | 项 | 状态 |
 | --- | --- |
@@ -281,7 +320,7 @@ initialChargeUpMs = 1750, shotCooldownMs = 500
 
 ---
 
-## 9. 15 个开火行为实现（`gameplay/abilities/`）
+## 10. 15 个开火行为实现（`gameplay/abilities/`）
 
 > **重大发现（台账 I90）**：22 把特殊武器的**真正实现不在单位文件里**，而在
 > `gameplay/abilities/ability_*_weapon_sequence.lua` 的 `Timeline()` 函数中。

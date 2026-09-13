@@ -398,6 +398,52 @@ export interface EntityRecord {
    */
   multiHex?: { shape: string; size: number };
 
+  /**
+   * **攻击后自身消失**（自杀式单位）。圣甲虫：开火序列打完最后一发就
+   * `TakeHiddenDestroyDamage()`（`ability_scarab_weapon_sequence.lua:51`）。
+   * 见 `extract.ts` 的 `attachSelfDestruct`。
+   */
+  selfDestruct?: boolean;
+
+  /**
+   * **命中后会在目标格铺一层火** —— 值是那个 fire modifier 的名字
+   * （圣甲虫与火焰轰炸机都是 `modifier_fire_bomber_fire`，
+   * 见 `modifier_scarab_projectile.lua:71-72`）。
+   */
+  leavesFire?: string;
+
+  /**
+   * 那层火的数值，**原样取自 `gameplay/auras/aura_fire.lua`**：
+   * `tick_ms`（`burn_tuning.tickPeriodMs`）/ `tick_damage`（`burn_tuning.damage.default`）/
+   * `persist_ms`（`fire_tuning.PERSIST_DURATION_MS`）/ `ground_only`。
+   * 提取期绑到单位上，UI 与模拟器一律读它，**不硬编码**。
+   */
+  fire?: Record<string, unknown>;
+
+  /**
+   * **命中后铺一层毒气**（`modifier_chem_warrior_gas_cloud`）—— 催化剂炮艇 / 化武兵 / 毒车。
+   * 与 `leavesFire` 同类，数值在 `gas`。
+   */
+  leavesGas?: string;
+
+  /**
+   * 毒气的数值，来自 `gameplay/auras/aura_gas_cloud.lua`：
+   * `tick_ms = 200` / `tick_damage = 6` / `persist_ms = 10000` /
+   * `vs = { Vehicle: 0 }`（**载具完全不吃**）/ `immune = ["Unit_Nod_ChemicalWarrior", "Unit_Nod_ChemQuad"]`。
+   */
+  gas?: Record<string, unknown>;
+
+  /**
+   * **独立的伤害组** —— 从源码里真实写着的两处结构解出来（不是字段嗅探）：
+   * `SetupModifierTuning { name, behaviour, tuning }` 与 `SetupCombatAbility(<名>, <tuning>, …)`。
+   *
+   * 为什么必须有它：**伤害不一定挂在那把武器自己的 projectile 上**。
+   * 催化剂炮艇的 800 点爆炸只在 `tiberiumExplosionTuning` 里
+   * （`SetupModifierTuning` 的 `ability_catalyst_explosion` 引用它），
+   * 而武器的 `projectile.modifier.tuning.damage` 只有 50 且**根本不用**。
+   */
+  groups?: Array<{ name: string; behaviour?: string; tuning?: unknown }>;
+
   /** Lua 全局名，等于源文件名去掉 `.lua` */
   id: string;
   faction: Faction;
@@ -561,6 +607,47 @@ export function damageAgainst(
 //   2. **打多少**（`damageAgainstTarget`）—— 由目标类型的回退链决定
 
 /**
+ * 一个六边形格的边长（以「世界单位」计）—— **全站唯一实现，不要在别处再写一个数**。
+ *
+ * ## 它是什么
+ *
+ * 引擎里并存两套空间，字段名就是分界线：
+ *   · **带 `InTiles` 的**（`attack_range_tiles` / `aggro_radius_tiles` / `vision_tiles`…）
+ *     本来就是格，**直接用，不要再除**；
+ *   · **裸名字段**（`speed` / `avoidanceRadius` / `crusherRadius` / `hexReservationRadius` /
+ *     `flyingHeight` / 弹体的 `damageRadius` / `empRadius`…）是世界单位，除以这个数才是格。
+ *
+ * ## 为什么是 14
+ *
+ * **实测标定，不是从 proto 读到的**。引擎侧没有任何"1 格 = N 世界单位"的字段
+ * （`libapp.so` 里唯一的 `mTileSize` 是 UI 组件 `HexMapAnchor` 的屏幕尺寸，见 I210）。
+ *
+ * 标定过程（一次游戏内掐表，视频 2 倍速）：
+ *
+ * ```
+ * 采集车前进 2 格：播放 7.480s → 10.992s = 3.512s ⇒ 3.51 s/格（未做倍速还原，见下方说明）
+ * 同一次录制：120° 掉头 7.146s → 7.480s = 0.334s（还原后 0.668s ⇒ 179.6 °/s ≈ angularSpeed 180）
+ * 采集车 speed = 3.958857（世界单位/秒，见 I208）
+ *   ⇒ 1 格 = 3.958857 × 3.51 ≈ 13.9  →  **取整 14**
+ * ```
+ *
+ * **为什么取整到 14**（用户决定）：掐表点受移动动画影响，第 3 位有效数字是假精度；
+ * 14 与实测值只差 0.7%，且 `秒/格 = 14 / speed` 心算即可核算。**这是"标定值"不是"事实"**，
+ * 误差量级约 ±5%（取 13.9 还是 14 对任何结论都不产生可观察差别）。
+ *
+ * ⚠️ **视频倍速这件事仍有一个未解释的 2 倍因子**：位移读数若按视频是 2 倍速还原
+ * （3.512 ÷ 2 = 1.756 s/格），常数会变成 ≈ 7.0；那样转向读数就必须按"未倍速"来读，
+ * 得 359 °/s，与 `angularSpeed = 180` 差 2 倍。**两条读数只能有一条做倍速还原。**
+ * 当前选择"位移不还原"（⇒ 14），依据：① 用户另一次独立估测"走 1 格 3~4 秒"正落在
+ * 3.51 上；② 14 让幽灵 EMP 的官方文案 "affects **adjacent**" 自洽（18÷14 = 1.29 格 ≈ 1 环，
+ * 而 18÷7 = 2.57 格 = 2 环，与"相邻"冲突）。完整判据表见 `docs/unit-dimensions.md` §3。
+ *
+ * 旧的 8 是拿"奥卡轰炸半径约 2 格"目测反推的（18 ÷ 8 = 2.25），那 8 条"证据"里
+ * 没有一条能排除其他候选值 —— 复查见 findings I225。
+ */
+export const WORLD_UNITS_PER_TILE = 14;
+
+/**
  * 武器描述符里「能打地面」的位。
  *
  * 位值由 `extract/luaRuntime.ts` 的 `DESCRIPTOR_BITS` 钉死。
@@ -619,20 +706,78 @@ export const DAMAGE_CASCADE: Record<DamageOverrideTag, DamageOverrideTag[]> = {
  * 但打不到载具（descriptors 只有 `Flying`），那条是够不着的死数据。
  */
 /**
- * 该武器的**索敌方式未知** —— `descriptors` 是空表。
+ * 该武器的**索敌方式未知** —— `descriptors` 是空表，**且弹体也没有给出 filter**。
  *
- * 全库 6 把，且这组是**杂项、没有统一含义**（见 docs/findings.md I71）：
- * `orcabomber.bomb`（爆炸，靠 `modifier_spawn`）、`catalystgunship.catalystWeapon`
- * （爆炸由毒雾触发）、`msv.rockets` / `ticktank.hidden`（带部署用的 `modifier_intro/outro`）、
- * `repairdrone.guns`（压根不是武器）。
+ * 全库 6 把 `descriptors = {}`，其中**三把能从弹体救回来**（见 `projectileDescriptors`）：
+ * `orcabomber.bomb`（弹体 `DESCRIPTOR_FILTERS = Ground`）、
+ * `catalystgunship.catalystWeapon`（同）、`msv.rockets`（同）。
+ * 剩下三把是真的未知：`ticktank.hidden`（只有部署用的 `modifier_intro/outro`）、
+ * `repairdrone.guns`（压根不是武器）、以及它们在 `_CR` 里的副本。
  *
- * 已试过三版解释（空=全能打 / 空=只对地 / 空=modifier 驱动），**全不成立**。
- * 所以这里不猜：调用方应当**先问这个函数**，是未知就如实显示"未知"，
- * 而不是拿 `canAttackTarget` 的返回值当结论。
+ * 已试过三版解释（空=全能打 / 空=只对地 / 空=modifier 驱动），**全不成立**（findings I71）。
+ * 所以这里不猜：调用方应当**先问这个函数**，是未知就如实显示"未知"。
  */
 export function targetingUnknown(weapon: WeaponTuning): boolean {
+  return !descriptorBits(weapon).length && !projectileDescriptors(weapon).length;
+}
+
+/**
+ * **弹体的目标过滤位掩码** —— 引擎决定"这一炸打得到谁"用的就是它。
+ *
+ * 为什么需要它：有些武器的伤害**不是武器自己直接施加的**，而是弹体命中时按
+ * 弹体自己的 filter 去查询目标。这类武器的武器级 `descriptors` 是空表，于是被判成
+ * "索敌未知"、整个逐目标伤害矩阵显示成"未知"——**奥卡炸弹就是这样**（findings I240）。
+ *
+ * ⚠️ **字段名是大写的 `DESCRIPTOR_FILTERS`**（不是小写的 `descriptors`）——
+ * 我第一版读错了名字，取到 `undefined`、回退静默失效。它在 tuning 里长这样：
+ *
+ * ```lua
+ * -- unit_gdi_orcabomber.lua:74（弹体）
+ * DESCRIPTOR_FILTERS = CombatantDescriptor.Ground,
+ * -- unit_gdi_orcabomber.lua:119（modifier_spawn，投弹）
+ * DESCRIPTOR_FILTERS = CombatantDescriptor.Ground
+ * ```
+ * 消费端：`modifier_orcabomber_projectile.lua:13` 的
+ * `self.query_settings.descriptors = self.tuning.DESCRIPTOR_FILTERS`。
+ *
+ * 两个位置都扫（**武器上的弹体** 与 **`modifier_spawn`**）——
+ * 后者是虎鲸投弹那一套参数，只扫前者会漏（与 `write.ts` 里扫 `empRadius` 的教训同族）。
+ *
+ * ⚠️ **位值的口径**：拿到的是 `extract/luaRuntime.ts` 里**钉死的那张表**
+ * （为兼容历史产物，只有 `Ground=8`/`TransportTypeMask_Flying=4096` 与真实枚举一致，
+ * 其余名字是重新分配的，见 I216）。本函数只服务 `canAttackTarget` 的
+ * 地面 / 空中 / 通吃判定，这几位在两个口径下语义一致，够用；
+ * **不要拿这个字段当真实位掩码做别的判断**。
+ */
+export function projectileDescriptors(weapon: WeaponTuning): number[] {
+  const holders = [
+    weapon.projectile?.modifier?.tuning,
+    (weapon as { modifier_spawn?: { tuning?: Record<string, unknown> } }).modifier_spawn?.tuning,
+    // `modifier_sequence.tuning` —— 有些实现把 filter 写在序列参数里
+    (weapon as { modifier_sequence?: { tuning?: Record<string, unknown> } }).modifier_sequence?.tuning,
+  ];
+  const out = new Set<number>();
+  for (const h of holders) {
+    if (!h) continue;
+    for (const key of ["DESCRIPTOR_FILTERS", "descriptors"]) {
+      const v = (h as Record<string, unknown>)[key];
+      /*
+       * ⚠️ **它可能是裸数字，不是数组** —— `DESCRIPTOR_FILTERS = CombatantDescriptor.Ground`
+       * 经 wasmoon 出来就是 `8`（枚举位值本身是单个 number）。第一版只认
+       * `Array.isArray(v)`，于是**永远返回空**、回退静默失效（调了半天才查出来）。
+       * 两种情况都要认。
+       */
+      if (typeof v === "number") out.add(v);
+      else if (Array.isArray(v)) for (const x of v) if (typeof x === "number") out.add(x);
+    }
+  }
+  return [...out];
+}
+
+/** 该武器自己的 descriptors（窄化后的安全读法） */
+function descriptorBits(weapon: WeaponTuning): number[] {
   const bits = weapon.descriptors;
-  return !Array.isArray(bits) || bits.length === 0;
+  return Array.isArray(bits) ? (bits as number[]) : [];
 }
 
 /**
@@ -643,17 +788,20 @@ export function targetingUnknown(weapon: WeaponTuning): boolean {
  *   空中 Aircraft          → 需 `TransportTypeMask_Flying` 位
  *   地空通吃               → `NotHiddenTypeMask` / `AllMask`（**防空单位都靠这个**）
  *
- * ⚠️ **`descriptors` 为空表时返回 `false`，但这个结果没有意义** ——
- * 那 6 把的索敌方式未知。**调用方必须先判断 `targetingUnknown()`**，
- * 否则会把它们误显示成"什么也打不到"。
+ * ⚠️ **位掩码的取值来源有两处，按优先级取**：
+ * ① 武器自己的 `descriptors`；
+ * ② 武器为空表时，退到**弹体 modifier 的 `DESCRIPTOR_FILTERS`**（`projectileDescriptors`）——
+ *    引擎对"靠弹体施加伤害"的武器就是按弹体 filter 查询目标的。
+ * 两处都空 ⇒ 索敌未知，返回 `false`，但**这个结果没有意义**，调用方必须先问 `targetingUnknown()`。
  *
- * ⚠️ 判据是武器自己的 `descriptors`，**不是** `goodAgainstTags`（AI 索敌偏好）、
- * **也不是** `targetSelector`（83/83 都是 `unit_antiInfantry`，无区分度）。
+ * ⚠️ 判据**不是** `goodAgainstTags`（AI 索敌偏好）、**也不是** `targetSelector`
+ * （83/83 都是 `unit_antiInfantry`，无区分度）。
  */
 export function canAttackTarget(weapon: WeaponTuning, target: DamageOverrideTag): boolean {
-  if (targetingUnknown(weapon)) return false;
+  const own = descriptorBits(weapon);
+  const bits = own.length ? own : projectileDescriptors(weapon);
+  if (!bits.length) return false;
   if (target === "Structure") return true;
-  const bits = weapon.descriptors as number[];
   if (bits.includes(DESCRIPTOR_NOT_HIDDEN) || bits.includes(DESCRIPTOR_ALL)) return true;
   if (target === "Aircraft") return bits.includes(DESCRIPTOR_FLYING);
   return bits.includes(DESCRIPTOR_GROUND);
